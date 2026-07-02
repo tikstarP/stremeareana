@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Trophy, Coins, Flame, LogOut, Settings, ChevronRight, Clock, Gamepad2, Palette, MessageSquare, ArrowRight } from 'lucide-react';
+import { User, Trophy, Coins, Flame, LogOut, Settings, ChevronRight, Clock, Gamepad2, Palette, MessageSquare, ArrowRight, Shield } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
@@ -195,6 +195,11 @@ export default function DashboardPage() {
                 <div className="w-10 h-10 rounded-xl bg-arcade-purple/20 flex items-center justify-center shrink-0"><User className="w-5 h-5 text-arcade-purple" /></div>
                 <div className="flex-1"><p className="text-sm font-medium text-text-primary">Settings</p><p className="text-xs text-text-muted">Edit profile</p></div>
                 <ChevronRight className="w-4 h-4 text-text-muted group-hover:text-arcade-purple transition-colors" />
+              </Link>
+              <Link to="/admin" className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-arcade-yellow/10 to-arcade-orange/5 border border-arcade-yellow/20 hover:border-arcade-yellow/40 transition-all group min-h-[44px] sm:min-h-auto">
+                <div className="w-10 h-10 rounded-xl bg-arcade-yellow/20 flex items-center justify-center shrink-0"><Shield className="w-5 h-5 text-arcade-yellow" /></div>
+                <div className="flex-1"><p className="text-sm font-medium text-text-primary">Admin</p><p className="text-xs text-text-muted">Manage platform</p></div>
+                <ChevronRight className="w-4 h-4 text-text-muted group-hover:text-arcade-yellow transition-colors" />
               </Link>
             </div>
           </motion.div>

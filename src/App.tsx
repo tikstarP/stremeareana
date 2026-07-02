@@ -21,6 +21,7 @@ import AudioDock from './pages/AudioDock';
 import LeaderboardPage from './pages/LeaderboardPage';
 import SettingsPage from './pages/SettingsPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import AdminPage from './pages/AdminPage';
 
 const StreamerStudio = lazy(() => import('./pages/StreamerStudio'));
 const OverlayPage = lazy(() => import('./pages/OverlayPage'));
@@ -43,6 +44,7 @@ function App() {
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/join" element={<JoinRoomPage />} />
             <Route path="/room/:roomCode" element={<LiveRoomPage />} />
