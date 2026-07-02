@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Keyboard, QrCode, Users, Radio, Search } from 'lucide-react';
+import { ArrowLeft, Keyboard, QrCode, Users, Radio, Search, Camera, CameraOff, Loader2 } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
 import { useApp } from '../context/AppContext';
 import { RoomCardSkeleton } from '../components/Skeleton';
+import jsQR from 'jsqr';
 
 export default function JoinRoomPage() {
   const [code, setCode] = useState('');
@@ -15,19 +16,105 @@ export default function JoinRoomPage() {
   const [rooms, setRooms] = useState<any[]>([]);
   const [roomsLoading, setRoomsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [cameraActive, setCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState('');
+  const [scanning, setScanning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const scanIntervalRef = useRef<number>(0);
   const navigate = useNavigate();
   const { addToast } = useApp();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const codeParam = searchParams.get('code');
+    const scanParam = searchParams.get('scan');
+    if (codeParam) {
+      navigate(`/room/${codeParam.toUpperCase()}`, { replace: true });
+      return;
+    }
+    if (scanParam === '1') {
+      setQrMode(true);
+    }
+  }, []);
 
   useEffect(() => {
     fetch('/api/rooms').then(r => r.json()).then(data => setRooms(data.filter((r: any) => r.is_live))).catch(() => { setRooms([]); }).finally(() => setRoomsLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (qrMode && !cameraActive) {
+      startCamera();
+    }
+    return () => stopCamera();
+  }, [qrMode]);
 
   const filteredRooms = useMemo(() => rooms.filter(r =>
     r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (r.host_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     r.code.toLowerCase().includes(searchTerm.toLowerCase())
   ), [rooms, searchTerm]);
+
+  const startCamera = async () => {
+    setCameraError('');
+    setScanning(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 640 } }
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+        setCameraActive(true);
+        startScanning();
+      }
+    } catch (err: any) {
+      setCameraError(err.message || 'Camera access denied');
+      setScanning(false);
+    }
+  };
+
+  const stopCamera = () => {
+    setScanning(false);
+    if (scanIntervalRef.current) { cancelAnimationFrame(scanIntervalRef.current); scanIntervalRef.current = 0; }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    setCameraActive(false);
+  };
+
+  const startScanning = () => {
+    const tick = () => {
+      if (!videoRef.current || !canvasRef.current || !scanning) return;
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      if (video.readyState !== video.HAVE_ENOUGH_DATA) { scanIntervalRef.current = requestAnimationFrame(tick); return; }
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { scanIntervalRef.current = requestAnimationFrame(tick); return; }
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const qr = jsQR(imageData.data, imageData.width, imageData.height);
+      if (qr) {
+        const url = qr.data;
+        const match = url.match(/\/room\/([A-Z0-9]{6})/i);
+        if (match) {
+          setScanning(false);
+          stopCamera();
+          addToast({ message: 'QR scanned! Joining room...', type: 'success' });
+          navigate(`/room/${match[1].toUpperCase()}`);
+          return;
+        }
+      }
+      scanIntervalRef.current = requestAnimationFrame(tick);
+    };
+    scanIntervalRef.current = requestAnimationFrame(tick);
+  };
 
   const handleJoin = () => {
     if (!code.trim()) { addToast({ message: 'Enter a room code', type: 'error' }); inputRef.current?.focus(); return; }
@@ -54,7 +141,7 @@ export default function JoinRoomPage() {
               <p className="text-neutral-400 text-sm">Enter a room code or scan a QR</p>
             </div>
             <div className="flex gap-2 mb-6 p-1 rounded-xl bg-bg-secondary">
-              <button onClick={() => setQrMode(false)} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] sm:min-h-auto ${!qrMode ? 'bg-arcade-pink/20 text-arcade-pink' : 'text-neutral-400 hover:text-text-primary'}`}>
+              <button onClick={() => { setQrMode(false); stopCamera(); }} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] sm:min-h-auto ${!qrMode ? 'bg-arcade-pink/20 text-arcade-pink' : 'text-neutral-400 hover:text-text-primary'}`}>
                 <Keyboard className="w-4 h-4" />Code
               </button>
               <button onClick={() => setQrMode(true)} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] sm:min-h-auto ${qrMode ? 'bg-arcade-blue/20 text-arcade-blue' : 'text-neutral-400 hover:text-text-primary'}`}>
@@ -74,9 +161,35 @@ export default function JoinRoomPage() {
                 </motion.button>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <div className="w-48 h-48 mx-auto rounded-2xl bg-white p-3 mb-4"><div className="w-full h-full bg-bg-primary rounded-lg flex items-center justify-center"><QrCode className="w-24 h-24 text-text-primary" /></div></div>
-                <p className="text-neutral-400 text-sm">Point camera at QR code</p>
+              <div className="text-center py-4">
+                {cameraError ? (
+                  <div className="space-y-4">
+                    <div className="w-24 h-24 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                      <CameraOff className="w-10 h-10 text-neutral-500" />
+                    </div>
+                    <p className="text-xs text-red-400">{cameraError}</p>
+                    <p className="text-xs text-neutral-500">Allow camera access or enter the code manually</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="relative w-56 h-56 mx-auto rounded-2xl overflow-hidden bg-black border-2 border-arcade-blue/30">
+                      <video ref={videoRef} playsInline muted className="w-full h-full object-cover" />
+                      <canvas ref={canvasRef} className="hidden" />
+                      {!cameraActive && scanning && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                          <Loader2 className="w-8 h-8 text-arcade-blue animate-spin" />
+                        </div>
+                      )}
+                      {cameraActive && (
+                        <div className="absolute inset-0 border-[3px] border-transparent border-t-arcade-blue animate-pulse pointer-events-none" style={{ boxShadow: 'inset 0 0 30px rgba(59,130,246,0.15)' }} />
+                      )}
+                    </div>
+                    <p className="text-xs text-neutral-400">Point camera at the QR code from the streamer's room</p>
+                    <button onClick={stopCamera}
+                      className="min-h-[44px] px-4 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-text-primary text-xs font-semibold"
+                    >Cancel Scan</button>
+                  </div>
+                )}
               </div>
             )}
           </div>

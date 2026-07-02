@@ -17,7 +17,7 @@ export default function MobileHero({ totalViewers, loading, apiError, role, onSw
 
   const handleJoin = () => {
     if (code.trim().length >= 3) {
-      navigate(`/join?code=${code.trim()}`);
+      navigate(`/room/${code.trim()}`);
     } else {
       navigate('/join');
     }
@@ -29,6 +29,8 @@ export default function MobileHero({ totalViewers, loading, apiError, role, onSw
   };
 
   const handleBrowse = () => navigate('/join');
+
+  const handleScan = () => navigate('/join?scan=1');
 
   return (
     <section
@@ -101,7 +103,7 @@ export default function MobileHero({ totalViewers, loading, apiError, role, onSw
                 />
                 <button
                   type="button"
-                  onClick={() => navigate('/join?scan=1')}
+                  onClick={handleScan}
                   className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-neutral-500 active:text-arcade-yellow active:scale-[0.97] transition-all duration-100 touch-manipulation "
                   aria-label="Scan QR code"
                 >
