@@ -68,11 +68,11 @@ export default function OverlayPage() {
       ch.onmessage = (e) => {
         if (e.data?.type === 'show_qr') {
           setShowQR(true);
-          clearTimeout(qrTimeoutRef.current);
+          if (qrTimeoutRef.current) clearTimeout(qrTimeoutRef.current);
           qrTimeoutRef.current = setTimeout(() => setShowQR(false), 120000);
         }
       };
-      return () => { ch.close(); clearTimeout(qrTimeoutRef.current); };
+      return () => { ch.close(); if (qrTimeoutRef.current) clearTimeout(qrTimeoutRef.current); };
     } catch { console.warn('BroadcastChannel not supported'); return; }
   }, [code]);
 
