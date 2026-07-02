@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Home, Image as ImageIcon, MessageSquare, Clock, LogOut, Trash2, Check, X, RefreshCw, Search, Shield, Queue } from 'lucide-react';
+import { Users, Home, Image as ImageIcon, MessageSquare, Clock, LogOut, Trash2, Check, X, RefreshCw, Search, Shield, ListOrdered } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
@@ -25,10 +25,11 @@ export default function AdminPage() {
 
   const token = user?.aud === 'authenticated' ? user?.aud : null;
 
-  const authHeaders = useCallback(async () => {
+  const authHeaders = useCallback(async (): Promise<Record<string, string>> => {
     const { default: supabase } = await import('../lib/supabase');
     const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+    if (session?.access_token) return { Authorization: `Bearer ${session.access_token}` };
+    return {};
   }, []);
 
   const fetchData = useCallback(async (endpoint: string) => {
@@ -112,7 +113,7 @@ export default function AdminPage() {
     { id: 'rooms', label: 'Rooms', icon: Home },
     { id: 'art', label: 'Art', icon: ImageIcon },
     { id: 'chat', label: 'Chat', icon: MessageSquare },
-    { id: 'queue', label: 'Queue', icon: Queue },
+    { id: 'queue', label: 'Queue', icon: ListOrdered },
   ];
 
   const filtered = (items: any[], fields: string[]) =>
@@ -158,7 +159,7 @@ export default function AdminPage() {
               { label: 'Rooms', value: stats?.rooms || 0, icon: Home, color: 'text-arcade-green', bg: 'bg-arcade-green/10' },
               { label: 'Art Submissions', value: stats?.art_submissions || 0, icon: ImageIcon, color: 'text-arcade-purple', bg: 'bg-arcade-purple/10' },
               { label: 'Chat Messages', value: stats?.chat_messages || 0, icon: MessageSquare, color: 'text-arcade-pink', bg: 'bg-arcade-pink/10' },
-              { label: 'Queue Entries', value: stats?.queue_entries || 0, icon: Queue, color: 'text-arcade-yellow', bg: 'bg-arcade-yellow/10' },
+              { label: 'Queue Entries', value: stats?.queue_entries || 0, icon: ListOrdered, color: 'text-arcade-yellow', bg: 'bg-arcade-yellow/10' },
             ].map(s => (
               <div key={s.label} className={`${s.bg} rounded-2xl p-4 border border-white/[0.06]`}>
                 <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
