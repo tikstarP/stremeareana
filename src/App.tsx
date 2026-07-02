@@ -1,4 +1,3 @@
-import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { AppProvider } from './context/AppContext';
@@ -22,9 +21,8 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import SettingsPage from './pages/SettingsPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminPage from './pages/AdminPage';
-
-const StreamerStudio = lazy(() => import('./pages/StreamerStudio'));
-const OverlayPage = lazy(() => import('./pages/OverlayPage'));
+import StreamerStudio from './pages/StreamerStudio';
+import OverlayPage from './pages/OverlayPage';
 
 function App() {
   return (
@@ -50,9 +48,9 @@ function App() {
             <Route path="/room/:roomCode" element={<LiveRoomPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/create-room" element={<CreateRoomPage />} />
-            <Route path="/studio/:roomCode" element={<Suspense fallback={<div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="w-8 h-8 border-2 border-arcade-yellow border-t-transparent rounded-full animate-spin" /></div>}><StreamerStudio /></Suspense>} />
+            <Route path="/studio/:roomCode" element={<StreamerStudio />} />
             <Route path="/audio/:roomCode" element={<AudioDock />} />
-            <Route path="/overlay/:roomCode" element={<Suspense fallback={<div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="w-8 h-8 border-2 border-arcade-yellow border-t-transparent rounded-full animate-spin" /></div>}><OverlayPage /></Suspense>} />
+            <Route path="/overlay/:roomCode" element={<OverlayPage />} />
           </Routes>
           </ErrorBoundary>
           <GlobalFloatingPlayer />
