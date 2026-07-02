@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Keyboard, QrCode, Users, Radio, Search, Camera, CameraOff, Loader2 } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
@@ -26,30 +26,29 @@ export default function JoinRoomPage() {
   const scanIntervalRef = useRef<number>(0);
   const navigate = useNavigate();
   const { addToast } = useApp();
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   useEffect(() => {
-    const codeParam = searchParams.get('code');
-    const scanParam = searchParams.get('scan');
+    const params = new URLSearchParams(location.search);
+    const codeParam = params.get('code');
+    const scanParam = params.get('scan');
     if (codeParam) {
       navigate(`/room/${codeParam.toUpperCase()}`, { replace: true });
       return;
     }
     if (scanParam === '1') {
       setQrMode(true);
+      startCamera();
     }
-  }, []);
+  }, [location.search]);
 
   useEffect(() => {
     fetch('/api/rooms').then(r => r.json()).then(data => setRooms(data.filter((r: any) => r.is_live))).catch(() => { setRooms([]); }).finally(() => setRoomsLoading(false));
   }, []);
 
   useEffect(() => {
-    if (qrMode && !cameraActive) {
-      startCamera();
-    }
     return () => stopCamera();
-  }, [qrMode]);
+  }, []);
 
   const filteredRooms = useMemo(() => rooms.filter(r =>
     r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -60,6 +59,11 @@ export default function JoinRoomPage() {
   const startCamera = async () => {
     setCameraError('');
     setScanning(true);
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError('Camera not supported on this device/browser');
+      setScanning(false);
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 640 } }
@@ -70,9 +74,18 @@ export default function JoinRoomPage() {
         await videoRef.current.play();
         setCameraActive(true);
         startScanning();
+      } else {
+        setCameraError('Camera element not ready');
+        setScanning(false);
       }
     } catch (err: any) {
-      setCameraError(err.message || 'Camera access denied');
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setCameraError('Camera permission denied. Please allow camera access in your browser settings.');
+      } else if (err.name === 'NotFoundError') {
+        setCameraError('No camera found on this device');
+      } else {
+        setCameraError(err.message || 'Camera access denied');
+      }
       setScanning(false);
     }
   };
@@ -144,7 +157,7 @@ export default function JoinRoomPage() {
               <button onClick={() => { setQrMode(false); stopCamera(); }} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] sm:min-h-auto ${!qrMode ? 'bg-arcade-pink/20 text-arcade-pink' : 'text-neutral-400 hover:text-text-primary'}`}>
                 <Keyboard className="w-4 h-4" />Code
               </button>
-              <button onClick={() => setQrMode(true)} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] sm:min-h-auto ${qrMode ? 'bg-arcade-blue/20 text-arcade-blue' : 'text-neutral-400 hover:text-text-primary'}`}>
+              <button onClick={() => { setQrMode(true); startCamera(); }} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all min-h-[44px] sm:min-h-auto ${qrMode ? 'bg-arcade-blue/20 text-arcade-blue' : 'text-neutral-400 hover:text-text-primary'}`}>
                 <QrCode className="w-4 h-4" />QR
               </button>
             </div>
