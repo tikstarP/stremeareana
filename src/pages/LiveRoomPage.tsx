@@ -36,8 +36,7 @@ const fanDropBadgeIcon = (state: string) => {
   return '🔒';
 };
 
-const roomTabs = [
-  { id: 'chat', label: 'Chat', icon: MessageSquare },
+const rightPanelTabs = [
   { id: 'games', label: 'Play', icon: Gamepad2 },
   { id: 'queue', label: 'Queue', icon: ListOrdered },
   { id: 'rank', label: 'Rank', icon: Trophy },
@@ -53,7 +52,7 @@ export default function LiveRoomPage() {
   const { startWatching } = useLivePlayer();
   const videoId = 'jfKfPfyJRdk';
   const [room, setRoom] = useState<any>(null);
-  const [tab, setTab] = useState('chat');
+  const [tab, setTab] = useState('games');
   const [mobileTab, setMobileTab] = useState('stream');
   const [countdown, setCountdown] = useState(45);
   const [likeCount, setLikeCount] = useState(0);
@@ -169,26 +168,30 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
         <YouTubePlayer />
       </div>
       <div className={`grid grid-cols-12 gap-5 px-5 pt-4 ${minimized ? 'pb-20' : 'pb-5'}`}>
-        <div className="col-span-7 xl:col-span-8 space-y-4 pb-8">
+        <div className="col-span-7 xl:col-span-8 space-y-4 pb-8 flex flex-col">
           <StreamerProfile roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} />
           <AboutThisRoom currentStatus={currentStatus} countdown={countdown} formatTime={formatTime} viewerCoins={viewerCoins} viewerPoints={viewerPoints} roomStatus={roomStatus} />
           <InteractionBar roomCode={roomCode} room={room} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} />
-          <ActivityFeed activities={activities} />
+          <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] flex-1 min-h-[300px] flex flex-col overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
+              <MessageSquare className="w-4 h-4 text-arcade-blue" />
+              <h3 className="text-sm font-semibold text-text-primary">Live Feed</h3>
+              <div className="w-1.5 h-1.5 rounded-full bg-arcade-green animate-pulse" />
+            </div>
+            <div className="flex-1 overflow-y-auto no-scrollbar">
+              <InteractionHub roomId={roomId} />
+            </div>
+          </div>
         </div>
         <div className="col-span-5 xl:col-span-4">
           <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] flex flex-col h-full min-h-[450px]">
             <div className="flex items-center gap-1.5 p-2 border-b border-white/[0.06] overflow-x-auto no-scrollbar">
-              {roomTabs.map(t => (
+              {rightPanelTabs.map(t => (
                 <TabButton key={t.id} id={t.id} label={t.id === 'art' ? `Fan Drop ${fanDropBadgeIcon(fanDropState)}` : t.label} icon={t.icon} active={tab === t.id} onClick={() => setTab(t.id)} />
               ))}
             </div>
             <div className="flex-1 overflow-y-auto no-scrollbar">
               <AnimatePresence mode="wait">
-                {tab === 'chat' && (
-                  <motion.div key="chat" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.15 }} className="h-full">
-                    <InteractionHub roomId={roomId} />
-                  </motion.div>
-                )}
                 {tab === 'games' && (
                   <motion.div key="games" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.15 }} className="h-full">
                     <GameArena roomId={roomId} />
@@ -520,11 +523,20 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
       <div className={`px-3 ${minimized ? 'pb-[140px]' : 'pb-20'}`}>
         <AnimatePresence mode="wait">
           {mobileTab === 'stream' && (
-            <motion.div key="stream" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
+            <motion.div key="stream" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3 pb-4">
               <StreamerProfileMobile roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} />
               <MainActionCard roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} roomCode={roomCode} addToast={addToast} />
               <StreamerInfoMobile streamerName={streamerName} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} />
-              <ActivityFeedMobile activities={activities} room={room} likeCount={likeCount} setLikeCount={setLikeCount} addToast={addToast} roomCode={roomCode} user={user} />
+              <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] overflow-hidden">
+                <div className="flex items-center gap-2 px-3 py-2.5 border-b border-white/[0.06]">
+                  <MessageSquare className="w-3.5 h-3.5 text-arcade-blue" />
+                  <span className="text-xs font-semibold text-text-primary">Live Feed</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-arcade-green animate-pulse" />
+                </div>
+                <div className="h-[320px] overflow-y-auto no-scrollbar">
+                  <InteractionHub roomId={roomId} />
+                </div>
+              </div>
             </motion.div>
           )}
           {mobileTab === 'queue' && (
@@ -557,11 +569,7 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
               <Leaderboard />
             </motion.div>
           )}
-          {mobileTab === 'chat' && (
-            <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-[calc(100vh-200px)]">
-              <InteractionHub roomId={roomId} />
-            </motion.div>
-          )}
+
         </AnimatePresence>
       </div>
 

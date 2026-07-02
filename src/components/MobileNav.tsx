@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 
 const tabs = [
   { id: 'stream', label: 'Stream', icon: '📺' },
-  { id: 'chat', label: 'Chat', icon: '💬' },
   { id: 'games', label: 'Play', icon: '🎮' },
   { id: 'queue', label: 'Queue', icon: '⏳' },
   { id: 'rank', label: 'Rank', icon: '🏆' },
