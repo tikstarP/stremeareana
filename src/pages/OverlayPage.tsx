@@ -53,7 +53,7 @@ export default function OverlayPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [connected] = useState(true);
   const [showQR, setShowQR] = useState(false);
-  const qrTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const qrTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {

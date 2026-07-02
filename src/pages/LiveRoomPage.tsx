@@ -134,7 +134,7 @@ export default function LiveRoomPage() {
       <div className="md:hidden"><MobileHeader /></div>
       <Toast />
       <div className="hidden md:block relative z-10 pt-20 px-4 max-w-[1600px] mx-auto">
-        <DesktopContent roomCode={roomCode} room={room} tab={tab} setTab={setTab} countdown={countdown} formatTime={formatTime} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} activities={activities} viewerCoins={viewerCoins} viewerPoints={viewerPoints} displayName={displayName} avatarUrl={avatarUrl} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} />
+        <DesktopContent roomCode={roomCode} room={room} tab={tab} setTab={setTab} countdown={countdown} formatTime={formatTime} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} activities={activities} viewerCoins={viewerCoins} viewerPoints={viewerPoints} displayName={displayName} avatarUrl={avatarUrl} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} setFanDropState={setFanDropState} />
       </div>
       <div className="md:hidden relative z-10 pt-14 max-w-md mx-auto touch-manipulation" style={{ height: 'calc(100vh - 56px - 80px)', overflow: 'hidden' }}>
         <MobileContent roomCode={roomCode} room={room} mobileTab={mobileTab} setMobileTab={setMobileTab} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} setFanDropState={setFanDropState} videoId={videoId} activities={activities} />
@@ -144,7 +144,7 @@ export default function LiveRoomPage() {
   );
 }
 
-function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, activities, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, fanDropState }: any) {
+function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, activities, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, fanDropState, setFanDropState }: any) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const [minimized, setMinimized] = useState(false);
@@ -429,7 +429,7 @@ function InteractionBar({ roomCode, room, user, addToast, likeCount, setLikeCoun
           </button>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setLikeCount((prev) => prev + 1)} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-red-400 hover:border-red-400/30 transition-all text-xs font-semibold min-h-[44px] active:scale-[0.97] touch-manipulation">
+          <button onClick={() => setLikeCount((prev: number) => prev + 1)} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-red-400 hover:border-red-400/30 transition-all text-xs font-semibold min-h-[44px] active:scale-[0.97] touch-manipulation">
             <Heart className="w-4 h-4" />
             <span>{likeCount}</span>
           </button>
@@ -759,7 +759,7 @@ function ActivityFeedMobile({ room, likeCount, setLikeCount, addToast, roomCode,
           <span className="text-xs font-semibold text-text-primary">Live Activity</span>
           <div className="w-1.5 h-1.5 rounded-full bg-arcade-green animate-pulse" />
         </div>
-        <button onClick={() => setLikeCount((prev) => prev + 1)} className="flex items-center gap-1 min-h-[44px] px-2 py-1 rounded-lg text-neutral-400 hover:text-red-400 transition-all text-[10px] active:scale-[0.97] touch-manipulation">
+        <button onClick={() => setLikeCount((prev: number) => prev + 1)} className="flex items-center gap-1 min-h-[44px] px-2 py-1 rounded-lg text-neutral-400 hover:text-red-400 transition-all text-[10px] active:scale-[0.97] touch-manipulation">
           <Heart className="w-3 h-3" /> <span>{likeCount}</span>
         </button>
       </div>
