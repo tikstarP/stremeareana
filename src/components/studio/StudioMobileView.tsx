@@ -100,15 +100,30 @@ export default function StudioMobileView({
     </div>
   );
 
-  const pipPreview = videoId ? (
-    <div className="fixed bottom-[68px] right-2 z-50 w-44 rounded-lg overflow-hidden bg-black border border-white/10 shadow-2xl">
+  const [pipOpen, setPipOpen] = useState(true);
+
+  const pipPreview = videoId && pipOpen ? (
+    <div className="fixed bottom-[72px] right-3 z-50 w-[45vw] max-w-[200px] rounded-xl overflow-hidden bg-black border border-white/15 shadow-2xl" style={{ touchAction: 'none' }}>
+      {/* Clickable overlay for toggle */}
+      <button onClick={() => setPipOpen(false)} className="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-black/80 border border-white/20 flex items-center justify-center">
+        <X className="w-3 h-3 text-white" />
+      </button>
+      <button onClick={(e) => { e.stopPropagation(); onToggleMute(); }} className="absolute top-1 left-1 z-10 w-5 h-5 rounded bg-black/60 flex items-center justify-center">
+        {isMuted ? <VolumeX className="w-3 h-3 text-white" /> : <Volume2 className="w-3 h-3 text-white" />}
+      </button>
       <div className="relative bg-black" style={{ aspectRatio: '16/9' }}>
         <iframe src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0&controls=0`}
           className="w-full h-full pointer-events-none" allow="autoplay" title="pip"
         />
-        <div className="absolute top-0.5 left-0.5 px-1 py-0.5 rounded bg-red-500/80 text-[7px] font-bold text-white leading-none">LIVE</div>
+        <div className="absolute top-1 left-6 px-1 py-0.5 rounded bg-red-500/80 text-[7px] font-bold text-white leading-none">LIVE</div>
       </div>
     </div>
+  ) : videoId ? (
+    <button onClick={() => setPipOpen(true)}
+      className="fixed bottom-[76px] right-3 z-50 w-10 h-10 rounded-full bg-arcade-pink/20 border border-arcade-pink/30 flex items-center justify-center shadow-lg"
+    >
+      <Monitor className="w-4 h-4 text-arcade-pink" />
+    </button>
   ) : null;
 
   const controlTab = (

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Volume2, VolumeX, ExternalLink, ChevronUp, ChevronDown, Monitor } from 'lucide-react';
+import { Volume2, VolumeX, ExternalLink, Monitor, X, Maximize2, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface StudioLivePreviewProps {
@@ -36,7 +36,7 @@ export default function StudioLivePreview({
   addToast,
 }: StudioLivePreviewProps) {
   const [inputValue, setInputValue] = useState('');
-  const [minimized, setMinimized] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const handleSetUrl = () => {
     const id = extractVideoId(inputValue);
@@ -54,40 +54,38 @@ export default function StudioLivePreview({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl overflow-hidden border border-white/[0.06]"
-      style={{ background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(12px)' }}
+    <div className="rounded-2xl overflow-hidden border border-white/[0.10] shadow-2xl"
+      style={{ background: 'rgba(10,10,15,0.92)', backdropFilter: 'blur(16px)' }}
     >
-      {/* Header bar — always visible */}
+      {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
           <span className="text-[11px] font-bold text-white tracking-wider">LIVE</span>
-          <span className="text-[10px] text-neutral-400 ml-1">{viewerCount.toLocaleString()} watching</span>
+          <span className="text-[10px] text-neutral-400 ml-0.5">{viewerCount.toLocaleString()} watching</span>
         </div>
         <div className="flex items-center gap-1">
           <button onClick={onToggleMute}
-            className="p-1 rounded hover:bg-white/5 text-neutral-400 hover:text-white transition-colors"
+            className="p-1 rounded hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
             title={isMuted ? 'Unmute' : 'Mute'}
           >{isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}</button>
           {videoId && (
             <a href={`https://www.youtube.com/watch?v=${videoId}`} target="_blank" rel="noopener noreferrer"
-              className="p-1 rounded hover:bg-white/5 text-neutral-400 hover:text-white transition-colors" title="Open in YouTube"
+              className="p-1 rounded hover:bg-white/10 text-neutral-400 hover:text-white transition-colors" title="Open in YouTube"
             ><ExternalLink className="w-3.5 h-3.5" /></a>
           )}
-          <button onClick={() => setMinimized(p => !p)}
-            className="p-1 rounded hover:bg-white/5 text-neutral-400 hover:text-white transition-colors"
-            title={minimized ? 'Expand' : 'Minimize'}
-          >{minimized ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}</button>
+          <button onClick={() => setExpanded(p => !p)}
+            className="p-1 rounded hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
+            title={expanded ? 'Collapse' : 'Expand'}
+          >{expanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}</button>
         </div>
       </div>
 
-      {/* Collapsible content */}
+      {/* Video or URL input */}
       <AnimatePresence>
-        {!minimized && (
+        {expanded ? (
           <motion.div
+            key="expanded"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -103,26 +101,37 @@ export default function StudioLivePreview({
                 />
               </div>
             ) : (
-              <div className="flex items-center gap-3 px-3 py-2.5">
-                <Monitor className="w-4 h-4 text-neutral-500" />
-                <span className="text-xs text-text-muted">No video configured</span>
-                <div className="flex-1" />
+              <div className="flex items-center gap-2 p-3">
+                <Monitor className="w-4 h-4 text-neutral-500 shrink-0" />
                 <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Paste YouTube URL or ID..."
-                  className="flex-1 max-w-[200px] bg-bg-secondary border border-white/[0.06] rounded-lg px-2.5 py-1.5 text-[10px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/30 transition-colors"
+                  type="text" value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
+                  placeholder="YouTube URL or ID..."
+                  className="flex-1 bg-white/[0.06] border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-[10px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/30"
                 />
                 <button onClick={handleSetUrl}
-                  className="min-h-[36px] px-2.5 py-1.5 rounded-lg bg-arcade-pink/20 border border-arcade-pink/30 text-arcade-pink text-[10px] font-semibold hover:bg-arcade-pink/30 transition-colors whitespace-nowrap"
-                >Set URL</button>
+                  className="px-2.5 py-1.5 rounded-lg bg-arcade-pink/20 border border-arcade-pink/30 text-arcade-pink text-[10px] font-semibold hover:bg-arcade-pink/30 whitespace-nowrap"
+                >Set</button>
               </div>
             )}
           </motion.div>
-        )}
+        ) : videoId ? (
+          <motion.div
+            key="mini"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="relative bg-black" style={{ aspectRatio: '16/9' }}>
+              <iframe
+                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0&controls=0`}
+                className="w-full h-full pointer-events-none"
+                allow="autoplay"
+              />
+            </div>
+          </motion.div>
+        ) : null}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
