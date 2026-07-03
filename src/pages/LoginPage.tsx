@@ -37,7 +37,7 @@ export default function LoginPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
-      navigate('/dashboard');
+      navigate('/streamer');
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
     } finally {
@@ -98,7 +98,7 @@ export default function LoginPage() {
               </motion.button>
             </form>
 
-            <button onClick={() => { const u = enableDemoLogin(); if (u) navigate('/dashboard'); }}
+            <button onClick={() => { const u = enableDemoLogin(); if (u) navigate('/streamer'); }}
               className="w-full py-2.5 rounded-xl bg-arcade-yellow/5 border border-arcade-yellow/20 text-arcade-yellow text-xs font-bold hover:bg-arcade-yellow/10 transition-colors flex items-center justify-center gap-2 min-h-[44px] sm:min-h-auto mt-3"
             >
               <Bug className="w-3.5 h-3.5" /> Demo Login (offline)

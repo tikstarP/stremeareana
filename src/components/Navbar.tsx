@@ -55,7 +55,7 @@ export default function Navbar() {
                   <Trophy className="w-4 h-4 text-arcade-purple" />
                   <span className="text-sm font-semibold text-arcade-purple">{profile.points}</span>
                 </div>
-                <Link to="/dashboard">
+                <Link to="/settings">
                   <img src={profile.avatar_url} alt={profile.username} className="w-8 h-8 rounded-full border border-arcade-blue/50 hover:border-arcade-pink/50 transition-colors" />
                 </Link>
               </div>
@@ -106,7 +106,7 @@ export default function Navbar() {
                 )}
               </div>
               {user ? (
-                <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="block text-center px-5 py-2.5 rounded-lg bg-gradient-to-r from-arcade-purple to-arcade-blue text-white text-sm font-semibold">
+                <Link to="/settings" onClick={() => setMobileOpen(false)} className="block text-center px-5 py-2.5 rounded-lg bg-gradient-to-r from-arcade-purple to-arcade-blue text-white text-sm font-semibold">
                   Dashboard
                 </Link>
               ) : (

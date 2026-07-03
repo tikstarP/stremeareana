@@ -127,7 +127,7 @@ export default function MobileLandingPage({ totalViewers, loading, apiError, roo
               <Link to="/create-room" className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-bold text-sm active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation mb-3">
                 <span className="text-base">🎬</span> Create Your Room
               </Link>
-              <Link to="/dashboard" className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-neutral-300 text-sm font-semibold active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation">
+              <Link to="/create-room" className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-neutral-300 text-sm font-semibold active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation">
                 Go to Dashboard <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -193,7 +193,7 @@ export default function MobileLandingPage({ totalViewers, loading, apiError, roo
             <div className="aspect-square rounded-xl overflow-hidden border border-arcade-purple/30 bg-gradient-to-br from-arcade-purple/20 to-transparent" />
             <div className="aspect-square rounded-xl overflow-hidden border border-arcade-blue/30 bg-gradient-to-br from-arcade-blue/20 to-transparent" />
           </div>
-          <Link to={role === 'streamer' ? '/dashboard' : '/join'} className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-semibold text-sm active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation ">
+          <Link to={role === 'streamer' ? '/create-room' : '/join'} className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-semibold text-sm active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation ">
             {role === 'streamer' ? 'Go to Dashboard' : 'Try Art Arena'} <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

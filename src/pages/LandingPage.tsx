@@ -255,7 +255,7 @@ export default function LandingPage({ role }: { role: 'streamer' | 'viewer' }) {
                 <Link to="/create-room" className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-semibold text-base hover:opacity-90 transition-opacity min-h-[44px] sm:min-h-auto inline-flex items-center gap-2">
                   <Play className="w-4 h-4" /> Create Your Room
                 </Link>
-                <Link to="/dashboard" className="px-8 py-3.5 rounded-xl bg-white/[0.03] border border-arcade-pink/10 text-text-primary font-semibold text-base hover:border-arcade-pink/40 transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center gap-2">
+                <Link to="/create-room" className="px-8 py-3.5 rounded-xl bg-white/[0.03] border border-arcade-pink/10 text-text-primary font-semibold text-base hover:border-arcade-pink/40 transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center gap-2">
                   Go to Dashboard <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -395,7 +395,7 @@ export default function LandingPage({ role }: { role: 'streamer' | 'viewer' }) {
                     </li>
                   ))}
                 </ul>
-                <Link to={role === 'streamer' ? '/dashboard' : '/join'} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-semibold text-sm hover:opacity-90 transition-opacity min-h-[44px] sm:min-h-auto">
+                <Link to={role === 'streamer' ? '/create-room' : '/join'} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-semibold text-sm hover:opacity-90 transition-opacity min-h-[44px] sm:min-h-auto">
                   {role === 'streamer' ? 'Go to Dashboard' : 'Try Art Arena'} <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </motion.div>
@@ -487,7 +487,7 @@ export default function LandingPage({ role }: { role: 'streamer' | 'viewer' }) {
                   <li><Link to="/join" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center">Join a Room</Link></li>
                   <li><Link to="/create-room" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center">Create Room</Link></li>
                   <li><Link to="/login" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center">Sign In</Link></li>
-                  <li><Link to="/dashboard" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center">Dashboard</Link></li>
+                  <li><Link to="/settings" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center">Settings</Link></li>
                   <li><Link to="/settings" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center">Settings</Link></li>
                 </ul>
               </div>

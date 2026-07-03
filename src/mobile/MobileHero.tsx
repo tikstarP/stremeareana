@@ -78,7 +78,7 @@ export default function MobileHero({ totalViewers, loading, apiError, role }: Mo
             <Link to="/create-room" className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-bold text-base active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation mb-3">
               🎬 Create Your Room
             </Link>
-            <Link to="/dashboard" className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-neutral-300 text-sm font-semibold active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation">
+            <Link to="/settings" className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-neutral-300 text-sm font-semibold active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation">
               Go to Dashboard <ArrowRight className="w-4 h-4" />
             </Link>
           </>

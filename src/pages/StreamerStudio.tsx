@@ -218,9 +218,9 @@ export default function StreamerStudio() {
           <div className="text-4xl mb-4">❌</div>
           <h2 className="font-display text-xl font-bold text-text-primary mb-2">Room Not Found</h2>
           <p className="text-sm text-neutral-400 mb-6">{roomError}</p>
-          <button onClick={() => navigate('/dashboard')}
+          <button onClick={() => navigate('/streamer')}
             className="min-h-[44px] px-6 py-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-bold text-sm hover:opacity-90 transition-opacity"
-          >Go to Dashboard</button>
+          >Go to Streamer Hub</button>
         </div>
       </div>
     );
@@ -253,9 +253,9 @@ export default function StreamerStudio() {
           <p className="text-sm text-neutral-400 mb-2">All coins returned. Player Lobby closed. Leaderboard saved.</p>
           <p className="text-xs text-neutral-500 mb-6">You can start a new stream anytime.</p>
           <div className="flex gap-3">
-            <button onClick={() => navigate('/dashboard')}
+            <button onClick={() => navigate('/create-room')}
               className="flex-1 min-h-[44px] px-4 py-2 rounded-xl bg-white/[0.05] border border-white/[0.1] text-sm text-neutral-300 hover:bg-white/[0.08] transition-all"
-            >Dashboard</button>
+            >Create Room</button>
             <button onClick={() => navigate(`/room/${code}`)}
               className="flex-1 min-h-[44px] px-4 py-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-bold text-sm hover:opacity-90 transition-opacity"
             >View Room</button>

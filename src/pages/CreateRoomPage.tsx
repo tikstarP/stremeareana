@@ -54,8 +54,8 @@ export default function CreateRoomPage() {
       <Toast />
       <div className="relative z-10 min-h-screen flex items-center justify-center pt-16 px-4">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-          <Link to="/dashboard" className="inline-flex items-center gap-2 text-neutral-400 hover:text-text-primary transition-colors mb-8 text-sm min-h-[44px] sm:min-h-auto">
-            <ArrowLeft className="w-4 h-4" /> Back to dashboard
+          <Link to="/streamer" className="inline-flex items-center gap-2 text-neutral-400 hover:text-text-primary transition-colors mb-8 text-sm min-h-[44px] sm:min-h-auto">
+            <ArrowLeft className="w-4 h-4" /> Back
           </Link>
 
           <div className="bg-white/[0.03] rounded-3xl p-8 border border-arcade-pink/10">

@@ -14,7 +14,6 @@ import AboutPage from './pages/AboutPage';
 import JoinRoomPage from './pages/JoinRoomPage';
 import LiveRoomPage from './pages/LiveRoomPage';
 import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
 import CreateRoomPage from './pages/CreateRoomPage';
 import AudioDock from './pages/AudioDock';
 import LeaderboardPage from './pages/LeaderboardPage';
@@ -44,7 +43,6 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/join" element={<JoinRoomPage />} />
             <Route path="/room/:roomCode" element={<LiveRoomPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/create-room" element={<CreateRoomPage />} />
             <Route path="/studio/:roomCode" element={<StreamerStudio />} />
             <Route path="/audio/:roomCode" element={<AudioDock />} />
