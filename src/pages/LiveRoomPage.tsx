@@ -23,10 +23,10 @@ const roomStatuses = [
   { id: 'queue_open', label: 'Queue Open', icon: '📋', desc: 'Join the queue to play', color: 'text-arcade-blue', bg: 'bg-arcade-blue/10', border: 'border-arcade-blue/30' },
   { id: 'quiz_active', label: 'Quiz Active', icon: '🎮', desc: 'Answer the quiz question', color: 'text-arcade-purple', bg: 'bg-arcade-purple/10', border: 'border-arcade-purple/30' },
   { id: 'guess_active', label: 'Guess Number', icon: '🎯', desc: 'Guess the number 1-100', color: 'text-arcade-pink', bg: 'bg-arcade-pink/10', border: 'border-arcade-pink/30' },
-  { id: 'fastest_active', label: 'Button Mash', icon: '⚡', desc: 'Type to win the round', color: 'text-arcade-orange', bg: 'bg-arcade-orange/10', border: 'border-arcade-orange/30' },
-  { id: 'art_review', label: 'Art Review', icon: '🎨', desc: 'Streamer is reviewing art', color: 'text-arcade-yellow', bg: 'bg-arcade-yellow/10', border: 'border-arcade-yellow/30' },
+  { id: 'fastest_active', label: 'Button Mash', icon: '⚡', desc: 'Type to win the round', color: 'text-arcade-purple', bg: 'bg-arcade-purple/10', border: 'border-arcade-purple/30' },
+  { id: 'art_review', label: 'Art Review', icon: '🎨', desc: 'Streamer is reviewing art', color: 'text-arcade-blue', bg: 'bg-arcade-blue/10', border: 'border-arcade-blue/30' },
   { id: 'winner_reveal', label: 'Winner Reveal', icon: '🏆', desc: 'Winner being announced!', color: 'text-arcade-green', bg: 'bg-arcade-green/10', border: 'border-arcade-green/30' },
-  { id: 'countdown', label: 'Countdown', icon: '⏰', desc: 'Next round starting soon', color: 'text-arcade-orange', bg: 'bg-arcade-orange/10', border: 'border-arcade-orange/30' },
+  { id: 'countdown', label: 'Countdown', icon: '⏰', desc: 'Next round starting soon', color: 'text-arcade-purple', bg: 'bg-arcade-purple/10', border: 'border-arcade-purple/30' },
   { id: 'paused', label: 'Paused', icon: '⏸️', desc: 'Stream is on break', color: 'text-neutral-400', bg: 'bg-neutral-500/10', border: 'border-neutral-500/30' },
   { id: 'ended', label: 'Ended', icon: '🔴', desc: 'Thanks for watching!', color: 'text-arcade-pink', bg: 'bg-arcade-pink/15', border: 'border-arcade-pink/40' },
 ];
@@ -277,7 +277,7 @@ function StreamerProfile({ streamerName, streamerAvatar, streamerVerified, subsc
     <>
       <div className="bg-white/[0.03] rounded-2xl p-3 border border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <img src={streamerAvatar} alt={streamerName} className="w-10 h-10 rounded-full border-2 border-arcade-yellow/30 shrink-0" />
+          <img src={streamerAvatar} alt={streamerName} className="w-10 h-10 rounded-full border-2 border-arcade-purple/30 shrink-0" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-sm text-text-primary truncate">{streamerName}</span>
@@ -297,7 +297,7 @@ function StreamerProfile({ streamerName, streamerAvatar, streamerVerified, subsc
               className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-arcade-blue hover:border-arcade-blue/30 transition-all"
             ><Share2 className="w-3.5 h-3.5" /></button>
             <button onClick={() => { setIsFollowing(p => !p); addToast({ message: isFollowing ? 'Unfollowed' : `Following ${streamerName}`, type: 'success' }); }}
-              className={`min-h-[36px] px-3 py-1.5 rounded-lg font-bold text-[10px] active:scale-[0.97] transition-all duration-100 touch-manipulation ${isFollowing ? 'bg-arcade-pink/20 text-arcade-pink border border-arcade-pink/30' : 'bg-gradient-to-r from-arcade-orange to-arcade-yellow text-white hover:opacity-90'}`}
+              className={`min-h-[36px] px-3 py-1.5 rounded-lg font-bold text-[10px] active:scale-[0.97] transition-all duration-100 touch-manipulation ${isFollowing ? 'bg-arcade-pink/20 text-arcade-pink border border-arcade-pink/30' : 'bg-gradient-to-r from-arcade-purple to-arcade-blue text-white hover:opacity-90'}`}
             >{isFollowing ? 'Following' : 'Follow'}</button>
           </div>
         </div>
@@ -325,7 +325,7 @@ function StreamerProfile({ streamerName, streamerAvatar, streamerVerified, subsc
               </div>
               <div className="flex items-center justify-center gap-1.5 mb-4">
                 <span className="text-[10px] text-neutral-500">Room code:</span>
-                <span className="text-sm font-black text-arcade-yellow tracking-widest">@{roomCode}</span>
+                <span className="text-sm font-black text-arcade-purple tracking-widest">@{roomCode}</span>
               </div>
               <div className="flex gap-2">
                 <button onClick={() => { navigator.clipboard?.writeText(roomUrl); addToast({ message: 'Link copied!', type: 'success' }); }}
@@ -351,14 +351,14 @@ function TabButton({ id, label, icon: Icon, active, onClick }: { id: string; lab
       aria-label={`${label} tab`}
       className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 min-h-[44px] ${
         active
-          ? 'bg-gradient-to-r from-arcade-orange/20 to-arcade-yellow/10 text-arcade-yellow border border-arcade-yellow/25'
+          ? 'bg-gradient-to-r from-arcade-purple/20 to-arcade-blue/10 text-arcade-blue border border-arcade-blue/25'
           : 'text-neutral-400 hover:text-text-primary hover:bg-white/[0.03] border border-transparent'
       }`}
     >
       <Icon className="w-4 h-4" />
       <span className="hidden sm:inline">{label}</span>
       {active && (
-        <motion.div layoutId="tabGlow" className="absolute inset-0 rounded-xl bg-gradient-to-r from-arcade-yellow/5 to-transparent -z-10" />
+        <motion.div layoutId="tabGlow" className="absolute inset-0 rounded-xl bg-gradient-to-r from-arcade-blue/5 to-transparent -z-10" />
       )}
     </button>
   );
@@ -385,11 +385,9 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
 
   return (
     <div ref={scrollRef} className="h-full overflow-y-auto no-scrollbar">
-      {mobileTab !== 'rank' && (
         <div ref={videoWrapperRef} className={`sticky top-0 z-10 bg-bg-primary transition-all duration-500 ${minimized ? 'h-0 overflow-hidden opacity-0 pointer-events-none' : ''}`}>
           <YouTubePlayer videoId={videoId} />
         </div>
-      )}
       <div className={`px-3 ${minimized ? 'pb-[140px]' : 'pb-20'}`}>
         <AnimatePresence mode="wait">
           {mobileTab === 'stream' && (
@@ -434,17 +432,17 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
       </div>
 
       <AnimatePresence>
-        {minimized && mobileTab !== 'rank' && (
+        {minimized && (
           <motion.div
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className="fixed left-0 right-0 z-50 bg-black/95 border-t border-white/[0.08] backdrop-blur-xl"
-            style={{ height: 60, bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
+            style={{ height: 80, bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
           >
-            <div className="flex items-center gap-2 h-full px-3">
-              <div className="relative shrink-0 rounded-lg overflow-hidden bg-black border border-white/[0.06]" style={{ width: 80, height: 48 }}>
+            <div className="flex items-center gap-3 h-full px-3">
+              <div className="relative shrink-0 rounded-lg overflow-hidden bg-black border border-white/[0.06]" style={{ width: 128, height: 72 }}>
                 {miniStarted ? (
                   <iframe
                     src={`https://www.youtube.com/embed/${videoId || 'jfKfPfyJRdk'}?autoplay=1&mute=${miniMuted ? 1 : 0}&rel=0&controls=0`}
@@ -463,7 +461,7 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-medium text-white truncate">{streamTitle || 'Live Stream'}</p>
-                <p className="text-[10px] text-neutral-400">@{roomCode}</p>
+                <p className="text-[10px] text-neutral-400">@{roomCode} • {viewerCount || 0} watching</p>
               </div>
               <button
                 onClick={() => { setMiniMuted(!miniMuted); if (!miniStarted) setMiniStarted(true); }}
@@ -497,7 +495,7 @@ function StreamerProfileMobile({ streamerName, streamerAvatar, streamerVerified,
     <>
       <div className="bg-white/[0.03] rounded-2xl p-3 border border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <img src={streamerAvatar} alt={streamerName} className="w-10 h-10 rounded-full border-2 border-arcade-yellow/30 shrink-0" />
+          <img src={streamerAvatar} alt={streamerName} className="w-10 h-10 rounded-full border-2 border-arcade-purple/30 shrink-0" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-sm text-text-primary truncate">{streamerName}</span>
@@ -517,7 +515,7 @@ function StreamerProfileMobile({ streamerName, streamerAvatar, streamerVerified,
               className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-arcade-blue hover:border-arcade-blue/30 transition-all"
             ><Share2 className="w-4 h-4" /></button>
             <button onClick={() => { setIsFollowing(p => !p); addToast({ message: isFollowing ? 'Unfollowed' : `Following ${streamerName}`, type: 'success' }); }}
-              className={`min-h-[44px] px-4 py-2 rounded-xl font-bold text-xs active:scale-[0.97] touch-manipulation ${isFollowing ? 'bg-arcade-pink/20 text-arcade-pink border border-arcade-pink/30' : 'bg-gradient-to-r from-arcade-orange to-arcade-yellow text-white'}`}
+              className={`min-h-[44px] px-4 py-2 rounded-xl font-bold text-xs active:scale-[0.97] touch-manipulation ${isFollowing ? 'bg-arcade-pink/20 text-arcade-pink border border-arcade-pink/30' : 'bg-gradient-to-r from-arcade-purple to-arcade-blue text-white'}`}
             >{isFollowing ? 'Following' : 'Follow'}</button>
           </div>
         </div>
@@ -545,7 +543,7 @@ function StreamerProfileMobile({ streamerName, streamerAvatar, streamerVerified,
               </div>
               <div className="text-center mb-4">
                 <span className="text-[10px] text-neutral-500 block mb-1">Room code</span>
-                <span className="text-xl font-black text-arcade-yellow tracking-[0.3em]">@{roomCode}</span>
+                <span className="text-xl font-black text-arcade-purple tracking-[0.3em]">@{roomCode}</span>
               </div>
               <div className="flex gap-2">
                 <button onClick={() => { navigator.clipboard?.writeText(roomUrl); addToast({ message: 'Link copied!', type: 'success' }); }}
@@ -579,7 +577,7 @@ function QueueBanner({ roomStatus, roomCode, user, addToast }: any) {
               <span className="hidden sm:inline text-[10px] text-neutral-400">@{roomCode}</span>
             </div>
             <button onClick={() => { if (!user) { addToast?.({ message: 'Sign in to join queue', type: 'warning' }); return; } setInQueue(p => !p); addToast?.({ message: inQueue ? 'Left queue' : 'Joined queue!', type: 'success' }); }}
-              className={`shrink-0 min-h-[32px] px-3 py-1 rounded-lg text-[10px] font-bold transition-all active:scale-[0.97] touch-manipulation ${inQueue ? 'bg-arcade-green/20 text-arcade-green border border-arcade-green/30' : 'bg-gradient-to-r from-arcade-orange to-arcade-yellow text-white'}`}
+              className={`shrink-0 min-h-[32px] px-3 py-1 rounded-lg text-[10px] font-bold transition-all active:scale-[0.97] touch-manipulation ${inQueue ? 'bg-arcade-green/20 text-arcade-green border border-arcade-green/30' : 'bg-gradient-to-r from-arcade-purple to-arcade-blue text-white'}`}
             >{inQueue ? '✓ In Queue' : 'Join Queue'}</button>
           </div>
         </motion.div>
@@ -769,7 +767,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
           <span className={`text-[10px] tabular-nums ${darkFeed ? 'text-text-muted' : 'text-gray-400'}`}>{filteredEntries.length} msgs</span>
           <button onClick={() => setDarkFeed(p => !p)}
             aria-label={darkFeed ? 'Switch to light feed' : 'Switch to dark feed'}
-            className={`p-1.5 rounded-lg transition-all touch-manipulation ${darkFeed ? 'text-arcade-yellow hover:bg-white/[0.04]' : 'text-gray-400 hover:bg-gray-100'}`}
+            className={`p-1.5 rounded-lg transition-all touch-manipulation ${darkFeed ? 'text-arcade-blue hover:bg-white/[0.04]' : 'text-gray-400 hover:bg-gray-100'}`}
           >{darkFeed ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}</button>
         </div>
       </div>
@@ -805,27 +803,27 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
               return (
                 <motion.div key={entry.id || idx} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                   className={`group flex items-start gap-2.5 p-2.5 rounded-xl transition-colors ${
-                    isSuper ? (darkFeed ? 'bg-arcade-yellow/5 border border-arcade-yellow/20' : 'bg-yellow-50 border border-yellow-200')
+                    isSuper ? (darkFeed ? 'bg-arcade-blue/5 border border-arcade-blue/20' : 'bg-yellow-50 border border-yellow-200')
                     : isAI ? (darkFeed ? 'bg-arcade-purple/5 border border-arcade-purple/20' : 'bg-purple-50 border border-purple-200')
                     : (darkFeed ? 'hover:bg-white/[0.03]' : 'hover:bg-gray-50')
                   }`}
                 >
                   <div className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 ${
-                    isSuper ? 'text-arcade-yellow' : isAI ? 'text-arcade-purple' : 'text-red-400'
+                        isSuper ? 'text-arcade-blue' : isAI ? 'text-arcade-purple' : 'text-red-400'
                   } ${darkFeed ? 'bg-white/[0.04] border-white/[0.06]' : 'bg-gray-100 border-gray-200'}`}>
                     {isSuper ? <Star className="w-3.5 h-3.5" /> : isAI ? <Bot className="w-3.5 h-3.5" /> : <MessageSquare className="w-3.5 h-3.5" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
-                        isSuper ? 'text-arcade-yellow' : isAI ? 'text-arcade-purple' : 'text-red-400'
+                    isSuper ? 'text-arcade-blue' : isAI ? 'text-arcade-purple' : 'text-red-400'
                       } ${darkFeed ? 'bg-white/[0.04]' : 'bg-gray-100'}`}>
                         [{isSuper ? 'Super' : isAI ? 'AI' : 'Chat'}]
                       </span>
                       <span className={`text-xs font-semibold truncate ${darkFeed ? 'text-text-primary' : 'text-gray-900'}`}>{entry.username}</span>
                       <span className={`text-[10px] shrink-0 ${darkFeed ? 'text-text-muted' : 'text-gray-400'}`}>{entry.time}</span>
                       {entry.amount && (
-                        <span className={`flex items-center gap-0.5 text-[10px] font-bold text-arcade-yellow px-1.5 py-0.5 rounded shrink-0 bg-arcade-yellow/10`}>
+                        <span className={`flex items-center gap-0.5 text-[10px] font-bold text-arcade-blue px-1.5 py-0.5 rounded shrink-0 bg-arcade-blue/10`}>
                           <Coins className="w-2.5 h-2.5" />{entry.amount}
                         </span>
                       )}
@@ -842,7 +840,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
       {/* Legend */}
       <div className={`px-3 py-1.5 flex items-center gap-2 text-[8px] justify-center flex-wrap ${darkFeed ? 'border-t border-arcade-pink/10 text-text-muted' : 'border-t border-gray-200 text-gray-400'}`}>
         <span className="flex items-center gap-1"><MessageSquare className="w-2.5 h-2.5 text-red-400" />Chat</span>
-        <span className="flex items-center gap-1"><Star className="w-2.5 h-2.5 text-arcade-yellow" />Super</span>
+        <span className="flex items-center gap-1"><Star className="w-2.5 h-2.5 text-arcade-blue" />Super</span>
         <span className="flex items-center gap-1"><Bot className="w-2.5 h-2.5 text-arcade-purple" />AI</span>
       </div>
 
@@ -857,7 +855,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
           <input type="text" value={message} onChange={e => setMessage(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} placeholder="Type..."
             className={`flex-1 rounded-xl px-3 py-2 text-sm placeholder:text-text-muted focus:outline-none ${darkFeed ? 'bg-white/[0.04] border border-white/[0.08] text-text-primary focus:border-arcade-pink/40' : 'bg-gray-100 border border-gray-200 text-gray-900 focus:border-arcade-pink'}`} />
           <button onClick={() => sendMessage()} aria-label="Send message" className="min-h-[36px] min-w-[36px] p-2 rounded-lg bg-arcade-blue/20 text-arcade-blue hover:bg-arcade-blue/30"><Send className="w-4 h-4" /></button>
-          <button onClick={() => sendMessage(true)} className="min-h-[36px] px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-arcade-yellow to-arcade-pink text-white text-[10px] font-bold hover:opacity-90">Super</button>
+          <button onClick={() => sendMessage(true)} className="min-h-[36px] px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-arcade-blue to-arcade-pink text-white text-[10px] font-bold hover:opacity-90">Super</button>
           <button onClick={() => setShowAI(p => !p)}
             className={`min-h-[36px] px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${showAI ? 'bg-arcade-purple text-white' : darkFeed ? 'bg-arcade-purple/15 text-arcade-purple border border-arcade-purple/30 hover:bg-arcade-purple/25' : 'bg-purple-100 text-purple-700 border border-purple-300 hover:bg-purple-200'}`}
           ><Bot className="w-3 h-3 inline mr-1" />AI</button>

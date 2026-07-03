@@ -20,6 +20,7 @@ export default function CreateRoomPage() {
 
   const handleCreate = async () => {
     if (!name.trim()) { addToast({ message: 'Enter a room name', type: 'error' }); return; }
+    if (!user) { addToast({ message: 'Sign in to create a room', type: 'warning' }); navigate('/login'); return; }
     setLoading(true);
     try {
       const res = await fetch('/api/rooms', {
@@ -59,7 +60,7 @@ export default function CreateRoomPage() {
 
           <div className="bg-white/[0.03] rounded-3xl p-8 border border-arcade-pink/10">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-arcade-yellow to-arcade-orange flex items-center justify-center mx-auto mb-4 glow-yellow">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-arcade-purple to-arcade-blue flex items-center justify-center mx-auto mb-4">
                 <Radio className="w-8 h-8 text-white" />
               </div>
               <h1 className="font-display text-2xl font-bold text-text-primary mb-2">Create Room</h1>
@@ -95,9 +96,9 @@ export default function CreateRoomPage() {
                   className="w-full bg-bg-secondary border border-arcade-pink/10 rounded-xl px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/50 transition-all resize-none"
                 />
                 <motion.button whileTap={{ scale: 0.98 }} onClick={handleCreate} disabled={loading}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-arcade-yellow to-arcade-orange text-black font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px] sm:min-h-auto"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px] sm:min-h-auto"
                 >
-                  {loading ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full" />
+                  {loading ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
                   : <><Radio className="w-4 h-4" />Create Room</>}
                 </motion.button>
               </div>
