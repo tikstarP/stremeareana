@@ -1,12 +1,19 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Radio, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Radio, Copy, Check, Crosshair, Brain, Palette, Puzzle } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
+
+const templates = [
+  { label: 'BGMI Battle', icon: Crosshair, name: 'BGMI Battle Royale', desc: 'Classic BGMI tournament — queue up, drop in, and fight for the winner spot.' },
+  { label: 'Quiz Show', icon: Brain, name: 'Quiz Show Live', desc: 'Test your knowledge with live trivia. Fastest answer wins coins!' },
+  { label: 'Art Jam', icon: Palette, name: 'Art Jam Session', desc: 'Submit your sketches live. Streamer rates and picks the best.' },
+  { label: 'Custom', icon: Puzzle, name: 'Custom Room', desc: 'Start from scratch — set your own rules and games.' },
+];
 
 export default function CreateRoomPage() {
   const { user, session } = useAuth();
@@ -14,6 +21,7 @@ export default function CreateRoomPage() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [createdRoom, setCreatedRoom] = useState<any>(null);
   const [copied, setCopied] = useState(false);
@@ -89,6 +97,30 @@ export default function CreateRoomPage() {
               </motion.div>
             ) : (
               <div className="space-y-4">
+                {/* Template picker */}
+                <div>
+                  <label className="text-[10px] text-text-muted block mb-2">Quick Start Template</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {templates.map((t, i) => {
+                      const Icon = t.icon;
+                      const active = selectedTemplate === i;
+                      return (
+                        <button key={i} onClick={() => {
+                          setSelectedTemplate(i);
+                          if (i < templates.length - 1) { setName(t.name); setDescription(t.desc); }
+                          else { setName(''); setDescription(''); }
+                        }}
+                          className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-all min-h-[44px] ${
+                            active ? 'border-arcade-purple/60 bg-arcade-purple/10' : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05]'
+                          }`}
+                        >
+                          <Icon className={`w-4 h-4 ${active ? 'text-arcade-purple' : 'text-neutral-400'}`} />
+                          <span className={`text-[10px] font-semibold ${active ? 'text-arcade-purple' : 'text-text-primary'}`}>{t.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Room name"
                   className="w-full bg-bg-secondary border border-arcade-pink/10 rounded-xl px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/50 transition-all"
                 />
