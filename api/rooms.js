@@ -46,12 +46,13 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'PUT') {
-      const { id, is_live, viewer_count, name, video_id } = req.body;
+      const { id, is_live, viewer_count, name, video_id, status } = req.body;
       const updateData = {};
       if (is_live !== undefined) updateData.is_live = is_live;
       if (viewer_count !== undefined) updateData.viewer_count = viewer_count;
       if (name !== undefined) updateData.name = name;
       if (video_id !== undefined) updateData.video_id = video_id;
+      if (status !== undefined) updateData.status = status;
       const { data, error } = await supabase.from('rooms').update(updateData).eq('id', id).select().single();
       if (error) throw error;
       return res.status(200).json(data);

@@ -136,7 +136,7 @@ export default function StreamerStudio() {
       fetch('/api/rooms', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ id: room.id, is_live: false }),
+        body: JSON.stringify({ id: room.id, is_live: false, status: 'ended' }),
       }).catch(() => {});
     }
     addToast({ message: `Stream ended. ${totalHeld} coins returned.`, type: 'info' });
@@ -146,6 +146,14 @@ export default function StreamerStudio() {
     setSelectionActive(true);
     setSelectionConfig(config);
     setMainGame(config.mainGame);
+    setStatus('live');
+    if (room) {
+      fetch('/api/rooms', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ id: room.id, status: 'selection' }),
+      }).catch(() => {});
+    }
     if (!smartSelectionNotified.current) {
       smartSelectionNotified.current = true;
       addToast({ message: 'Smart Selection active. AI can generate quiz questions, run timers, score answers, select winners, and pick replacements if someone does not join.', type: 'info' });
@@ -155,13 +163,20 @@ export default function StreamerStudio() {
       addToast({ message: 'Safe Coin Hold is always on. Coins held when entering priority, spent only if selected, returned otherwise.', type: 'info' });
     }
     addToast({ message: `${config.selectionMethod} started for ${config.mainGame}!`, type: 'success' });
-  }, [addToast]);
+  }, [addToast, room, session]);
 
   const handleResetSelection = useCallback(() => {
     setSelectionActive(false);
     setSelectionConfig(null);
+    if (room) {
+      fetch('/api/rooms', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ id: room.id, status: 'queue_open' }),
+      }).catch(() => {});
+    }
     addToast({ message: 'Selection cancelled', type: 'info' });
-  }, [addToast]);
+  }, [addToast, room, session]);
 
   const handleSelectPlayer = useCallback((id: number) => {
     setLobbyPlayers(prev => prev.map(p => p.id === id ? { ...p, status: 'selected' as const } : p));
@@ -183,8 +198,15 @@ export default function StreamerStudio() {
   }, [lobbyPlayers]);
 
   const handleStartGame = useCallback(() => {
+    if (room) {
+      fetch('/api/rooms', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ id: room.id, status: 'playing' }),
+      }).catch(() => {});
+    }
     addToast({ message: `${mainGame} started!`, type: 'success' });
-  }, [mainGame, addToast]);
+  }, [mainGame, addToast, room, session]);
 
   const handleAllowShoutout = useCallback((id: number) => {
     addToast({ message: 'Shoutout allowed and announced', type: 'success' });

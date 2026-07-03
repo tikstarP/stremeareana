@@ -44,8 +44,6 @@ const rightPanelTabs = [
   { id: 'art', label: 'Fan Drop', icon: Sparkles },
 ];
 
-const statusCycle = ['queue_open', 'quiz_active', 'guess_active', 'fastest_active', 'art_review', 'winner_reveal', 'countdown', 'paused', 'ended'];
-
 export default function LiveRoomPage() {
   const { roomCode } = useParams();
   const { user } = useAuth();
@@ -57,7 +55,7 @@ export default function LiveRoomPage() {
   const [mobileTab, setMobileTab] = useState('stream');
   const [countdown, setCountdown] = useState(45);
   const [likeCount, setLikeCount] = useState(0);
-  const [roomStatus, setRoomStatus] = useState('queue_open');
+  const roomStatus = room?.status || 'queue_open';
   const [fanDropState, setFanDropState] = useState('locked');
   const [activities] = useState<any[]>([]);
 
@@ -67,7 +65,7 @@ export default function LiveRoomPage() {
       if (data?.id) setRoom(data);
       else throw new Error('Room not found');
     }).catch(() => {
-      setRoom({ id: null, code: roomCode, name: 'Live Room', host_name: 'Streamer', host_avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer', is_live: true, viewer_count: 0, video_id: '' });
+      setRoom({ id: null, code: roomCode, name: 'Live Room', host_name: 'Streamer', host_avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer', is_live: true, viewer_count: 0, video_id: '', status: 'queue_open' });
       addToast({ message: 'Could not load room data — showing demo stream', type: 'info' });
     });
   }, [roomCode]);
@@ -77,12 +75,16 @@ export default function LiveRoomPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Poll room data for status updates
   useEffect(() => {
+    if (!roomCode) return;
     const i = setInterval(() => {
-      setRoomStatus(prev => statusCycle[(statusCycle.indexOf(prev) + 1) % statusCycle.length]);
-    }, 8000);
+      fetch(`/api/rooms?code=${roomCode}`).then(r => r.json()).then(data => {
+        if (data?.id) setRoom(data);
+      }).catch(() => {});
+    }, 10000);
     return () => clearInterval(i);
-  }, []);
+  }, [roomCode]);
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
   const roomId = room?.id;
