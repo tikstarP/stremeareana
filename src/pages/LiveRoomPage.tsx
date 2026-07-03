@@ -589,16 +589,17 @@ function QueueBanner({ roomStatus, roomCode, user, addToast }: any) {
 }
 
 const demoMessages = [
-  { id: -1, username: 'StreamArena', message: 'Welcome to the stream! Type a message to chat with everyone 🎉', color: '#818cf8', is_super: false, created_at: new Date().toISOString() },
-  { id: -2, username: 'StreamArena', message: 'Tip: Click the star icon for Super Chat to get noticed! ⭐', color: '#818cf8', is_super: false, created_at: new Date().toISOString() },
-  { id: -3, username: 'Rahul', message: 'yo streamer W 🔥', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
-  { id: -4, username: 'Priya', message: 'first time here, this is sick!', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
-  { id: -5, username: 'RajGamer', message: 'gg guys 🔥🔥', color: '#FFB000', is_super: true, created_at: new Date().toISOString(), amount: 10 },
-  { id: -6, username: 'Neha', message: 'lets gooo 🚀', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
-  { id: -7, username: 'Vikram', message: 'next round pls', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
-  { id: -8, username: 'Anon', message: 'what game we playing?', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
-  { id: -9, username: 'Sofia', message: 'just joined, hi everyone!', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
-  { id: -10, username: 'Aman', message: 'bro that last round was insane 💀', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
+  { id: -1, username: 'StreamArena', message: 'Welcome to the stream! Type a message to chat with everyone 🎉', color: '#818cf8', is_super: false, created_at: new Date(Date.now() - 90000).toISOString() },
+  { id: -2, username: 'StreamArena', message: '💡 Tip: Use the Super Chat button (star icon) to get noticed!', color: '#818cf8', is_super: false, created_at: new Date(Date.now() - 80000).toISOString() },
+  { id: -3, type: 'ai', username: 'AI Host', message: '🏆 Round 1 finished — Aman is leading with 850 points!', color: '#a78bfa', is_super: false, created_at: new Date(Date.now() - 65000).toISOString() },
+  { id: -4, username: 'Rahul', message: 'yo streamer W 🔥', color: '#FFF2DD', is_super: false, created_at: new Date(Date.now() - 55000).toISOString() },
+  { id: -5, username: 'Priya', message: 'first time here, this is sick!', color: '#FFF2DD', is_super: false, created_at: new Date(Date.now() - 45000).toISOString() },
+  { id: -6, username: 'RajGamer', message: 'gg guys 🔥🔥', color: '#FFB000', is_super: true, created_at: new Date(Date.now() - 35000).toISOString(), amount: 10 },
+  { id: -7, username: 'Neha', message: 'lets gooo 🚀', color: '#FFF2DD', is_super: false, created_at: new Date(Date.now() - 30000).toISOString() },
+  { id: -8, type: 'ai', username: 'AI Host', message: '⏰ Next round starting in 30 seconds — get ready!', color: '#a78bfa', is_super: false, created_at: new Date(Date.now() - 20000).toISOString() },
+  { id: -9, username: 'Vikram', message: 'next round pls', color: '#FFF2DD', is_super: false, created_at: new Date(Date.now() - 15000).toISOString() },
+  { id: -10, username: 'Anon', message: 'what game we playing?', color: '#FFF2DD', is_super: false, created_at: new Date(Date.now() - 10000).toISOString() },
+  { id: -11, username: 'Sofia', message: 'just joined, hi everyone!', color: '#FFF2DD', is_super: false, created_at: new Date(Date.now() - 5000).toISOString() },
 ];
 
 function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
@@ -676,7 +677,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
 
   const entries = displayMessages.map((msg: any, i: number) => ({
     id: msg.id || i,
-    type: msg.is_super ? 'youtube_superchat' as const : 'youtube_chat' as const,
+    type: msg.type === 'ai' ? 'ai' as const : msg.is_super ? 'youtube_superchat' as const : 'youtube_chat' as const,
     username: msg.username || 'Anonymous',
     text: msg.message,
     time: msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'now',
@@ -751,17 +752,26 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
               </div>
             ) : filteredEntries.map((entry, idx) => {
               const isSuper = entry.type === 'youtube_superchat';
+              const isAI = entry.type === 'ai';
               return (
                 <motion.div key={entry.id || idx} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  className={`group flex items-start gap-2.5 p-2.5 rounded-xl transition-colors ${isSuper ? (darkFeed ? 'bg-arcade-yellow/5 border border-arcade-yellow/20' : 'bg-yellow-50 border border-yellow-200') : (darkFeed ? 'hover:bg-white/[0.03]' : 'hover:bg-gray-50')}`}
+                  className={`group flex items-start gap-2.5 p-2.5 rounded-xl transition-colors ${
+                    isSuper ? (darkFeed ? 'bg-arcade-yellow/5 border border-arcade-yellow/20' : 'bg-yellow-50 border border-yellow-200')
+                    : isAI ? (darkFeed ? 'bg-arcade-purple/5 border border-arcade-purple/20' : 'bg-purple-50 border border-purple-200')
+                    : (darkFeed ? 'hover:bg-white/[0.03]' : 'hover:bg-gray-50')
+                  }`}
                 >
-                  <div className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 ${isSuper ? 'text-arcade-yellow' : 'text-red-400'} ${darkFeed ? 'bg-white/[0.04] border-white/[0.06]' : 'bg-gray-100 border-gray-200'}`}>
-                    {isSuper ? <Star className="w-3.5 h-3.5" /> : <MessageSquare className="w-3.5 h-3.5" />}
+                  <div className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 ${
+                    isSuper ? 'text-arcade-yellow' : isAI ? 'text-arcade-purple' : 'text-red-400'
+                  } ${darkFeed ? 'bg-white/[0.04] border-white/[0.06]' : 'bg-gray-100 border-gray-200'}`}>
+                    {isSuper ? <Star className="w-3.5 h-3.5" /> : isAI ? <Bot className="w-3.5 h-3.5" /> : <MessageSquare className="w-3.5 h-3.5" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded shrink-0 ${isSuper ? 'text-arcade-yellow' : 'text-red-400'} ${darkFeed ? 'bg-white/[0.04]' : 'bg-gray-100'}`}>
-                        [{isSuper ? 'Super' : 'Chat'}]
+                      <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                        isSuper ? 'text-arcade-yellow' : isAI ? 'text-arcade-purple' : 'text-red-400'
+                      } ${darkFeed ? 'bg-white/[0.04]' : 'bg-gray-100'}`}>
+                        [{isSuper ? 'Super' : isAI ? 'AI' : 'Chat'}]
                       </span>
                       <span className={`text-xs font-semibold truncate ${darkFeed ? 'text-text-primary' : 'text-gray-900'}`}>{entry.username}</span>
                       <span className={`text-[10px] shrink-0 ${darkFeed ? 'text-text-muted' : 'text-gray-400'}`}>{entry.time}</span>
@@ -784,6 +794,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
       <div className={`px-3 py-1.5 flex items-center gap-2 text-[8px] justify-center flex-wrap ${darkFeed ? 'border-t border-arcade-pink/10 text-text-muted' : 'border-t border-gray-200 text-gray-400'}`}>
         <span className="flex items-center gap-1"><MessageSquare className="w-2.5 h-2.5 text-red-400" />Chat</span>
         <span className="flex items-center gap-1"><Star className="w-2.5 h-2.5 text-arcade-yellow" />Super</span>
+        <span className="flex items-center gap-1"><Bot className="w-2.5 h-2.5 text-arcade-purple" />AI</span>
       </div>
 
       {/* Chat input */}
