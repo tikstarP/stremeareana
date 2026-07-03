@@ -615,7 +615,10 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
   const [fetchedOnce, setFetchedOnce] = useState(false);
 
   const fetchMessages = useCallback(async () => {
-    if (!roomId) return;
+    if (!roomId) {
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch(`/api/chat?roomId=${roomId}`);
       if (res.ok) {

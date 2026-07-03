@@ -32,9 +32,9 @@ app.get('/api/rooms', async (req, res) => {
   try {
     const { code } = req.query;
     if (code) {
-      const { data, error } = await supabase.from('rooms').select('*').eq('code', String(code).toUpperCase()).single();
+      const { data, error } = await supabase.from('rooms').select('*').eq('code', String(code).toUpperCase());
       if (error) throw error;
-      return res.json(data);
+      return res.json(data && data.length > 0 ? data[0] : null);
     }
     const { data, error } = await supabase.from('rooms').select('*').eq('is_live', true).order('created_at', { ascending: false }).limit(20);
     if (error) throw error;
