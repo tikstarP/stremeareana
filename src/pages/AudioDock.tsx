@@ -82,7 +82,7 @@ export default function AudioDock() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-4 relative overflow-hidden">
       <MoltenBackground />
       <div className="relative z-10 w-full max-w-lg">
         <div className="bg-white/[0.03] rounded-2xl border border-arcade-pink/10 p-4 sm:p-8 space-y-5">

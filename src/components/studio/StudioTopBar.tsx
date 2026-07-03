@@ -184,7 +184,7 @@ export default function StudioTopBar({
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-[#0a0a0f] border border-arcade-pink/20 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+              className="relative bg-bg-primary border border-arcade-pink/20 rounded-2xl p-6 max-w-md w-full shadow-2xl"
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-text-primary">End Stream?</h3>
@@ -236,7 +236,7 @@ export default function StudioTopBar({
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-[#0a0a0f] border border-arcade-blue/20 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center"
+              className="relative bg-bg-primary border border-arcade-blue/20 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center"
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-text-primary">Share QR Code</h3>

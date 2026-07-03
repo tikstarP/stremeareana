@@ -18,7 +18,7 @@ export default function EntryPage() {
       <Toast />
 
       {/* ===== MOBILE HEADER (<768px) ===== */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-[rgba(0,0,0,0.9)] backdrop-blur-[10px] border-b border-white/[0.06]"
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-bg-primary/90 backdrop-blur-[10px] border-b border-white/[0.06]"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between h-14 px-4">
           <Link to="/" className="flex items-center gap-2 active:scale-[0.97] transition-transform duration-100">
@@ -53,7 +53,7 @@ export default function EntryPage() {
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-lg mx-auto w-full flex flex-col justify-center flex-1">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-arcade-pink/30 mb-5 w-fit mx-auto">
-            <Sparkles className="w-3 h-3 text-arcade-yellow" />
+            <Sparkles className="w-3 h-3 text-arcade-blue" />
             <span className="text-xs text-neutral-400">Welcome to finalSTREAm</span>
           </div>
 
@@ -110,7 +110,7 @@ export default function EntryPage() {
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-arcade-pink/30 mb-8"
           >
-            <Sparkles className="w-4 h-4 text-arcade-yellow" />
+            <Sparkles className="w-4 h-4 text-arcade-blue" />
             <span className="text-sm text-neutral-400">Welcome to finalSTREAm</span>
           </motion.div>
 
@@ -140,7 +140,7 @@ export default function EntryPage() {
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.35 }} className="mt-10">
-            <a href="#choose-path" className="group inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-arcade-pink via-arcade-yellow to-arcade-blue text-white font-semibold text-sm sm:text-base hover:scale-105 transition-all shadow-lg shadow-arcade-pink/20 w-full sm:w-auto">
+            <a href="#choose-path" className="group inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-arcade-pink via-arcade-blue to-arcade-blue text-white font-semibold text-sm sm:text-base hover:scale-105 transition-all shadow-lg shadow-arcade-pink/20 w-full sm:w-auto">
               Choose Your Path <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
           </motion.div>
@@ -148,7 +148,7 @@ export default function EntryPage() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.6 }} className="mt-8 sm:mt-12">
             <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity }} className="flex justify-center">
               <div className="w-6 h-10 rounded-full border border-text-muted flex items-start justify-center p-1.5">
-                <div className="w-1 h-2.5 rounded-full bg-arcade-yellow" />
+                <div className="w-1 h-2.5 rounded-full bg-arcade-blue" />
               </div>
             </motion.div>
           </motion.div>
@@ -169,14 +169,14 @@ export default function EntryPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             {[
-              { icon: Crown, title: 'For Streamers', desc: 'Full control to host, moderate, and customize your room.', border: 'border-arcade-orange/20', from: 'from-arcade-orange/10' },
-              { icon: Gamepad2, title: 'For Viewers', desc: 'Play, create, chat, and climb the leaderboards live.', border: 'border-arcade-yellow/15', from: 'from-arcade-yellow/8' },
+              { icon: Crown, title: 'For Streamers', desc: 'Full control to host, moderate, and customize your room.', border: 'border-arcade-purple/20', from: 'from-arcade-purple/10' },
+              { icon: Gamepad2, title: 'For Viewers', desc: 'Play, create, chat, and climb the leaderboards live.', border: 'border-arcade-blue/15', from: 'from-arcade-blue/8' },
               { icon: Zap, title: 'Live & Interactive', desc: 'Real-time quizzes, art ratings, and queue battles.', border: 'border-arcade-pink/15', from: 'from-arcade-pink/8' },
             ].map((item, i) => (
               <motion.div key={item.title} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                 className={`bg-gradient-to-b ${item.from} ${item.border} border rounded-2xl p-6 sm:p-8 text-center space-y-5 max-w-sm mx-auto md:max-w-none`}
               >
-                <item.icon className="w-10 h-10 mx-auto text-arcade-yellow drop-shadow-[0_0_6px_rgba(255,0,110,0.3)_0_0_14px_rgba(255,190,11,0.4)]" />
+                <item.icon className="w-10 h-10 mx-auto text-arcade-blue drop-shadow-[0_0_6px_rgba(99,102,241,0.3)_0_0_14px_rgba(139,92,246,0.4)]" />
                 <h3 className="font-display text-lg font-bold text-text-primary">{item.title}</h3>
                 <p className="text-base text-gray-300 leading-relaxed max-w-xs mx-auto">{item.desc}</p>
               </motion.div>
@@ -197,10 +197,10 @@ export default function EntryPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 max-w-5xl mx-auto">
             <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
-              <div className="group relative bg-gradient-to-b from-arcade-orange/15 to-transparent border border-arcade-orange/20 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-xl hover:shadow-arcade-orange/20 hover:border-arcade-orange/60 hover:from-arcade-orange/30 space-y-6">
+              <div className="group relative bg-gradient-to-b from-arcade-purple/15 to-transparent border border-arcade-purple/20 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-xl hover:shadow-arcade-purple/20 hover:border-arcade-purple/60 hover:from-arcade-purple/30 space-y-6">
                 <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-arcade-orange/30 to-arcade-yellow/20 flex items-center justify-center shrink-0">
-                    <Crown className="w-7 h-7 text-arcade-yellow drop-shadow-[0_0_4px_rgba(255,0,110,0.3)_0_0_10px_rgba(255,190,11,0.4)]" />
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-arcade-purple/30 to-arcade-blue/20 flex items-center justify-center shrink-0">
+                    <Crown className="w-7 h-7 text-arcade-blue drop-shadow-[0_0_4px_rgba(99,102,241,0.3)_0_0_10px_rgba(139,92,246,0.4)]" />
                   </div>
                   <div>
                     <h3 className="font-display text-xl sm:text-2xl font-bold text-text-primary mb-1">I'm a Streamer</h3>
@@ -214,14 +214,14 @@ export default function EntryPage() {
                     'AI voice & sound triggers',
                   ].map((bullet) => (
                     <li key={bullet} className="flex items-start gap-3 text-sm text-gray-300 leading-relaxed">
-                      <div className="w-1.5 h-1.5 rounded-full bg-arcade-orange mt-1.5 shrink-0" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-arcade-purple mt-1.5 shrink-0" />
                       {bullet}
                     </li>
                   ))}
                 </ul>
                 <button
                   onClick={() => selectRole('streamer')}
-                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-arcade-orange to-arcade-yellow text-white font-semibold text-sm hover:opacity-90 transition-opacity min-h-[44px]"
+                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-semibold text-sm hover:opacity-90 transition-opacity min-h-[44px]"
                 >
                   Get Started <ArrowRight className="w-4 h-4" />
                 </button>
@@ -229,10 +229,10 @@ export default function EntryPage() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
-              <div className="group relative bg-gradient-to-b from-arcade-yellow/10 to-transparent border border-arcade-yellow/15 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-xl hover:shadow-arcade-yellow/20 hover:border-arcade-yellow/50 hover:from-arcade-yellow/25 space-y-6">
+              <div className="group relative bg-gradient-to-b from-arcade-blue/10 to-transparent border border-arcade-blue/15 rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-xl hover:shadow-arcade-blue/20 hover:border-arcade-blue/50 hover:from-arcade-blue/25 space-y-6">
                 <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-arcade-yellow/20 to-arcade-orange/20 flex items-center justify-center shrink-0">
-                    <Gamepad2 className="w-7 h-7 text-arcade-yellow drop-shadow-[0_0_4px_rgba(255,0,110,0.3)_0_0_10px_rgba(255,190,11,0.4)]" />
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-arcade-blue/20 to-arcade-purple/20 flex items-center justify-center shrink-0">
+                    <Gamepad2 className="w-7 h-7 text-arcade-blue drop-shadow-[0_0_4px_rgba(99,102,241,0.3)_0_0_10px_rgba(139,92,246,0.4)]" />
                   </div>
                   <div>
                     <h3 className="font-display text-xl sm:text-2xl font-bold text-text-primary mb-1">I'm a Viewer</h3>
@@ -246,14 +246,14 @@ export default function EntryPage() {
                     'Trigger sounds & earn coins',
                   ].map((bullet) => (
                     <li key={bullet} className="flex items-start gap-3 text-sm text-gray-300 leading-relaxed">
-                      <div className="w-1.5 h-1.5 rounded-full bg-arcade-yellow mt-1.5 shrink-0" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-arcade-blue mt-1.5 shrink-0" />
                       {bullet}
                     </li>
                   ))}
                 </ul>
                 <button
                   onClick={() => selectRole('viewer')}
-                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-arcade-yellow to-arcade-orange text-white font-semibold text-sm hover:opacity-90 transition-opacity min-h-[44px]"
+                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-arcade-blue to-arcade-purple text-white font-semibold text-sm hover:opacity-90 transition-opacity min-h-[44px]"
                 >
                   Jump In <ArrowRight className="w-4 h-4" />
                 </button>
@@ -276,9 +276,9 @@ export default function EntryPage() {
           </div>
           <p className="text-xs text-neutral-400">© 2026 finalSTREAm. All rights reserved.</p>
           <div className="flex items-center gap-4">
-            <Link to="/privacy" className="text-xs text-neutral-400 hover:text-arcade-yellow transition-colors">Privacy</Link>
-            <Link to="/terms" className="text-xs text-neutral-400 hover:text-arcade-yellow transition-colors">Terms</Link>
-            <Link to="/contact" className="text-xs text-neutral-400 hover:text-arcade-yellow transition-colors">Contact</Link>
+            <Link to="/privacy" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors">Privacy</Link>
+            <Link to="/terms" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors">Terms</Link>
+            <Link to="/contact" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors">Contact</Link>
           </div>
         </div>
       </footer>

@@ -165,7 +165,7 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
 
   return (
     <div ref={scrollRef} className="h-[calc(100vh-72px)] overflow-y-auto no-scrollbar">
-      <div ref={videoWrapperRef} className={`sticky top-0 z-10 bg-[#0a0a0a] ${minimized ? 'h-0 overflow-hidden opacity-0 pointer-events-none' : ''}`}>
+      <div ref={videoWrapperRef} className={`sticky top-0 z-10 bg-bg-primary ${minimized ? 'h-0 overflow-hidden opacity-0 pointer-events-none' : ''}`}>
         <YouTubePlayer />
       </div>
       <div className={`grid grid-cols-12 gap-5 px-5 pt-4 ${minimized ? 'pb-20' : 'pb-5'}`}>
@@ -311,7 +311,7 @@ function StreamerProfile({ streamerName, streamerAvatar, streamerVerified, subsc
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               onClick={e => e.stopPropagation()}
-              className="relative bg-[#0a0a0f] border border-arcade-blue/20 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center">
+              className="relative bg-bg-primary border border-arcade-blue/20 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center">
               <button onClick={() => setQrOpen(false)}
                 aria-label="Close QR code"
                 className="absolute top-3 right-3 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-neutral-400 hover:text-text-primary hover:bg-white/[0.04] transition-all">
@@ -386,7 +386,7 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
   return (
     <div ref={scrollRef} className="h-full overflow-y-auto no-scrollbar">
       {mobileTab !== 'rank' && (
-        <div ref={videoWrapperRef} className={`sticky top-0 z-10 bg-[#0a0a0a] transition-all duration-500 ${minimized ? 'h-0 overflow-hidden opacity-0 pointer-events-none' : ''}`}>
+        <div ref={videoWrapperRef} className={`sticky top-0 z-10 bg-bg-primary transition-all duration-500 ${minimized ? 'h-0 overflow-hidden opacity-0 pointer-events-none' : ''}`}>
           <YouTubePlayer videoId={videoId} />
         </div>
       )}
@@ -532,7 +532,7 @@ function StreamerProfileMobile({ streamerName, streamerAvatar, streamerVerified,
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
             <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }}
               onClick={e => e.stopPropagation()}
-              className="relative bg-[#0a0a0f] border border-arcade-blue/20 rounded-t-2xl sm:rounded-2xl p-6 pb-8 max-w-sm w-full shadow-2xl text-center">
+              className="relative bg-bg-primary border border-arcade-blue/20 rounded-t-2xl sm:rounded-2xl p-6 pb-8 max-w-sm w-full shadow-2xl text-center">
               <button onClick={() => setQrOpen(false)}
                 aria-label="Close QR code"
                 className="absolute top-3 right-3 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-neutral-400 hover:text-text-primary transition-all">

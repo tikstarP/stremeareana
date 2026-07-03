@@ -18,14 +18,14 @@ export default function MobileFooter() {
         </div>
         <div className="relative inline-flex">
           <select
-            className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-sm text-neutral-400 outline-none focus:border-arcade-yellow/30 transition-colors min-h-[44px] pr-8"
+            className="appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-sm text-neutral-400 outline-none focus:border-arcade-blue/30 transition-colors min-h-[44px] pr-8"
             defaultValue="en"
           >
-            <option value="en" className="bg-[#111]">English</option>
-            <option value="es" className="bg-[#111]">Español</option>
-            <option value="fr" className="bg-[#111]">Français</option>
-            <option value="de" className="bg-[#111]">Deutsch</option>
-            <option value="pt" className="bg-[#111]">Português</option>
+            <option value="en" className="bg-bg-secondary">English</option>
+            <option value="es" className="bg-bg-secondary">Español</option>
+            <option value="fr" className="bg-bg-secondary">Français</option>
+            <option value="de" className="bg-bg-secondary">Deutsch</option>
+            <option value="pt" className="bg-bg-secondary">Português</option>
           </select>
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none text-xs">▼</span>
         </div>

@@ -271,7 +271,7 @@ export default function SelectionArena({ onStartSelection, onResetSelection, sel
               exit={{ opacity: 0, scale: 0.92, y: 10 }}
               transition={{ duration: 0.15 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-[#0a0a0f] border border-arcade-purple/20 rounded-2xl p-5 max-w-sm w-full shadow-2xl"
+              className="relative bg-bg-primary border border-arcade-purple/20 rounded-2xl p-5 max-w-sm w-full shadow-2xl"
             >
               <div className="flex items-center justify-between mb-3">
                 <div>
@@ -355,7 +355,7 @@ export default function SelectionArena({ onStartSelection, onResetSelection, sel
               exit={{ opacity: 0, scale: 0.92, y: 10 }}
               transition={{ duration: 0.15 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-[#0a0a0f] border border-arcade-purple/20 rounded-2xl p-5 max-w-sm w-full shadow-2xl"
+              className="relative bg-bg-primary border border-arcade-purple/20 rounded-2xl p-5 max-w-sm w-full shadow-2xl"
             >
               <div className="flex items-center justify-between mb-3">
                 <div>

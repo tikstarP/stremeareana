@@ -55,11 +55,11 @@ export default function HowItWorks({ role = 'viewer' }: HowItWorksProps) {
           {steps.map((step, i) => (
             <div key={i} className="flex gap-4">
               <div className="flex flex-col items-center">
-                <div className="w-9 h-9 rounded-full border border-arcade-yellow/30 bg-[#111] flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-arcade-yellow">{step.num}</span>
+                <div className="w-9 h-9 rounded-full border border-arcade-purple/30 bg-white/[0.04] flex items-center justify-center shrink-0">
+                  <span className="text-xs font-bold text-arcade-blue">{step.num}</span>
                 </div>
                 {i < steps.length - 1 && (
-                  <div className="w-px flex-1 bg-gradient-to-b from-arcade-yellow/20 to-transparent min-h-[24px]" />
+                  <div className="w-px flex-1 bg-gradient-to-b from-arcade-blue/20 to-transparent min-h-[24px]" />
                 )}
               </div>
               <div className={`pb-8 ${i === steps.length - 1 ? 'pb-0' : ''}`}>

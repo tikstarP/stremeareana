@@ -42,14 +42,14 @@ export default function MobileHero({ totalViewers, loading, apiError, role }: Mo
           {role === 'viewer' ? (
             <>
               <span className="text-text-primary">Where Streams</span><br />
-              <span className="bg-gradient-to-r from-arcade-yellow via-arcade-orange to-red-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-arcade-blue via-arcade-purple to-arcade-pink bg-clip-text text-transparent">
                 Become Games ✨
               </span>
             </>
           ) : (
             <>
               <span className="text-text-primary">The Future of</span><br />
-              <span className="bg-gradient-to-r from-arcade-yellow via-arcade-orange to-red-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-arcade-blue via-arcade-purple to-arcade-pink bg-clip-text text-transparent">
                 Live Streaming ✨
               </span>
             </>
@@ -68,14 +68,14 @@ export default function MobileHero({ totalViewers, loading, apiError, role }: Mo
           <>
             <button
               onClick={() => navigate('/join')}
-              className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-orange to-arcade-yellow text-black text-base font-bold active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation mb-3"
+              className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white text-base font-bold active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation mb-3"
             >
               🚀 Join a Room
             </button>
           </>
         ) : (
           <>
-            <Link to="/create-room" className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-orange to-arcade-yellow text-white font-bold text-base active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation mb-3">
+            <Link to="/create-room" className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-bold text-base active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation mb-3">
               🎬 Create Your Room
             </Link>
             <Link to="/dashboard" className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-neutral-300 text-sm font-semibold active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation">

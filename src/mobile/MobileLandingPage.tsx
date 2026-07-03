@@ -20,7 +20,7 @@ interface MobileLandingPageProps {
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="group rounded-xl border border-arcade-yellow/10 bg-white/[0.02] overflow-hidden transition-all duration-300">
+    <div className="group rounded-xl border border-arcade-blue/10 bg-white/[0.02] overflow-hidden transition-all duration-300">
       <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left min-h-[48px] active:scale-[0.97] transition-transform duration-100">
         <span className="text-sm font-semibold text-zinc-200">{question}</span>
         <ChevronDown className={`w-4 h-4 text-neutral-400 shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
@@ -46,7 +46,7 @@ export default function MobileLandingPage({ totalViewers, loading, apiError, roo
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-transparent">
       <MobileHeader />
       <MobileHero
         totalViewers={totalViewers}
@@ -92,7 +92,7 @@ export default function MobileLandingPage({ totalViewers, loading, apiError, roo
                   {rooms.filter((r: any) => r.is_live).slice(0, 3).map((room: any) => (
                     <Link key={room.id} to={`/room/${room.code}`} className="block bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4 active:scale-[0.97] transition-transform duration-100">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-arcade-orange/20 to-arcade-yellow/20 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-arcade-purple/20 to-arcade-blue/20 flex items-center justify-center">
                           <Radio className="w-5 h-5 text-arcade-blue" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -114,8 +114,8 @@ export default function MobileLandingPage({ totalViewers, loading, apiError, roo
               </Link>
             </>
           ) : (
-            <div className="bg-gradient-to-b from-arcade-orange/10 via-arcade-yellow/5 to-transparent border border-arcade-orange/20 rounded-3xl p-6 text-center">
-              <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-arcade-yellow/20 to-arcade-orange/20 flex items-center justify-center mb-4">
+            <div className="bg-gradient-to-b from-arcade-purple/10 via-arcade-blue/5 to-transparent border border-arcade-purple/20 rounded-3xl p-6 text-center">
+              <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-arcade-blue/20 to-arcade-purple/20 flex items-center justify-center mb-4">
                 <span className="text-2xl">🎙️</span>
               </div>
               <h2 className="font-display text-2xl font-bold mb-2">
@@ -124,7 +124,7 @@ export default function MobileLandingPage({ totalViewers, loading, apiError, roo
               <p className="text-sm text-neutral-400 mb-5 leading-relaxed">
                 Create your room in seconds. Share your code and let viewers play along — no setup needed.
               </p>
-              <Link to="/create-room" className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-orange to-arcade-yellow text-white font-bold text-sm active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation mb-3">
+              <Link to="/create-room" className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-bold text-sm active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation mb-3">
                 <span className="text-base">🎬</span> Create Your Room
               </Link>
               <Link to="/dashboard" className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] text-neutral-300 text-sm font-semibold active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation">
@@ -157,8 +157,8 @@ export default function MobileLandingPage({ totalViewers, loading, apiError, roo
                 { value: '12K', label: 'Art Pieces Submitted', icon: Palette },
                 { value: '3.2K', label: 'Players Online', icon: Users },
               ].map((stat) => (
-                <div key={stat.label} className="text-center p-3 rounded-xl bg-gradient-to-b from-arcade-yellow/8 to-transparent border border-arcade-yellow/15">
-                  <stat.icon className="w-5 h-5 mx-auto mb-1.5 text-arcade-yellow" />
+                <div key={stat.label} className="text-center p-3 rounded-xl bg-gradient-to-b from-arcade-blue/8 to-transparent border border-arcade-blue/15">
+                  <stat.icon className="w-5 h-5 mx-auto mb-1.5 text-arcade-blue" />
                   <div className="text-lg font-bold gradient-text">{stat.value}</div>
                   <div className="text-[10px] text-neutral-400">{stat.label}</div>
                 </div>
@@ -191,9 +191,9 @@ export default function MobileLandingPage({ totalViewers, loading, apiError, roo
           </ul>
           <div className="grid grid-cols-2 gap-2 mb-4">
             <div className="aspect-square rounded-xl overflow-hidden border border-arcade-purple/30 bg-gradient-to-br from-arcade-purple/20 to-transparent" />
-            <div className="aspect-square rounded-xl overflow-hidden border border-arcade-yellow/30 bg-gradient-to-br from-arcade-yellow/20 to-transparent" />
+            <div className="aspect-square rounded-xl overflow-hidden border border-arcade-blue/30 bg-gradient-to-br from-arcade-blue/20 to-transparent" />
           </div>
-          <Link to={role === 'streamer' ? '/dashboard' : '/join'} className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-orange to-arcade-yellow text-white font-semibold text-sm active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation ">
+          <Link to={role === 'streamer' ? '/dashboard' : '/join'} className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-semibold text-sm active:scale-[0.97] active:opacity-90 transition-all duration-100 touch-manipulation ">
             {role === 'streamer' ? 'Go to Dashboard' : 'Try Art Arena'} <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -224,7 +224,7 @@ export default function MobileLandingPage({ totalViewers, loading, apiError, roo
       {/* Switch role */}
       <section className="px-4 pb-4">
         <div className="max-w-lg mx-auto text-center">
-          <button onClick={switchRole} className="text-xs text-neutral-400 active:text-arcade-yellow transition-colors underline underline-offset-2 min-h-[44px]">
+          <button onClick={switchRole} className="text-xs text-neutral-400 active:text-arcade-blue transition-colors underline underline-offset-2 min-h-[44px]">
             {role === 'streamer' ? 'Not a streamer? Switch to Viewer →' : 'Not a viewer? Switch to Streamer →'}
           </button>
         </div>

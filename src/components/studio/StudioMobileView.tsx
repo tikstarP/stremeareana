@@ -253,7 +253,7 @@ export default function StudioMobileView({
   );
 
   return (
-    <div className="md:hidden min-h-screen bg-bg-primary pb-[60px]">
+    <div className="md:hidden min-h-screen bg-transparent pb-[60px]">
       {topBar}
       {preview}
       <div className="flex-1 overflow-y-auto no-scrollbar">

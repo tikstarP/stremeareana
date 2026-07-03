@@ -44,7 +44,7 @@ export default function ResetPasswordPage() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center relative overflow-hidden">
         <MoltenBackground />
         <div className="relative z-10 w-6 h-6 border-2 border-arcade-yellow border-t-transparent rounded-full animate-spin" />
       </div>

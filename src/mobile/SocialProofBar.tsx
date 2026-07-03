@@ -9,7 +9,7 @@ export default function SocialProofBar() {
           <span className="text-sm text-neutral-400 whitespace-nowrap">12K+ Creators</span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Gamepad2 className="w-4 h-4 text-arcade-yellow/70" />
+          <Gamepad2 className="w-4 h-4 text-arcade-purple/70" />
           <span className="text-sm text-neutral-400 whitespace-nowrap">50K+ Games Played</span>
         </div>
         <div className="flex items-center gap-2 shrink-0">

@@ -139,7 +139,7 @@ export default function StreamerStudio() {
 
   if (showEnded) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-transparent flex items-center justify-center p-4 relative overflow-hidden">
         <MoltenBackground />
         <div className="relative z-10 bg-white/[0.03] rounded-2xl p-8 border border-arcade-pink/10 max-w-md w-full text-center">
           <div className="text-4xl mb-4">🔴</div>
@@ -160,7 +160,7 @@ export default function StreamerStudio() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] relative overflow-hidden">
+    <div className="min-h-screen bg-transparent relative overflow-hidden">
       <MoltenBackground />
       <Toast />
       <StudioTopBar
@@ -193,7 +193,7 @@ export default function StreamerStudio() {
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative bg-[#0a0a0f] border border-arcade-pink/20 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+            className="relative bg-bg-primary border border-arcade-pink/20 rounded-2xl p-6 max-w-md w-full shadow-2xl"
           >
             <h3 className="text-lg font-bold text-text-primary mb-2">End stream safely?</h3>
             <p className="text-xs text-neutral-400 mb-4 leading-relaxed">

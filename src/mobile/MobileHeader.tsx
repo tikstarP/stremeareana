@@ -5,7 +5,7 @@ export default function MobileHeader() {
   return (
     <header
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
-      className="fixed top-0 left-0 right-0 z-50 bg-[rgba(0,0,0,0.9)] backdrop-blur-[10px] border-b border-white/[0.06]"
+      className="fixed top-0 left-0 right-0 z-50 bg-bg-primary/90 backdrop-blur-[10px] border-b border-white/[0.06]"
     >
       <div className="flex items-center justify-between h-14 px-4">
         <Link to="/" className="flex items-center gap-2 active:scale-[0.97] transition-transform duration-100">

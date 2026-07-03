@@ -100,9 +100,9 @@ export default function AdminPage() {
     else addToast({ message: 'Failed to update', type: 'error' });
   };
 
-  if (authLoading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="w-8 h-8 border-2 border-arcade-yellow border-t-transparent rounded-full animate-spin" /></div>;
+  if (authLoading) return <div className="min-h-screen bg-transparent flex items-center justify-center"><div className="w-8 h-8 border-2 border-arcade-yellow border-t-transparent rounded-full animate-spin" /></div>;
   if (!user) return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><MoltenBackground />
+    <div className="min-h-screen bg-transparent flex items-center justify-center"><MoltenBackground />
       <div className="relative z-10 text-center"><Shield className="w-12 h-12 text-arcade-pink mx-auto mb-4" /><p className="text-neutral-400">Sign in to access admin panel</p></div>
     </div>
   );
@@ -120,7 +120,7 @@ export default function AdminPage() {
     items.filter(item => fields.some(f => String(item[f] || '').toLowerCase().includes(search.toLowerCase())));
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] relative">
+    <div className="min-h-screen bg-transparent relative overflow-hidden">
       <MoltenBackground />
       <Toast />
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-6">

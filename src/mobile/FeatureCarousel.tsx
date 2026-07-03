@@ -62,7 +62,7 @@ export default function FeatureCarousel({ role = 'viewer' }: FeatureCarouselProp
         {features.map((f, i) => (
           <div
             key={i}
-            className="min-w-[260px] max-w-[280px] flex-shrink-0 rounded-xl bg-[#111] p-5 flex flex-col transition-all duration-300"
+            className="min-w-[260px] max-w-[280px] flex-shrink-0 rounded-xl bg-white/[0.03] p-5 flex flex-col transition-all duration-300"
             style={{
               scrollSnapAlign: 'center',
               height: '180px',
@@ -74,7 +74,7 @@ export default function FeatureCarousel({ role = 'viewer' }: FeatureCarouselProp
                 : 'none',
             }}
           >
-            <f.icon className="w-8 h-8 text-arcade-yellow mb-3" />
+            <f.icon className="w-8 h-8 text-arcade-blue mb-3" />
             <h3 className="text-lg font-bold text-white mb-1">{f.title}</h3>
             <p className="text-sm text-neutral-400 leading-relaxed line-clamp-2">{f.desc}</p>
           </div>
