@@ -151,7 +151,7 @@ export default function StreamerStudio() {
               className="flex-1 min-h-[44px] px-4 py-2 rounded-xl bg-white/[0.05] border border-white/[0.1] text-sm text-neutral-300 hover:bg-white/[0.08] transition-all"
             >Dashboard</button>
             <button onClick={() => navigate(`/room/${code}`)}
-              className="flex-1 min-h-[44px] px-4 py-2 rounded-xl bg-gradient-to-r from-arcade-orange to-arcade-yellow text-white font-bold text-sm hover:opacity-90 transition-opacity"
+              className="flex-1 min-h-[44px] px-4 py-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-bold text-sm hover:opacity-90 transition-opacity"
             >View Room</button>
           </div>
         </div>
@@ -163,20 +163,22 @@ export default function StreamerStudio() {
     <div className="min-h-screen bg-transparent relative overflow-hidden">
       <MoltenBackground />
       <Toast />
-      <StudioTopBar
-        roomName={roomName}
-        roomCode={code}
-        status={status}
-        viewerCount={viewerCount}
-        queueCount={lobbyPlayers.filter(p => p.status === 'waiting').length}
-        priorityCount={lobbyPlayers.filter(p => p.status === 'selected').length}
-        fanDropPending={pendingSubmissions.length}
-        coinsSpent={coinsSpent}
-        coinsHeld={coinsHeld}
-        overlayUrl={overlayUrl}
-        onEndStream={() => setEndConfirmOpen(true)}
-        addToast={addToast}
-      />
+      <div className="hidden md:block">
+        <StudioTopBar
+          roomName={roomName}
+          roomCode={code}
+          status={status}
+          viewerCount={viewerCount}
+          queueCount={lobbyPlayers.filter(p => p.status === 'waiting').length}
+          priorityCount={lobbyPlayers.filter(p => p.status === 'selected').length}
+          fanDropPending={pendingSubmissions.length}
+          coinsSpent={coinsSpent}
+          coinsHeld={coinsHeld}
+          overlayUrl={overlayUrl}
+          onEndStream={() => setEndConfirmOpen(true)}
+          addToast={addToast}
+        />
+      </div>
 
       {/* Emergency Lock Overlay */}
       {emergencyLock && (
@@ -212,7 +214,7 @@ export default function StreamerStudio() {
       )}
 
       {/* Mobile */}
-      <div className="md:hidden pt-12">
+      <div className="md:hidden">
         <StudioMobileView
           roomCode={code}
           roomName={roomName}
