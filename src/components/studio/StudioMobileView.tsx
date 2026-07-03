@@ -100,37 +100,16 @@ export default function StudioMobileView({
     </div>
   );
 
-  const preview = (
-    <div className="mx-3 mt-2 glass rounded-xl overflow-hidden border border-white/[0.06]">
-      {videoId ? (
-        <div className="relative aspect-video bg-black">
-          <iframe src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0`}
-            className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen
-          />
-          <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-black/60 backdrop-blur-sm border border-white/10">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-[9px] font-bold text-white tracking-wider">LIVE</span>
-          </div>
-        </div>
-      ) : (
-        <div className="aspect-video bg-black/60 flex items-center justify-center">
-          <p className="text-xs text-text-muted">No video configured</p>
-        </div>
-      )}
-      <div className="flex items-center justify-between px-3 py-2 bg-black/40 border-t border-white/[0.06]">
-        <Eye className="w-3 h-3 text-neutral-500" />
-        <span className="text-[10px] text-neutral-400">{viewerCount} watching</span>
-        <div className="flex gap-1">
-          <button onClick={onToggleMute} className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg hover:bg-white/5 text-neutral-400 transition-colors">
-            {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-          </button>
-          <button onClick={onRefresh} className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg hover:bg-white/5 text-neutral-400 transition-colors">
-            <RefreshCw className="w-3.5 h-3.5" />
-          </button>
-        </div>
+  const pipPreview = videoId ? (
+    <div className="fixed bottom-[68px] right-2 z-50 w-32 rounded-lg overflow-hidden bg-black border border-white/10 shadow-2xl">
+      <div className="relative bg-black" style={{ aspectRatio: '16/9' }}>
+        <iframe src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0&controls=0`}
+          className="w-full h-full pointer-events-none" allow="autoplay" title="pip"
+        />
+        <div className="absolute top-0.5 left-0.5 px-1 py-0.5 rounded bg-red-500/80 text-[7px] font-bold text-white leading-none">LIVE</div>
       </div>
     </div>
-  );
+  ) : null;
 
   const controlTab = (
     <div className="px-3 pb-4 space-y-3">
@@ -253,9 +232,9 @@ export default function StudioMobileView({
   );
 
   return (
-    <div className="md:hidden min-h-screen bg-transparent pb-[60px]">
+    <div className="md:hidden min-h-screen bg-transparent pb-[60px] flex flex-col">
       {topBar}
-      {preview}
+      {pipPreview}
       <div className="flex-1 overflow-y-auto no-scrollbar">
         <AnimatePresence mode="wait">
           <motion.div
