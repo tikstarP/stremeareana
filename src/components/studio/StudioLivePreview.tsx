@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Volume2, VolumeX, ExternalLink, Monitor, X, Maximize2, Minimize2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Volume2, VolumeX, ExternalLink, Monitor } from 'lucide-react';
 
 interface StudioLivePreviewProps {
   videoId: string;
@@ -36,7 +35,6 @@ export default function StudioLivePreview({
   addToast,
 }: StudioLivePreviewProps) {
   const [inputValue, setInputValue] = useState('');
-  const [expanded, setExpanded] = useState(false);
 
   const handleSetUrl = () => {
     const id = extractVideoId(inputValue);
@@ -74,64 +72,32 @@ export default function StudioLivePreview({
               className="p-1 rounded hover:bg-white/10 text-neutral-400 hover:text-white transition-colors" title="Open in YouTube"
             ><ExternalLink className="w-3.5 h-3.5" /></a>
           )}
-          <button onClick={() => setExpanded(p => !p)}
-            className="p-1 rounded hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
-            title={expanded ? 'Collapse' : 'Expand'}
-          >{expanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}</button>
         </div>
       </div>
 
       {/* Video or URL input */}
-      <AnimatePresence>
-        {expanded ? (
-          <motion.div
-            key="expanded"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {videoId ? (
-              <div className="relative bg-black" style={{ aspectRatio: '16/9' }}>
-                <iframe
-                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0`}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 p-3">
-                <Monitor className="w-4 h-4 text-neutral-500 shrink-0" />
-                <input
-                  type="text" value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
-                  placeholder="YouTube URL or ID..."
-                  className="flex-1 bg-white/[0.06] border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-[10px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/30"
-                />
-                <button onClick={handleSetUrl}
-                  className="px-2.5 py-1.5 rounded-lg bg-arcade-pink/20 border border-arcade-pink/30 text-arcade-pink text-[10px] font-semibold hover:bg-arcade-pink/30 whitespace-nowrap"
-                >Set</button>
-              </div>
-            )}
-          </motion.div>
-        ) : videoId ? (
-          <motion.div
-            key="mini"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="relative bg-black" style={{ aspectRatio: '16/9' }}>
-              <iframe
-                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0&controls=0`}
-                className="w-full h-full pointer-events-none"
-                allow="autoplay"
-              />
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {videoId ? (
+        <div className="relative bg-black" style={{ aspectRatio: '16/9' }}>
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0`}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 p-3">
+          <Monitor className="w-4 h-4 text-neutral-500 shrink-0" />
+          <input
+            type="text" value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
+            placeholder="YouTube URL or ID..."
+            className="flex-1 bg-white/[0.06] border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-[10px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/30"
+          />
+          <button onClick={handleSetUrl}
+            className="px-2.5 py-1.5 rounded-lg bg-arcade-pink/20 border border-arcade-pink/30 text-arcade-pink text-[10px] font-semibold hover:bg-arcade-pink/30 whitespace-nowrap"
+          >Set</button>
+        </div>
+      )}
     </div>
   );
 }
