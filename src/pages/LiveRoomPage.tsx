@@ -588,6 +588,19 @@ function QueueBanner({ roomStatus, roomCode, user, addToast }: any) {
   );
 }
 
+const demoMessages = [
+  { id: -1, username: 'StreamArena', message: 'Welcome to the stream! Type a message to chat with everyone 🎉', color: '#818cf8', is_super: false, created_at: new Date().toISOString() },
+  { id: -2, username: 'StreamArena', message: 'Tip: Click the star icon for Super Chat to get noticed! ⭐', color: '#818cf8', is_super: false, created_at: new Date().toISOString() },
+  { id: -3, username: 'Rahul', message: 'yo streamer W 🔥', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
+  { id: -4, username: 'Priya', message: 'first time here, this is sick!', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
+  { id: -5, username: 'RajGamer', message: 'gg guys 🔥🔥', color: '#FFB000', is_super: true, created_at: new Date().toISOString(), amount: 10 },
+  { id: -6, username: 'Neha', message: 'lets gooo 🚀', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
+  { id: -7, username: 'Vikram', message: 'next round pls', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
+  { id: -8, username: 'Anon', message: 'what game we playing?', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
+  { id: -9, username: 'Sofia', message: 'just joined, hi everyone!', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
+  { id: -10, username: 'Aman', message: 'bro that last round was insane 💀', color: '#FFF2DD', is_super: false, created_at: new Date().toISOString() },
+];
+
 function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -598,12 +611,17 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
   const [newCount, setNewCount] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef(true);
+  const [fetchedOnce, setFetchedOnce] = useState(false);
 
   const fetchMessages = useCallback(async () => {
     if (!roomId) return;
     try {
       const res = await fetch(`/api/chat?roomId=${roomId}`);
-      if (res.ok) setMessages(await res.json());
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data);
+        setFetchedOnce(true);
+      }
     } catch { /* silent */ }
     finally { setLoading(false); }
   }, [roomId]);
@@ -654,7 +672,9 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
     } catch { /* silent */ }
   };
 
-  const entries = messages.map((msg: any, i: number) => ({
+  const displayMessages = !fetchedOnce && messages.length === 0 ? demoMessages : messages;
+
+  const entries = displayMessages.map((msg: any, i: number) => ({
     id: msg.id || i,
     type: msg.is_super ? 'youtube_superchat' as const : 'youtube_chat' as const,
     username: msg.username || 'Anonymous',
