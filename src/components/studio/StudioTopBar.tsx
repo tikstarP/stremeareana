@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Eye, Coins, Users, Smartphone,
-  Link, QrCode, Monitor, Power, X, Copy, ExternalLink, Check
+  Link, QrCode, Monitor, Power, X, Copy, ExternalLink, Check, Play
 } from 'lucide-react';
 
 interface StudioTopBarProps {
@@ -35,6 +36,7 @@ export default function StudioTopBar({
   const [endConfirmOpen, setEndConfirmOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedOverlay, setCopiedOverlay] = useState(false);
+  const navigate = useNavigate();
 
   const cfg = statusConfig[status];
   const roomUrl = `${window.location.origin}/room/${roomCode}`;
@@ -141,10 +143,10 @@ export default function StudioTopBar({
 
           {/* Coins */}
           <div className="flex items-center gap-1.5 shrink-0">
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-arcade-yellow/10 border border-arcade-yellow/20">
-              <Coins className="w-3.5 h-3.5 text-arcade-yellow" />
-              <span className="text-xs font-bold text-arcade-yellow tabular-nums">{coinsSpent}</span>
-              <span className="text-[10px] text-arcade-yellow/70 hidden sm:inline">spent</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-arcade-blue/10 border border-arcade-blue/20">
+              <Coins className="w-3.5 h-3.5 text-arcade-blue" />
+              <span className="text-xs font-bold text-arcade-blue tabular-nums">{coinsSpent}</span>
+              <span className="text-[10px] text-arcade-blue/70 hidden sm:inline">spent</span>
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-arcade-blue/10 border border-arcade-blue/20">
               <Coins className="w-3.5 h-3.5 text-arcade-blue" />
@@ -158,6 +160,7 @@ export default function StudioTopBar({
           {/* Actions */}
           <div className="flex items-center gap-1.5 shrink-0">
             <ActionButton icon={copiedLink ? Check : Link} label="Copy Viewer Link" onClick={copyLink} copied={copiedLink} />
+            <ActionButton icon={Eye} label="View Room" onClick={() => navigate(`/room/${roomCode}`)} />
             <ActionButton icon={QrCode} label="QR Code" onClick={() => { setQrOpen(true); broadcastShowQR(); }} />
             <ActionButton icon={Smartphone} label="Show on Stream" onClick={broadcastShowQR} />
             <ActionButton icon={copiedOverlay ? Check : Monitor} label="Copy Overlay URL" onClick={copyOverlay} copied={copiedOverlay} />

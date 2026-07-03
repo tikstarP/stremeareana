@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Volume2, VolumeX, Gamepad2, MessageSquare, Trophy, Coins, Hash, Share2, Heart, Play, Shield, ListOrdered, Sparkles, Clock, BadgeCheck, X, Copy, Sun, Moon, ArrowDown, Send, Star, Eye, Crown, Bot, Smartphone, UserPlus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -99,6 +99,7 @@ export default function LiveRoomPage() {
   const subscriberCount = room?.subscriber_count?.toLocaleString() || '12.4K';
   const streamStarted = useMemo(() => room?.stream_started_at ? Math.floor((Date.now() - new Date(room.stream_started_at).getTime()) / 3600000) + 'h ago' : '2h ago', [room?.stream_started_at]);
   const streamTitle = room?.stream_title || 'GRIND FOR BGMS | SIMP IS LIVE 🍑';
+  const isHost = user?.id === room?.host_id;
 
   useEffect(() => {
     if (roomCode && videoId) startWatching(roomCode, videoId, streamerName);
@@ -134,17 +135,17 @@ export default function LiveRoomPage() {
       <div className="md:hidden"><MobileHeader /></div>
       <Toast />
       <div className="hidden md:block relative z-10 pt-20 px-4 max-w-[1600px] mx-auto">
-        <DesktopContent roomCode={roomCode} room={room} tab={tab} setTab={setTab} countdown={countdown} formatTime={formatTime} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} setFanDropState={setFanDropState} profile={profile} refreshProfile={refreshProfile} />
+        <DesktopContent roomCode={roomCode} room={room} tab={tab} setTab={setTab} countdown={countdown} formatTime={formatTime} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} setFanDropState={setFanDropState} profile={profile} refreshProfile={refreshProfile} isHost={isHost} />
       </div>
       <div className="md:hidden relative z-10 pt-14 max-w-md mx-auto touch-manipulation" style={{ height: 'calc(100vh - 56px - 80px)', overflow: 'hidden' }}>
-        <MobileContent roomCode={roomCode} room={room} mobileTab={mobileTab} setMobileTab={setMobileTab} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} setFanDropState={setFanDropState} videoId={videoId} profile={profile} refreshProfile={refreshProfile} />
+        <MobileContent roomCode={roomCode} room={room} mobileTab={mobileTab} setMobileTab={setMobileTab} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} setFanDropState={setFanDropState} videoId={videoId} profile={profile} refreshProfile={refreshProfile} isHost={isHost} />
       </div>
       <div className="md:hidden"><MobileNav activeTab={mobileTab} onTabChange={setMobileTab} /></div>
     </div>
   );
 }
 
-function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, fanDropState, setFanDropState, profile, refreshProfile }: any) {
+function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, fanDropState, setFanDropState, profile, refreshProfile, isHost }: any) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const [minimized, setMinimized] = useState(false);
@@ -170,7 +171,7 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
       </div>
       <div className={`grid grid-cols-12 gap-5 px-5 pt-4 ${minimized ? 'pb-20' : 'pb-5'}`}>
         <div className="col-span-7 xl:col-span-8 space-y-3 pb-8 flex flex-col">
-          <StreamerProfile roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} />
+          <StreamerProfile roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} isHost={isHost} />
           <QueueBanner roomStatus={roomStatus} roomCode={roomCode} user={user} addToast={addToast} />
           <ViewerFeed roomId={roomId} user={user} addToast={addToast} profile={profile} refreshProfile={refreshProfile} />
         </div>
@@ -267,9 +268,10 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
   );
 }
 
-function StreamerProfile({ streamerName, streamerAvatar, streamerVerified, subscriberCount, viewerCount, streamStarted, streamTitle, roomCode }: any) {
+function StreamerProfile({ streamerName, streamerAvatar, streamerVerified, subscriberCount, viewerCount, streamStarted, streamTitle, roomCode, isHost }: any) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
+  const navigate = useNavigate();
   const { addToast } = useApp();
   const roomUrl = `${window.location.origin}/room/${roomCode}`;
   const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(roomUrl)}`;
@@ -292,6 +294,11 @@ function StreamerProfile({ streamerName, streamerAvatar, streamerVerified, subsc
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
+            {isHost && (
+              <button onClick={() => navigate(`/studio/${roomCode}`)}
+                className="min-h-[36px] px-3 py-1.5 rounded-lg font-bold text-[10px] bg-arcade-pink/20 text-arcade-pink border border-arcade-pink/30 hover:bg-arcade-pink/30 transition-all"
+              >Studio</button>
+            )}
             <button onClick={() => { setQrOpen(true); }}
               aria-label="Share room"
               className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-arcade-blue hover:border-arcade-blue/30 transition-all"
@@ -364,7 +371,7 @@ function TabButton({ id, label, icon: Icon, active, onClick }: { id: string; lab
   );
 }
 
-function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, setFanDropState, videoId, profile, refreshProfile }: any) {
+function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, setFanDropState, videoId, profile, refreshProfile, isHost }: any) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const [minimized, setMinimized] = useState(false);
@@ -392,7 +399,7 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
         <AnimatePresence mode="wait">
           {mobileTab === 'stream' && (
             <motion.div key="stream" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3 pb-4">
-              <StreamerProfileMobile roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} />
+              <StreamerProfileMobile roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} isHost={isHost} />
               <QueueBanner roomStatus={roomStatus} roomCode={roomCode} user={user} addToast={addToast} />
               <ViewerFeed roomId={roomId} user={user} addToast={addToast} profile={profile} refreshProfile={refreshProfile} />
             </motion.div>
@@ -485,9 +492,10 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
   );
 }
 
-function StreamerProfileMobile({ streamerName, streamerAvatar, streamerVerified, subscriberCount, viewerCount, streamStarted, streamTitle, roomCode }: any) {
+function StreamerProfileMobile({ streamerName, streamerAvatar, streamerVerified, subscriberCount, viewerCount, streamStarted, streamTitle, roomCode, isHost }: any) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
+  const navigate = useNavigate();
   const { addToast } = useApp();
   const roomUrl = `${window.location.origin}/room/${roomCode}`;
   const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(roomUrl)}`;
@@ -510,6 +518,11 @@ function StreamerProfileMobile({ streamerName, streamerAvatar, streamerVerified,
             </div>
           </div>
           <div className="flex items-center gap-1.5">
+            {isHost && (
+              <button onClick={() => navigate(`/studio/${roomCode}`)}
+                className="min-h-[44px] px-3 py-2 rounded-xl font-bold text-xs bg-arcade-pink/20 text-arcade-pink border border-arcade-pink/30 hover:bg-arcade-pink/30 transition-all"
+              >Studio</button>
+            )}
             <button onClick={() => setQrOpen(true)}
               aria-label="Share room"
               className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-arcade-blue hover:border-arcade-blue/30 transition-all"
