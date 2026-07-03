@@ -1,11 +1,20 @@
 import { useNavigate, Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Gamepad2, Zap, ArrowRight, Sparkles } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
 import Toast from '../components/Toast';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function EntryPage() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/streamer', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const selectRole = (role: 'streamer' | 'viewer') => {
     localStorage.setItem('streamarena_role', role);

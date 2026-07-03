@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, Save, LogOut, KeyRound } from 'lucide-react';
+import { ArrowLeft, User, Save, LogOut, KeyRound, Coins, Trophy, Calendar } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
@@ -56,6 +56,10 @@ export default function SettingsPage() {
     navigate('/');
   };
 
+  const memberSince = user?.created_at
+    ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    : '—';
+
   return (
     <div className="min-h-screen bg-transparent relative overflow-hidden">
       <MoltenBackground />
@@ -63,37 +67,60 @@ export default function SettingsPage() {
       <Toast />
       <div className="relative z-10 pt-20 pb-12 px-4 max-w-2xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-arcade-purple to-arcade-blue flex items-center justify-center">
-              <User className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="font-display text-2xl font-bold break-words"><span className="gradient-text">Settings</span></h1>
-              <p className="text-xs text-neutral-400">Manage your profile and account</p>
-            </div>
-          </div>
+          <button onClick={() => navigate(-1)}
+            className="min-h-[44px] inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-text-primary transition-colors mb-6"
+          ><ArrowLeft className="w-4 h-4" /> Back</button>
 
           {!user ? (
             <div className="bg-white/[0.03] rounded-2xl p-8 border border-arcade-pink/10 text-center">
-              <p className="text-neutral-400 text-sm mb-4">Sign in to access settings</p>
+              <p className="text-neutral-400 text-sm mb-4">Sign in to access your profile</p>
               <button onClick={() => navigate('/login')}
-                className="min-h-[44px] px-6 py-2 rounded-xl bg-gradient-to-r from-arcade-orange to-arcade-yellow text-white font-semibold text-sm"
+                className="min-h-[44px] px-6 py-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-semibold text-sm"
               >Sign In</button>
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Profile section */}
+              {/* Profile Card */}
+              <div className="bg-white/[0.03] rounded-2xl p-6 border border-arcade-pink/10">
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-arcade-purple to-arcade-blue flex items-center justify-center text-2xl font-bold text-white shrink-0">
+                    {(profile?.username || user.email || '?')[0].toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <h1 className="text-lg font-bold text-text-primary truncate">{profile?.username || 'User'}</h1>
+                    <p className="text-xs text-neutral-400 truncate">{user.email}</p>
+                    <p className="text-[10px] text-neutral-500 mt-0.5">Joined {memberSince}</p>
+                  </div>
+                </div>
+
+                {/* Stats row */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white/[0.04] rounded-xl p-3 text-center">
+                    <Coins className="w-4 h-4 text-arcade-yellow mx-auto mb-1" />
+                    <p className="text-sm font-bold text-text-primary">{profile?.coins ?? 0}</p>
+                    <p className="text-[9px] text-neutral-500">Coins</p>
+                  </div>
+                  <div className="bg-white/[0.04] rounded-xl p-3 text-center">
+                    <Trophy className="w-4 h-4 text-arcade-blue mx-auto mb-1" />
+                    <p className="text-sm font-bold text-text-primary">{profile?.points ?? 0}</p>
+                    <p className="text-[9px] text-neutral-500">Points</p>
+                  </div>
+                  <div className="bg-white/[0.04] rounded-xl p-3 text-center">
+                    <Calendar className="w-4 h-4 text-arcade-purple mx-auto mb-1" />
+                    <p className="text-sm font-bold text-text-primary">{profile?.streak ?? 0}</p>
+                    <p className="text-[9px] text-neutral-500">Day Streak</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Edit Username */}
               <div className="bg-white/[0.03] rounded-2xl p-6 border border-arcade-pink/10 space-y-4">
-                <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2"><User className="w-4 h-4 text-arcade-purple" /> Profile</h3>
+                <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2"><User className="w-4 h-4 text-arcade-purple" /> Edit Profile</h3>
                 <div>
                   <label className="text-[10px] text-text-muted block mb-1">Username</label>
                   <input type="text" value={username} onChange={e => setUsername(e.target.value)}
                     className="w-full bg-bg-secondary border border-arcade-pink/10 rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-purple/50 transition-all"
                   />
-                </div>
-                <div>
-                  <label className="text-[10px] text-text-muted block mb-1">Email</label>
-                  <p className="text-sm text-text-primary bg-bg-secondary rounded-xl px-4 py-2.5 border border-arcade-pink/10">{user.email}</p>
                 </div>
                 <button onClick={handleSave} disabled={saving || !username.trim()}
                   className="min-h-[44px] px-5 py-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white text-xs font-bold hover:opacity-90 disabled:opacity-30 transition-all flex items-center gap-2"
@@ -103,7 +130,7 @@ export default function SettingsPage() {
                 </button>
               </div>
 
-              {/* Password section */}
+              {/* Password */}
               <div className="bg-white/[0.03] rounded-2xl p-6 border border-arcade-pink/10 space-y-4">
                 <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2"><KeyRound className="w-4 h-4 text-arcade-yellow" /> Password</h3>
                 {showResetEmail ? (
