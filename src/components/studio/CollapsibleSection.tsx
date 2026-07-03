@@ -30,7 +30,7 @@ export default function CollapsibleSection({
             <span className="px-1.5 py-0.5 rounded-full bg-arcade-pink/20 text-arcade-pink text-[9px] font-bold">{badge}</span>
           )}
         </div>
-        {open ? <ChevronUp className="w-3.5 h-3.5 text-neutral-500" /> : <ChevronUp className="w-3.5 h-3.5 text-neutral-500" />}
+        {open ? <ChevronUp className="w-3.5 h-3.5 text-neutral-500" /> : <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />}
       </button>
       <AnimatePresence>
         {open && (

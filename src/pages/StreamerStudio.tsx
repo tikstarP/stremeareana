@@ -176,7 +176,9 @@ export default function StreamerStudio() {
 
   const handleReturnCoins = useCallback((id: number) => {
     const p = lobbyPlayers.find(x => x.id === id);
-    if (p?.coins_held) setCoinsHeld(h => h - p.coins_held!);
+    if (!p || p.coins_held == null) return;
+    const amount = p.coins_held;
+    setCoinsHeld(h => h - amount);
   }, [lobbyPlayers]);
 
   const handleStartGame = useCallback(() => {

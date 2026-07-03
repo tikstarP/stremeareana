@@ -67,7 +67,7 @@ const mockEntries: FeedEntry[] = [
 ];
 
 export default function LiveFeed({ entries: _entries, onAllowShoutout, onRejectShoutout, addToast, roomCode }: LiveFeedProps) {
-  const [entries, setEntries] = useState<FeedEntry[]>(_entries || mockEntries);
+  const [entries, setEntries] = useState<FeedEntry[]>(_entries && _entries.length > 0 ? _entries : mockEntries);
   const [filter, setFilter] = useState<FilterTab>('all');
   const [darkFeed, setDarkFeed] = useState(true);
   const [pinned, setPinned] = useState(true);

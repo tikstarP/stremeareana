@@ -152,7 +152,7 @@ export default function StudioFanDropPanel({
   const [likeVoting, setLikeVoting] = useState(true);
   const [onePerViewer, setOnePerViewer] = useState(false);
   const [extraWithCoins, setExtraWithCoins] = useState(false);
-  const [submissions, setSubmissions] = useState<FanDropSubmission[]>(_pendingSubmissions.length > 0 ? _pendingSubmissions : mockSubmissions);
+  const [submissions, setSubmissions] = useState<FanDropSubmission[]>(_pendingSubmissions && _pendingSubmissions.length > 0 ? _pendingSubmissions : mockSubmissions);
 
   const toggleAllowedType = (id: string) => {
     setAllowedTypes(prev =>

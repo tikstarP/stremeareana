@@ -76,7 +76,7 @@ export default function PlayerLobby({
   onInvite, onStartGame, gameActive, mainGame, addToast,
 }: PlayerLobbyProps) {
   const [activeTab, setActiveTab] = useState('selected');
-  const [players] = useState<LobbyPlayer[]>(_players.length > 0 ? _players : mockPlayers);
+  const players = _players.length > 0 ? _players : mockPlayers;
 
   const selected = players.filter(p => p.status === 'selected');
   const waiting = players.filter(p => p.status === 'waiting');
