@@ -101,7 +101,7 @@ export default function StudioMobileView({
   );
 
   const pipPreview = videoId ? (
-    <div className="fixed bottom-[68px] right-2 z-50 w-32 rounded-lg overflow-hidden bg-black border border-white/10 shadow-2xl">
+    <div className="fixed bottom-[68px] right-2 z-50 w-44 rounded-lg overflow-hidden bg-black border border-white/10 shadow-2xl">
       <div className="relative bg-black" style={{ aspectRatio: '16/9' }}>
         <iframe src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0&controls=0`}
           className="w-full h-full pointer-events-none" allow="autoplay" title="pip"
