@@ -345,23 +345,21 @@ export default function StreamerStudio() {
 
       {/* Desktop */}
       <div className="hidden md:block relative z-10 pt-12">
-        {/* PiP Live Preview (desktop floating overlay) */}
-        <div className="fixed bottom-4 right-4 z-50 w-[280px] shadow-2xl rounded-2xl overflow-hidden">
-          <StudioLivePreview
-            videoId={videoId}
-            isMuted={isMuted}
-            viewerCount={viewerCount}
-            onToggleMute={() => setIsMuted(p => !p)}
-            onRefresh={() => addToast({ message: 'Player refreshed', type: 'info' })}
-            onSetVideoId={(id) => { setVideoId(id); setYoutubeUrl(`https://youtube.com/watch?v=${id}`); }}
-            addToast={addToast}
-          />
-        </div>
         <div className="max-w-[1920px] mx-auto px-4 py-2">
           <div className="grid grid-cols-12 gap-4" style={{ minHeight: 'calc(100vh - 90px)' }}>
 
             {/* LEFT COLUMN (4/12) */}
             <div className="col-span-4 space-y-2 overflow-y-auto pr-1 no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
+              <div className="sticky top-0 z-10">
+                <StudioLivePreview
+                  videoId={videoId}
+                  isMuted={isMuted}
+                  viewerCount={viewerCount}
+                  onToggleMute={() => setIsMuted(p => !p)}
+                  onSetVideoId={(id) => { setVideoId(id); setYoutubeUrl(`https://youtube.com/watch?v=${id}`); }}
+                  addToast={addToast}
+                />
+              </div>
               <LiveFeed
                 roomCode={code}
                 onAllowShoutout={handleAllowShoutout}

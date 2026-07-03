@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { Volume2, VolumeX, ExternalLink, Youtube } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Volume2, VolumeX, ExternalLink, ChevronUp, ChevronDown, Monitor } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface StudioLivePreviewProps {
   videoId: string;
   isMuted: boolean;
   viewerCount: number;
   onToggleMute: () => void;
-  onRefresh: () => void;
   onSetVideoId: (id: string) => void;
   addToast: (t: { message: string; type: 'success' | 'error' | 'info' | 'warning' }) => void;
 }
@@ -33,11 +32,11 @@ export default function StudioLivePreview({
   isMuted,
   viewerCount,
   onToggleMute,
-  onRefresh,
   onSetVideoId,
   addToast,
 }: StudioLivePreviewProps) {
   const [inputValue, setInputValue] = useState('');
+  const [minimized, setMinimized] = useState(false);
 
   const handleSetUrl = () => {
     const id = extractVideoId(inputValue);
@@ -61,6 +60,7 @@ export default function StudioLivePreview({
       className="rounded-2xl overflow-hidden border border-white/[0.06]"
       style={{ background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(12px)' }}
     >
+      {/* Header bar — always visible */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -77,64 +77,52 @@ export default function StudioLivePreview({
               className="p-1 rounded hover:bg-white/5 text-neutral-400 hover:text-white transition-colors" title="Open in YouTube"
             ><ExternalLink className="w-3.5 h-3.5" /></a>
           )}
+          <button onClick={() => setMinimized(p => !p)}
+            className="p-1 rounded hover:bg-white/5 text-neutral-400 hover:text-white transition-colors"
+            title={minimized ? 'Expand' : 'Minimize'}
+          >{minimized ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}</button>
         </div>
       </div>
 
-      {videoId ? (
-        <div className="relative bg-black" style={{ aspectRatio: '16/9' }}>
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0`}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-      ) : (
-        <div className="p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Youtube className="w-4 h-4 text-neutral-500" />
-            <span className="text-xs text-text-muted">No video configured</span>
-          </div>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Paste YouTube URL or ID..."
-              className="flex-1 bg-bg-secondary border border-white/[0.06] rounded-xl px-3 py-2.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/30 transition-colors"
-            />
-            <button
-              onClick={handleSetUrl}
-              className="min-h-[44px] sm:min-h-auto px-3 py-2 rounded-xl bg-arcade-pink/20 border border-arcade-pink/30 text-arcade-pink text-xs font-semibold hover:bg-arcade-pink/30 transition-colors whitespace-nowrap"
-            >
-              Set URL
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* URL input when no video */}
-      {!videoId && (
-        <div className="p-3">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Paste YouTube URL or ID..."
-              className="flex-1 bg-bg-secondary border border-white/[0.06] rounded-xl px-3 py-2 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/30 transition-colors"
-            />
-            <button
-              onClick={handleSetUrl}
-              className="min-h-[44px] sm:min-h-auto px-3 py-2 rounded-xl bg-arcade-pink/20 border border-arcade-pink/30 text-arcade-pink text-xs font-semibold hover:bg-arcade-pink/30 transition-colors whitespace-nowrap"
-            >
-              Set URL
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Collapsible content */}
+      <AnimatePresence>
+        {!minimized && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {videoId ? (
+              <div className="relative bg-black" style={{ aspectRatio: '16/9' }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0`}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 px-3 py-2.5">
+                <Monitor className="w-4 h-4 text-neutral-500" />
+                <span className="text-xs text-text-muted">No video configured</span>
+                <div className="flex-1" />
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Paste YouTube URL or ID..."
+                  className="flex-1 max-w-[200px] bg-bg-secondary border border-white/[0.06] rounded-lg px-2.5 py-1.5 text-[10px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/30 transition-colors"
+                />
+                <button onClick={handleSetUrl}
+                  className="min-h-[36px] px-2.5 py-1.5 rounded-lg bg-arcade-pink/20 border border-arcade-pink/30 text-arcade-pink text-[10px] font-semibold hover:bg-arcade-pink/30 transition-colors whitespace-nowrap"
+                >Set URL</button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
