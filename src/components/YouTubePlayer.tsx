@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Play, Volume2, VolumeX, PictureInPicture2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function YouTubePlayer({ videoId = 'jfKfPfyJRdk' }: { videoId?: string }) {
+export default function YouTubePlayer({ videoId = '' }: { videoId?: string }) {
   const [pip, setPip] = useState(true);
   const [muted, setMuted] = useState(true);
   const [started, setStarted] = useState(false);

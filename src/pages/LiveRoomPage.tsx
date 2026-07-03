@@ -51,8 +51,8 @@ export default function LiveRoomPage() {
   const { user } = useAuth();
   const { addToast, profile, refreshProfile } = useApp();
   const { startWatching } = useLivePlayer();
-  const videoId = 'jfKfPfyJRdk';
   const [room, setRoom] = useState<any>(null);
+  const videoId = room?.video_id || '';
   const [tab, setTab] = useState('games');
   const [mobileTab, setMobileTab] = useState('stream');
   const [countdown, setCountdown] = useState(45);
@@ -67,7 +67,7 @@ export default function LiveRoomPage() {
       if (data?.id) setRoom(data);
       else throw new Error('Room not found');
     }).catch(() => {
-      setRoom({ id: null, code: roomCode, name: 'Live Room', host_name: 'Streamer', host_avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer', is_live: true, viewer_count: 0 });
+      setRoom({ id: null, code: roomCode, name: 'Live Room', host_name: 'Streamer', host_avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer', is_live: true, viewer_count: 0, video_id: '' });
       addToast({ message: 'Could not load room data — showing demo stream', type: 'info' });
     });
   }, [roomCode]);
@@ -135,7 +135,7 @@ export default function LiveRoomPage() {
       <div className="md:hidden"><MobileHeader /></div>
       <Toast />
       <div className="hidden md:block relative z-10 pt-20 px-4 max-w-[1600px] mx-auto">
-        <DesktopContent roomCode={roomCode} room={room} tab={tab} setTab={setTab} countdown={countdown} formatTime={formatTime} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} setFanDropState={setFanDropState} profile={profile} refreshProfile={refreshProfile} isHost={isHost} />
+        <DesktopContent roomCode={roomCode} room={room} tab={tab} setTab={setTab} countdown={countdown} formatTime={formatTime} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} setFanDropState={setFanDropState} videoId={videoId} profile={profile} refreshProfile={refreshProfile} isHost={isHost} />
       </div>
       <div className="md:hidden relative z-10 pt-14 max-w-md mx-auto touch-manipulation" style={{ height: 'calc(100vh - 56px - 80px)', overflow: 'hidden' }}>
         <MobileContent roomCode={roomCode} room={room} mobileTab={mobileTab} setMobileTab={setMobileTab} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} setFanDropState={setFanDropState} videoId={videoId} profile={profile} refreshProfile={refreshProfile} isHost={isHost} />
@@ -145,12 +145,12 @@ export default function LiveRoomPage() {
   );
 }
 
-function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, fanDropState, setFanDropState, profile, refreshProfile, isHost }: any) {
+function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, fanDropState, setFanDropState, videoId, profile, refreshProfile, isHost }: any) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
     <div ref={scrollRef} className="h-[calc(100vh-72px)] overflow-y-auto no-scrollbar">
-      <YouTubePlayer />
+      <YouTubePlayer videoId={videoId} />
       <div className="grid grid-cols-12 gap-5 px-5 pt-4 pb-5">
         <div className="col-span-7 xl:col-span-8 space-y-3 pb-8 flex flex-col">
           <StreamerProfile roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} isHost={isHost} />
@@ -380,7 +380,7 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
               <div className="relative shrink-0 rounded-lg overflow-hidden bg-black border border-white/[0.06]" style={{ width: 128, height: 72 }}>
                 {miniStarted ? (
                   <iframe
-                    src={`https://www.youtube.com/embed/${videoId || 'jfKfPfyJRdk'}?autoplay=1&mute=${miniMuted ? 1 : 0}&rel=0&controls=0`}
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${miniMuted ? 1 : 0}&rel=0&controls=0`}
                     className="w-full h-full pointer-events-none"
                     allow="autoplay"
                     title="mini"

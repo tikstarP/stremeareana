@@ -35,6 +35,7 @@ interface RoomData {
   host_avatar: string;
   is_live: boolean;
   viewer_count: number;
+  video_id: string;
   created_at: string;
 }
 
@@ -357,7 +358,17 @@ export default function StreamerStudio() {
                 isMuted={isMuted}
                 viewerCount={viewerCount}
                 onToggleMute={() => setIsMuted(p => !p)}
-                onSetVideoId={(id) => { setVideoId(id); setYoutubeUrl(`https://youtube.com/watch?v=${id}`); }}
+                onSetVideoId={(id) => {
+                  setVideoId(id);
+                  setYoutubeUrl(`https://youtube.com/watch?v=${id}`);
+                  if (room) {
+                    fetch('/api/rooms', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+                      body: JSON.stringify({ id: room.id, video_id: id }),
+                    }).catch(() => {});
+                  }
+                }}
                 addToast={addToast}
               />
               <LiveFeed
@@ -376,7 +387,14 @@ export default function StreamerStudio() {
                     moderationMode={moderationMode}
                     streamerMode={streamerMode}
                     onUpdateRoomTitle={setRoomName}
-                    onUpdateYoutubeUrl={setYoutubeUrl}
+                    onUpdateYoutubeUrl={(url) => {
+                      setYoutubeUrl(url);
+                      const match = url.match(/[?&]v=([a-zA-Z0-9_-]{11})|youtu\.be\/([a-zA-Z0-9_-]{11})|^([a-zA-Z0-9_-]{11})$/);
+                      const id = match?.[1] || match?.[2] || match?.[3] || '';
+                      if (id) {
+                        setVideoId(id);
+                      }
+                    }}
                     onUpdateLanguage={setLanguage}
                     onUpdateModeration={setModerationMode}
                     onUpdateStreamerMode={setStreamerMode}
@@ -385,7 +403,7 @@ export default function StreamerStudio() {
                         fetch('/api/rooms', {
                           method: 'PUT',
                           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-                          body: JSON.stringify({ id: room.id, is_live: status === 'live' }),
+                          body: JSON.stringify({ id: room.id, name: roomName, video_id: videoId, is_live: status === 'live' }),
                         }).catch(() => {});
                       }
                       addToast({ message: 'Settings saved', type: 'success' });
