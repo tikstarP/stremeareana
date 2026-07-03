@@ -2,10 +2,11 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Users, Crown, Clock, Sparkles, Coins, Star, Smartphone } from 'lucide-react';
+import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 
 type OverlayEvent = {
   id: number;
-  type: 'selection' | 'winner' | 'countdown' | 'shoutout' | 'coin' | 'player_join' | 'fan_drop';
+  type: string;
   title: string;
   subtitle: string;
   icon: typeof Trophy;
@@ -21,6 +22,17 @@ const mockEvents: OverlayEvent[] = [
   { id: 6, type: 'player_join', title: 'Sofia joined the lobby', subtitle: 'Waiting for selection', icon: Users, color: '#06b6d4' },
   { id: 7, type: 'fan_drop', title: 'Fan Drop: sketch.png', subtitle: 'New submission from Neha', icon: Sparkles, color: '#ec4899' },
 ];
+
+const eventIcons: Record<string, typeof Trophy> = {
+  selection: Trophy, winner: Crown, countdown: Clock, shoutout: Star,
+  coin: Coins, player_join: Users, fan_drop: Sparkles, fan_drop_show: Sparkles,
+};
+
+const eventColors: Record<string, string> = {
+  selection: '#10b981', winner: '#f59e0b', countdown: '#3b82f6',
+  shoutout: '#a855f7', coin: '#eab308', player_join: '#06b6d4',
+  fan_drop: '#ec4899', fan_drop_show: '#ec4899',
+};
 
 function OverlayEventDisplay({ event }: { event: OverlayEvent }) {
   const Icon = event.icon;
@@ -50,18 +62,65 @@ export default function OverlayPage() {
   const code = useMemo(() => roomCode || Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join(''), [roomCode]);
   const roomUrl = `${window.location.origin}/room/${code}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(roomUrl)}`;
+
+  const [roomId, setRoomId] = useState<number | null>(null);
+  const [events, setEvents] = useState<OverlayEvent[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [connected] = useState(true);
   const [showQR, setShowQR] = useState(false);
   const qrTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const displayEvents = events.length > 0 ? events : mockEvents;
 
+  // Fetch room by code
+  useEffect(() => {
+    if (!roomCode) return;
+    fetch(`/api/rooms?code=${roomCode}`).then(r => r.json()).then(data => {
+      if (data?.id) setRoomId(data.id);
+    }).catch(() => {});
+  }, [roomCode]);
+
+  // Fetch existing overlay events
+  useEffect(() => {
+    if (!roomId) return;
+    fetch(`/api/overlay-events?roomId=${roomId}`).then(r => r.json()).then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        setEvents(data.map((e: any) => ({
+          id: e.id,
+          type: e.event_type,
+          title: e.event_data?.title || e.event_type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+          subtitle: e.event_data?.subtitle || '',
+          icon: eventIcons[e.event_type] || Sparkles,
+          color: eventColors[e.event_type] || '#a78bfa',
+        })));
+      }
+    }).catch(() => {});
+  }, [roomId]);
+
+  // Realtime subscription for new events
+  useRealtimeSubscription(
+    'overlay_events',
+    roomId ? { column: 'room_id', value: roomId } : undefined,
+    (newEvent: any) => {
+      setEvents(prev => [...prev, {
+        id: newEvent.id,
+        type: newEvent.event_type,
+        title: newEvent.event_data?.title || newEvent.event_type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+        subtitle: newEvent.event_data?.subtitle || '',
+        icon: eventIcons[newEvent.event_type] || Sparkles,
+        color: eventColors[newEvent.event_type] || '#a78bfa',
+      }]);
+    },
+  );
+
+  // Auto-advance through events
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex(i => (i + 1) % mockEvents.length);
+      setCurrentIndex(i => (i + 1) % Math.max(displayEvents.length, 1));
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [displayEvents.length]);
 
+  // BroadcastChannel for QR show
   useEffect(() => {
     try {
       const ch = new BroadcastChannel(`streamarena-${code}`);
@@ -73,32 +132,30 @@ export default function OverlayPage() {
         }
       };
       return () => { ch.close(); if (qrTimeoutRef.current) clearTimeout(qrTimeoutRef.current); };
-    } catch { console.warn('BroadcastChannel not supported'); return; }
+    } catch { return; }
   }, [code]);
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col items-center justify-between p-8 pb-8">
-      {/* Connection indicator */}
       <div className="self-end flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/5">
         <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
         <span className="text-[10px] text-white/40 font-mono">@{code}</span>
       </div>
 
-      {/* Event display */}
       <div className="relative w-full max-w-3xl flex items-center justify-center" style={{ minHeight: '240px' }}>
         <AnimatePresence mode="wait">
-          <OverlayEventDisplay key={mockEvents[currentIndex].id} event={mockEvents[currentIndex]} />
+          {displayEvents.length > 0 && (
+            <OverlayEventDisplay key={displayEvents[currentIndex]?.id || 0} event={displayEvents[currentIndex] || mockEvents[0]} />
+          )}
         </AnimatePresence>
       </div>
 
-      {/* Event indicator dots */}
       <div className="flex items-center gap-2">
-        {mockEvents.map((_, i) => (
+        {displayEvents.map((_, i) => (
           <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === currentIndex ? 'bg-white w-5' : 'bg-white/20'}`} />
         ))}
       </div>
 
-      {/* QR + Join link — appears when streamer clicks Show on Stream */}
       <AnimatePresence>
         {showQR && (
           <motion.div
