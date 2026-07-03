@@ -94,7 +94,7 @@ export default function EntryPage() {
             💡 Streamer tools work best on desktop
           </p>
 
-          <p className="text-center text-sm text-neutral-500 mt-6">12,000+ creators hosting interactive streams daily</p>
+          <p className="text-center text-sm text-neutral-500 mt-6">~12,000+ creators hosting interactive streams daily</p>
         </div>
       </section>
 
@@ -145,7 +145,7 @@ export default function EntryPage() {
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
             className="text-xs text-neutral-500 max-w-3xl mx-auto"
           >
-            12,000+ creators hosting interactive streams daily
+            ~12,000+ creators hosting interactive streams daily
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.35 }} className="mt-10">

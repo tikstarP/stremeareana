@@ -415,9 +415,9 @@ export default function LandingPage({ role }: { role: 'streamer' | 'viewer' }) {
             <div className="max-w-5xl mx-auto">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 {[
-                  { value: '45K', label: 'Games Played Today', icon: Gamepad2 },
-                  { value: '12K', label: 'Art Pieces Submitted', icon: Palette },
-                  { value: '3.2K', label: 'Players Online', icon: Users },
+                  { value: '~45K', label: 'Games Played Today', icon: Gamepad2 },
+                  { value: '~12K', label: 'Art Pieces Submitted', icon: Palette },
+                  { value: '~3.2K', label: 'Players Online', icon: Users },
                 ].map((stat) => (
                   <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
                     className="text-center p-3 sm:p-4 rounded-xl bg-gradient-to-b from-arcade-blue/8 to-transparent border border-arcade-blue/15"
@@ -487,7 +487,6 @@ export default function LandingPage({ role }: { role: 'streamer' | 'viewer' }) {
                   <li><Link to="/join" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center">Join a Room</Link></li>
                   <li><Link to="/create-room" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center">Create Room</Link></li>
                   <li><Link to="/login" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center">Sign In</Link></li>
-                  <li><Link to="/settings" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center">Settings</Link></li>
                   <li><Link to="/settings" className="text-xs text-neutral-400 hover:text-arcade-blue transition-colors min-h-[44px] sm:min-h-auto inline-flex items-center">Settings</Link></li>
                 </ul>
               </div>

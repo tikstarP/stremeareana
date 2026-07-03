@@ -14,7 +14,7 @@ import Toast from '../components/Toast';
 import YouTubePlayer from '../components/YouTubePlayer';
 import Leaderboard from '../components/Leaderboard';
 import { Skeleton, CardSkeleton } from '../components/Skeleton';
-import InteractionHub from '../components/InteractionHub';
+
 import QueuePanel from '../components/QueuePanel';
 import GameArena from '../components/GameArena';
 import FanDropRoom from '../components/FanDropRoom';
