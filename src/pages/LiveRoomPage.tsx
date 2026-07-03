@@ -147,29 +147,11 @@ export default function LiveRoomPage() {
 
 function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, fanDropState, setFanDropState, profile, refreshProfile, isHost }: any) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const videoWrapperRef = useRef<HTMLDivElement>(null);
-  const [minimized, setMinimized] = useState(false);
-  const [miniMuted, setMiniMuted] = useState(true);
-  const [miniStarted, setMiniStarted] = useState(false);
-
-  useEffect(() => {
-    const container = scrollRef.current;
-    const videoWrapper = videoWrapperRef.current;
-    if (!container || !videoWrapper) return;
-    const handleScroll = () => {
-      const videoHeight = videoWrapper.offsetHeight;
-      setMinimized(container.scrollTop > videoHeight * 0.6);
-    };
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <div ref={scrollRef} className="h-[calc(100vh-72px)] overflow-y-auto no-scrollbar">
-      <div ref={videoWrapperRef} className={`sticky top-0 z-10 bg-bg-primary ${minimized ? 'h-0 overflow-hidden opacity-0 pointer-events-none' : ''}`}>
-        <YouTubePlayer />
-      </div>
-      <div className={`grid grid-cols-12 gap-5 px-5 pt-4 ${minimized ? 'pb-20' : 'pb-5'}`}>
+      <YouTubePlayer />
+      <div className="grid grid-cols-12 gap-5 px-5 pt-4 pb-5">
         <div className="col-span-7 xl:col-span-8 space-y-3 pb-8 flex flex-col">
           <StreamerProfile roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} isHost={isHost} />
           <QueueBanner roomStatus={roomStatus} roomCode={roomCode} user={user} addToast={addToast} />
@@ -210,60 +192,6 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
         </div>
       </div>
 
-      <AnimatePresence>
-        {minimized && (
-          <motion.div
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 80, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-black/95 border-t border-white/[0.08] backdrop-blur-xl"
-            style={{ height: 72, paddingBottom: 'env(safe-area-inset-bottom)' }}
-          >
-            <div className="flex items-center gap-3 h-full px-4 max-w-7xl mx-auto">
-              <div className="relative shrink-0 rounded-lg overflow-hidden bg-black border border-white/[0.06]" style={{ width: 128, height: 72 }}>
-                {miniStarted ? (
-                  <iframe
-                    src={`https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=${miniMuted ? 1 : 0}&rel=0&controls=0`}
-                    className="w-full h-full pointer-events-none"
-                    allow="autoplay"
-                    title="mini"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <button onClick={() => setMiniStarted(true)}>
-                      <Play className="w-5 h-5 text-neutral-400" />
-                    </button>
-                  </div>
-                )}
-                <div className="absolute top-1 left-1 px-1 py-0.5 rounded bg-red-500/80 text-[8px] font-bold text-white leading-none">LIVE</div>
-              </div>
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{streamTitle || 'Live Stream'}</p>
-                  <p className="text-xs text-neutral-400">@{roomCode} • {viewerCount || 0} watching</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  onClick={() => setMiniMuted(!miniMuted)}
-                  aria-label={miniMuted ? 'Unmute mini player' : 'Mute mini player'}
-                  className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 text-neutral-400 hover:text-white transition-colors touch-manipulation"
-                >
-                  {miniMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                </button>
-                <button
-                  onClick={() => setMinimized(false)}
-                  aria-label="Close mini player"
-                  className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 text-neutral-400 hover:text-white transition-colors touch-manipulation"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

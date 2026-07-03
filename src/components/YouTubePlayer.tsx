@@ -3,7 +3,7 @@ import { Play, Volume2, VolumeX, PictureInPicture2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function YouTubePlayer({ videoId = 'jfKfPfyJRdk' }: { videoId?: string }) {
-  const [pip, setPip] = useState(false);
+  const [pip, setPip] = useState(true);
   const [muted, setMuted] = useState(true);
   const [started, setStarted] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -122,7 +122,7 @@ export default function YouTubePlayer({ videoId = 'jfKfPfyJRdk' }: { videoId?: s
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className="fixed z-50 w-56 rounded-xl overflow-hidden bg-black border border-white/10 shadow-2xl cursor-grab active:cursor-grabbing"
+            className="fixed z-50 w-64 rounded-xl overflow-hidden bg-black border border-white/10 shadow-2xl cursor-grab active:cursor-grabbing"
             style={{ touchAction: 'none', bottom: 'calc(5rem + env(safe-area-inset-bottom))', right: 'calc(1rem + env(safe-area-inset-right))' }}
             onPointerDown={handlePiPDragStart}
           >
