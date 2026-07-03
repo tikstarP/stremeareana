@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
 
 export default function SettingsPage() {
-  const { user, signOut } = useAuth();
+  const { user, session, signOut } = useAuth();
   const { profile, refreshProfile, addToast } = useApp();
   const navigate = useNavigate();
   const [username, setUsername] = useState(profile?.username || '');
@@ -23,7 +23,7 @@ export default function SettingsPage() {
     try {
       const res = await fetch('/api/profiles', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
         body: JSON.stringify({ username: username.trim() }),
       });
       if (res.ok) {
