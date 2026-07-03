@@ -465,13 +465,44 @@ export default function StreamerStudio() {
                     pendingSubmissions={pendingSubmissions}
                     onSetStatus={setFanDropStatus}
                     onUpdateTheme={setFanDropTheme}
-                    onApprove={(id) => addToast({ message: 'Approved', type: 'success' })}
-                    onReject={(id) => addToast({ message: 'Rejected', type: 'error' })}
-                    onDelete={(id) => addToast({ message: 'Deleted', type: 'info' })}
-                    onShowOnOverlay={(id) => addToast({ message: 'Showing on overlay', type: 'info' })}
-                    onRate={(id) => addToast({ message: 'Rated', type: 'info' })}
+                    onApprove={async (id) => {
+                      try {
+                        await fetch('/api/art', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status: 'approved' }) });
+                        addToast({ message: 'Approved', type: 'success' });
+                      } catch { addToast({ message: 'Failed to approve', type: 'error' }); }
+                    }}
+                    onReject={async (id) => {
+                      try {
+                        await fetch('/api/art', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status: 'rejected' }) });
+                        addToast({ message: 'Rejected', type: 'error' });
+                      } catch { addToast({ message: 'Failed to reject', type: 'error' }); }
+                    }}
+                    onDelete={async (id) => {
+                      try {
+                        await fetch('/api/art', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+                        addToast({ message: 'Deleted', type: 'info' });
+                      } catch { addToast({ message: 'Failed to delete', type: 'error' }); }
+                    }}
+                    onShowOnOverlay={async (id) => {
+                      try {
+                        await fetch('/api/art', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status: 'showing' }) });
+                        if (room) {
+                          await fetch('/api/overlay-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room_id: room.id, event_type: 'fan_drop_show', event_data: { submission_id: id } }) });
+                        }
+                        addToast({ message: 'Showing on overlay', type: 'info' });
+                      } catch { addToast({ message: 'Failed to show on overlay', type: 'error' }); }
+                    }}
+                    onRate={(id) => addToast({ message: 'Rating submitted', type: 'info' })}
                     onAwardPoints={(id) => addToast({ message: 'Points awarded', type: 'success' })}
-                    onAIRead={(id) => addToast({ message: 'AI reading...', type: 'info' })}
+                    onAIRead={async (id) => {
+                      try {
+                        const sub = pendingSubmissions.find(s => s.id === id);
+                        if (sub && room) {
+                          await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room_id: room.id, user_id: 'ai-host', username: '🤖 AI Host', message: `[AI] ${sub.preview}`, color: '#a78bfa', is_super: false }) });
+                          addToast({ message: 'AI reading submission aloud', type: 'info' });
+                        }
+                      } catch { addToast({ message: 'AI read failed', type: 'error' }); }
+                    }}
                     onClearPending={() => addToast({ message: 'Pending cleared', type: 'info' })}
                     addToast={addToast}
                   />
@@ -506,7 +537,13 @@ export default function StreamerStudio() {
                       </div>
                       <div className="grid grid-cols-4 gap-1.5">
                         {['Countdown', 'Next Player', 'Winner', 'Coin Alert', 'Fan Drop', 'Shoutout', 'Leaderboard'].map(alert => (
-                          <button key={alert} onClick={() => addToast({ message: `${alert} sent to overlay!`, type: 'info' })}
+                          <button key={alert} onClick={async () => {
+                            if (!room) return;
+                            try {
+                              await fetch('/api/overlay-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room_id: room.id, event_type: alert.toLowerCase().replace(/\s+/g, '_'), event_data: {} }) });
+                              addToast({ message: `${alert} sent to overlay!`, type: 'info' });
+                            } catch { addToast({ message: `${alert} failed`, type: 'error' }); }
+                          }}
                             className="min-h-[32px] py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-neutral-400 text-[8px] font-bold hover:text-text-primary hover:bg-white/[0.06] transition-all"
                           >{alert}</button>
                         ))}
@@ -583,7 +620,14 @@ export default function StreamerStudio() {
                     onToggleAI={() => setSmartVoice(p => !p)}
                     onVolumeChange={setVoiceVolume}
                     onVoiceModeChange={setAiVoiceStyle}
-                    onSpeak={(msg) => addToast({ message: `AI: "${msg}"`, type: 'info' })}
+                    onSpeak={async (msg) => {
+                      try {
+                        if (room) {
+                          await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room_id: room.id, user_id: 'ai-host', username: '🤖 AI Host', message: `[AI] ${msg}`, color: '#a78bfa', is_super: false }) });
+                          addToast({ message: `AI: "${msg}"`, type: 'info' });
+                        }
+                      } catch { addToast({ message: 'AI speak failed', type: 'error' }); }
+                    }}
                     addToast={addToast}
                   />
                 </div>

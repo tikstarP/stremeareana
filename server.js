@@ -301,6 +301,17 @@ app.put('/api/art', async (req, res) => {
   }
 });
 
+app.delete('/api/art', async (req, res) => {
+  try {
+    const { id } = req.body;
+    const { error } = await supabase.from('art_submissions').delete().eq('id', id);
+    if (error) throw error;
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── Upload ──────────────────────────────────────────────────
 app.post('/api/upload', async (req, res) => {
   try {
@@ -313,6 +324,35 @@ app.post('/api/upload', async (req, res) => {
     if (error) throw error;
     const { data: urlData } = supabase.storage.from('art-uploads').getPublicUrl(fileName);
     res.json({ url: urlData.publicUrl });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Overlay Events ──────────────────────────────────────────
+app.post('/api/overlay-events', async (req, res) => {
+  try {
+    const { room_id, event_type, event_data } = req.body;
+    if (!room_id || !event_type) return res.status(400).json({ error: 'room_id and event_type required' });
+    const { data, error } = await supabase.from('overlay_events').insert({
+      room_id, event_type, event_data: event_data || {}
+    }).select().single();
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/overlay-events', async (req, res) => {
+  try {
+    const { roomId, since } = req.query;
+    let query = supabase.from('overlay_events').select('*').order('created_at', { ascending: false }).limit(50);
+    if (roomId) query = query.eq('room_id', parseInt(String(roomId)));
+    if (since) query = query.gt('created_at', since);
+    const { data, error } = await query;
+    if (error) throw error;
+    res.json((data || []).reverse());
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
