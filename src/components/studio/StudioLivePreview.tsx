@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Volume2, VolumeX, RefreshCw, ExternalLink, Youtube, Eye } from 'lucide-react';
+import { Volume2, VolumeX, ExternalLink, Youtube } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface StudioLivePreviewProps {
@@ -58,38 +58,36 @@ export default function StudioLivePreview({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass rounded-2xl overflow-hidden border border-white/[0.06]"
+      className="rounded-2xl overflow-hidden border border-white/[0.06]"
+      style={{ background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(12px)' }}
     >
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <Youtube className="w-4 h-4 text-arcade-pink" />
-          <h3 className="font-semibold text-text-primary text-sm">Live Preview</h3>
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+          <span className="text-[11px] font-bold text-white tracking-wider">LIVE</span>
+          <span className="text-[10px] text-neutral-400 ml-1">{viewerCount.toLocaleString()} watching</span>
         </div>
-        {videoId && (
-          <a
-            href={`https://www.youtube.com/watch?v=${videoId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto p-1.5 rounded-lg hover:bg-white/5 text-neutral-400 hover:text-white transition-colors touch-manipulation"
-            title="Open in YouTube"
-          >
-            <ExternalLink className="w-4 h-4" />
-          </a>
-        )}
+        <div className="flex items-center gap-1">
+          <button onClick={onToggleMute}
+            className="p-1 rounded hover:bg-white/5 text-neutral-400 hover:text-white transition-colors"
+            title={isMuted ? 'Unmute' : 'Mute'}
+          >{isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}</button>
+          {videoId && (
+            <a href={`https://www.youtube.com/watch?v=${videoId}`} target="_blank" rel="noopener noreferrer"
+              className="p-1 rounded hover:bg-white/5 text-neutral-400 hover:text-white transition-colors" title="Open in YouTube"
+            ><ExternalLink className="w-3.5 h-3.5" /></a>
+          )}
+        </div>
       </div>
 
       {videoId ? (
-        <div className="relative aspect-video bg-black">
+        <div className="relative bg-black" style={{ aspectRatio: '16/9' }}>
           <iframe
             src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0`}
             className="w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
-          <div className="absolute top-3 left-3 flex items-center gap-2 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-sm border border-white/10">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-[11px] font-bold text-white tracking-wider">LIVE</span>
-          </div>
         </div>
       ) : (
         <div className="p-4">
@@ -116,28 +114,27 @@ export default function StudioLivePreview({
         </div>
       )}
 
-      <div className="flex items-center justify-between px-3 py-2.5 bg-black/40 border-t border-white/[0.06]">
-        <div className="flex items-center gap-2">
-          <Eye className="w-3.5 h-3.5 text-neutral-500" />
-          <span className="text-xs text-neutral-400">{viewerCount.toLocaleString()} watching</span>
+      {/* URL input when no video */}
+      {!videoId && (
+        <div className="p-3">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Paste YouTube URL or ID..."
+              className="flex-1 bg-bg-secondary border border-white/[0.06] rounded-xl px-3 py-2 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/30 transition-colors"
+            />
+            <button
+              onClick={handleSetUrl}
+              className="min-h-[44px] sm:min-h-auto px-3 py-2 rounded-xl bg-arcade-pink/20 border border-arcade-pink/30 text-arcade-pink text-xs font-semibold hover:bg-arcade-pink/30 transition-colors whitespace-nowrap"
+            >
+              Set URL
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={onToggleMute}
-            className="min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto p-1.5 rounded-lg hover:bg-white/5 text-neutral-400 hover:text-white transition-colors touch-manipulation"
-            title={isMuted ? 'Unmute' : 'Mute'}
-          >
-            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-          </button>
-          <button
-            onClick={onRefresh}
-            className="min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto p-1.5 rounded-lg hover:bg-white/5 text-neutral-400 hover:text-white transition-colors touch-manipulation"
-            title="Refresh player"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+      )}
     </motion.div>
   );
 }
