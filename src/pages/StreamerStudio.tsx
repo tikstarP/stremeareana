@@ -1,10 +1,11 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Bot, Lock, Sparkles, Eye, Monitor, Shield, Volume2, Headphones, Zap, ChevronDown, Check } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
 import Toast from '../components/Toast';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../contexts/AuthContext';
 import StudioTopBar from '../components/studio/StudioTopBar';
 import StudioLivePreview from '../components/studio/StudioLivePreview';
 import StudioRoomSetup from '../components/studio/StudioRoomSetup';
@@ -23,25 +24,45 @@ interface FanDropSubmission {
   id: number; username: string; avatar_url: string; type: string;
   preview: string; submitted_at: string; likes: number; status: 'pending' | 'approved' | 'rejected';
 }
+
+interface RoomData {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  host_id: string;
+  host_name: string;
+  host_avatar: string;
+  is_live: boolean;
+  viewer_count: number;
+  created_at: string;
+}
+
 export default function StreamerStudio() {
   const { roomCode } = useParams();
   const navigate = useNavigate();
   const { addToast } = useApp();
-  const code = useMemo(() => roomCode || Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join(''), [roomCode]);
+  const { user, session } = useAuth();
+  const code = roomCode || '';
+  const overlayUrl = `${window.location.origin}/overlay/${code}`;
 
-  const [roomName, setRoomName] = useState('GRIND FOR BGMS');
-  const [status] = useState<'live' | 'offline' | 'paused' | 'ended'>('live');
-  const [videoId, setVideoId] = useState('jfKfPfyJRdk');
+  const [room, setRoom] = useState<RoomData | null>(null);
+  const [roomLoading, setRoomLoading] = useState(true);
+  const [roomError, setRoomError] = useState('');
+  const [notHost, setNotHost] = useState(false);
+
+  const [roomName, setRoomName] = useState('Studio');
+  const [status, setStatus] = useState<'live' | 'offline' | 'paused' | 'ended'>('live');
+  const [videoId, setVideoId] = useState('');
   const [isMuted, setIsMuted] = useState(false);
-  const [youtubeUrl, setYoutubeUrl] = useState('https://youtube.com/watch?v=jfKfPfyJRdk');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [language, setLanguage] = useState('en');
   const [moderationMode, setModerationMode] = useState<'safe' | 'review' | 'loose' | 'manual_read'>('safe');
   const [streamerMode, setStreamerMode] = useState<'desktop_obs' | 'mobile_host'>('desktop_obs');
   const [showEnded, setShowEnded] = useState(false);
   const [endConfirmOpen, setEndConfirmOpen] = useState(false);
-  const overlayUrl = `${window.location.origin}/overlay/${code}`;
 
-  const [viewerCount] = useState(1240);
+  const [viewerCount, setViewerCount] = useState(0);
   const [coinsSpent] = useState(150);
   const [coinsHeld, setCoinsHeld] = useState(200);
   const [fanDropStatus, setFanDropStatus] = useState<'locked' | 'scheduled' | 'open' | 'closed'>('locked');
@@ -70,6 +91,37 @@ export default function StreamerStudio() {
     { id: 2, username: 'Rahul', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rahul', type: 'text', preview: 'Check out!', submitted_at: '4m ago', likes: 0, status: 'pending' },
   ]);
 
+  useEffect(() => {
+    if (!code) {
+      setRoomError('No room code provided');
+      setRoomLoading(false);
+      return;
+    }
+    setRoomLoading(true);
+    setRoomError('');
+    fetch(`/api/rooms?code=${encodeURIComponent(code)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data || data.error) {
+          setRoomError(data?.error || 'Room not found');
+          return;
+        }
+        const r = data as RoomData;
+        setRoom(r);
+
+        if (user && r.host_id !== user.id) {
+          setNotHost(true);
+          return;
+        }
+
+        setRoomName(r.name);
+        setStatus(r.is_live ? 'live' : 'offline');
+        setViewerCount(r.viewer_count || 0);
+      })
+      .catch(() => setRoomError('Failed to load room'))
+      .finally(() => setRoomLoading(false));
+  }, [code, user]);
+
   const playersNeeded = selectionConfig?.playerCount || 4;
 
   const handleEndStream = useCallback(() => {
@@ -79,8 +131,15 @@ export default function StreamerStudio() {
     setFanDropStatus('closed');
     setEndConfirmOpen(false);
     setShowEnded(true);
+    if (room) {
+      fetch('/api/rooms', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ id: room.id, is_live: false }),
+      }).catch(() => {});
+    }
     addToast({ message: `Stream ended. ${totalHeld} coins returned.`, type: 'info' });
-  }, [lobbyPlayers, addToast]);
+  }, [lobbyPlayers, addToast, room, session]);
 
   const handleStartSelection = useCallback((config: SelectionConfig) => {
     setSelectionActive(true);
@@ -137,6 +196,53 @@ export default function StreamerStudio() {
     addToast({ message: emergencyLock ? 'Emergency lock deactivated' : 'Emergency lock activated', type: 'warning' });
   }, [emergencyLock, addToast]);
 
+  if (roomLoading) {
+    return (
+      <div className="min-h-screen bg-transparent flex items-center justify-center relative overflow-hidden">
+        <MoltenBackground />
+        <div className="relative z-10 flex flex-col items-center gap-3">
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="w-8 h-8 border-2 border-arcade-purple border-t-transparent rounded-full"
+          />
+          <p className="text-sm text-text-muted">Loading studio...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (roomError) {
+    return (
+      <div className="min-h-screen bg-transparent flex items-center justify-center p-4 relative overflow-hidden">
+        <MoltenBackground />
+        <div className="relative z-10 bg-white/[0.03] rounded-2xl p-8 border border-arcade-pink/10 max-w-md w-full text-center">
+          <div className="text-4xl mb-4">❌</div>
+          <h2 className="font-display text-xl font-bold text-text-primary mb-2">Room Not Found</h2>
+          <p className="text-sm text-neutral-400 mb-6">{roomError}</p>
+          <button onClick={() => navigate('/dashboard')}
+            className="min-h-[44px] px-6 py-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-bold text-sm hover:opacity-90 transition-opacity"
+          >Go to Dashboard</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (notHost) {
+    return (
+      <div className="min-h-screen bg-transparent flex items-center justify-center p-4 relative overflow-hidden">
+        <MoltenBackground />
+        <div className="relative z-10 bg-white/[0.03] rounded-2xl p-8 border border-arcade-pink/10 max-w-md w-full text-center">
+          <div className="text-4xl mb-4">🔒</div>
+          <h2 className="font-display text-xl font-bold text-text-primary mb-2">Not Your Room</h2>
+          <p className="text-sm text-neutral-400 mb-2">Only the room host can access the studio.</p>
+          <p className="text-xs text-neutral-500 mb-6">If you are the host, sign in with the correct account.</p>
+          <button onClick={() => navigate('/login')}
+            className="min-h-[44px] px-6 py-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white font-bold text-sm hover:opacity-90 transition-opacity"
+          >Sign In</button>
+        </div>
+      </div>
+    );
+  }
+
   if (showEnded) {
     return (
       <div className="min-h-screen bg-transparent flex items-center justify-center p-4 relative overflow-hidden">
@@ -180,14 +286,12 @@ export default function StreamerStudio() {
         />
       </div>
 
-      {/* Emergency Lock Overlay */}
       {emergencyLock && (
         <div className="fixed inset-0 z-30 pointer-events-none">
           <div className="absolute inset-0 border-4 border-red-500/30 pointer-events-none" />
         </div>
       )}
 
-      {/* End Stream Confirmation */}
       {endConfirmOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setEndConfirmOpen(false)}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -275,7 +379,16 @@ export default function StreamerStudio() {
                     onUpdateLanguage={setLanguage}
                     onUpdateModeration={setModerationMode}
                     onUpdateStreamerMode={setStreamerMode}
-                    onSave={() => addToast({ message: 'Settings saved', type: 'success' })}
+                    onSave={() => {
+                      if (room) {
+                        fetch('/api/rooms', {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+                          body: JSON.stringify({ id: room.id, is_live: status === 'live' }),
+                        }).catch(() => {});
+                      }
+                      addToast({ message: 'Settings saved', type: 'success' });
+                    }}
                     addToast={addToast}
                   />
                 </div>
@@ -458,7 +571,7 @@ export default function StreamerStudio() {
               </CollapsibleSection>
 
               {/* Moderation */}
-              <CollapsibleSection title="Moderation" icon={Shield} iconColor="text-arcade-orange" defaultOpen={false}>
+              <CollapsibleSection title="Moderation" icon={Shield} iconColor="text-arcade-purple" defaultOpen={false}>
                 <div className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-semibold text-text-muted">Moderation: {moderationMode === 'safe' ? 'Safe' : moderationMode === 'review' ? 'Review' : moderationMode === 'manual_read' ? 'Manual Read' : 'Loose'}</span>
@@ -485,15 +598,15 @@ export default function StreamerStudio() {
                         <button key={m.id} onClick={() => setModerationMode(m.id)}
                           className={`w-full flex items-center justify-between px-3 py-2 rounded-xl border text-left transition-all ${
                             moderationMode === m.id
-                              ? 'bg-arcade-orange/10 border-arcade-orange/30'
+                              ? 'bg-arcade-purple/10 border-arcade-purple/30'
                               : 'bg-white/[0.03] border-white/[0.06] hover:border-white/[0.12]'
                           }`}
                         >
                           <div>
-                            <p className={`text-[11px] font-bold ${moderationMode === m.id ? 'text-arcade-orange' : 'text-text-primary'}`}>{m.label}</p>
+                            <p className={`text-[11px] font-bold ${moderationMode === m.id ? 'text-arcade-purple' : 'text-text-primary'}`}>{m.label}</p>
                             <p className="text-[8px] text-text-muted">{m.desc}</p>
                           </div>
-                          {moderationMode === m.id && <Check className="w-3.5 h-3.5 text-arcade-orange" />}
+                          {moderationMode === m.id && <Check className="w-3.5 h-3.5 text-arcade-purple" />}
                         </button>
                       ))}
                     </div>
