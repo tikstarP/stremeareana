@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
+import type { ArtSubmission } from '../types';
 
 const stickers = [
   { id: 'fire', emoji: '🔥' }, { id: 'heart', emoji: '❤️' }, { id: 'crown', emoji: '👑' },
@@ -47,12 +48,12 @@ export default function FanDropRoom({ roomId, isHost, onStateChange }: { roomId?
   const [selectedSticker, setSelectedSticker] = useState<string | null>(null);
   const [notifyMe, setNotifyMe] = useState(false);
   const [galleryView, setGalleryView] = useState(false);
-  const [gallery, setGallery] = useState<any[]>([]);
+  const [gallery, setGallery] = useState<ArtSubmission[]>([]);
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
-  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<ArtSubmission[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [lastTap, setLastTap] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -69,9 +70,9 @@ export default function FanDropRoom({ roomId, isHost, onStateChange }: { roomId?
     doubleTapLike: true,
   });
 
-  const notifyStateChange = (s: string) => {
-    setRoomState(s as any);
-    setConfig(prev => ({ ...prev, status: s as any }));
+  const notifyStateChange = (s: 'locked' | 'scheduled' | 'open' | 'closed') => {
+    setRoomState(s);
+    setConfig(prev => ({ ...prev, status: s }));
     if (s === 'scheduled') {
       setScheduleTime(config.scheduledAt || new Date(Date.now() + 120000));
     }
@@ -82,20 +83,20 @@ export default function FanDropRoom({ roomId, isHost, onStateChange }: { roomId?
     fetchGallery();
   }, [roomId]);
 
-  useRealtimeSubscription('art_submissions', roomId ? { column: 'room_id', value: roomId } : undefined,
-    (newArt: any) => {
-      if (newArt.status === 'approved' && !gallery.find((g: any) => g.id === newArt.id)) {
+  useRealtimeSubscription<ArtSubmission>('art_submissions', roomId ? { column: 'room_id', value: roomId } : undefined,
+    (newArt) => {
+      if (newArt.status === 'approved' && !gallery.find(g => g.id === newArt.id)) {
         setGallery(prev => [...prev, newArt]);
       }
     },
-    (updatedArt: any) => {
+    (updatedArt) => {
       if (updatedArt.status === 'approved') {
         setGallery(prev => prev.some(g => g.id === updatedArt.id) ? prev : [...prev, updatedArt]);
       } else {
         setGallery(prev => prev.filter(g => g.id !== updatedArt.id));
       }
     },
-    (deletedArt: any) => {
+    (deletedArt) => {
       setGallery(prev => prev.filter(g => g.id !== deletedArt.id));
     },
   );
@@ -140,7 +141,7 @@ export default function FanDropRoom({ roomId, isHost, onStateChange }: { roomId?
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        setGallery(data.filter((a: any) => a.status === 'approved'));
+        setGallery(data.filter((a: ArtSubmission) => a.status === 'approved'));
       }
     } catch { console.warn('Failed to fetch gallery'); }
     finally { setLoading(false); }
@@ -214,7 +215,7 @@ export default function FanDropRoom({ roomId, isHost, onStateChange }: { roomId?
     });
   };
 
-  const renderGalleryCard = (item: any) => {
+  const renderGalleryCard = (item: ArtSubmission) => {
     const isOwn = item.user_id === user?.id;
     const contentType = item.type || (item.image_url ? 'image' : 'text');
     const typeIcon = contentTypes.find(c => c.id === contentType);
@@ -537,7 +538,7 @@ export default function FanDropRoom({ roomId, isHost, onStateChange }: { roomId?
           <div>
             <p className="text-[10px] text-neutral-500 mb-1.5">Room Status</p>
             <div className="flex items-center gap-1.5">
-              {['locked', 'scheduled', 'open', 'closed'].map(s => (
+              {(['locked', 'scheduled', 'open', 'closed'] as const).map(s => (
                 <button key={s} onClick={() => notifyStateChange(s)}
                   className={`min-h-[44px] px-2.5 py-1.5 rounded-lg text-[10px] font-bold capitalize transition-all active:scale-[0.97] touch-manipulation ${
                     config.status === s ? 'bg-arcade-pink/20 text-arcade-pink border border-arcade-pink/30' : 'bg-white/[0.04] text-neutral-400 border border-transparent hover:text-text-primary'

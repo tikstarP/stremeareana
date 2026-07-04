@@ -7,13 +7,14 @@ import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
 import { useApp } from '../context/AppContext';
 import { RoomCardSkeleton } from '../components/Skeleton';
+import type { RoomData } from '../types';
 import jsQR from 'jsqr';
 
 export default function JoinRoomPage() {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [qrMode, setQrMode] = useState(false);
-  const [rooms, setRooms] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<RoomData[]>([]);
   const [roomsLoading, setRoomsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [cameraActive, setCameraActive] = useState(false);
@@ -43,7 +44,7 @@ export default function JoinRoomPage() {
   }, [location.search]);
 
   useEffect(() => {
-    fetch('/api/rooms').then(r => r.json()).then(data => setRooms(data.filter((r: any) => r.is_live))).catch(() => { setRooms([]); }).finally(() => setRoomsLoading(false));
+    fetch('/api/rooms').then(r => r.json()).then(data => setRooms(data.filter((r: RoomData) => r.is_live))).catch(() => { setRooms([]); }).finally(() => setRoomsLoading(false));
   }, []);
 
   useEffect(() => {
@@ -78,13 +79,14 @@ export default function JoinRoomPage() {
         setCameraError('Camera element not ready');
         setScanning(false);
       }
-    } catch (err: any) {
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+    } catch (err: unknown) {
+      const e = err as { name?: string; message?: string };
+      if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
         setCameraError('Camera permission denied. Please allow camera access in your browser settings.');
-      } else if (err.name === 'NotFoundError') {
+      } else if (e.name === 'NotFoundError') {
         setCameraError('No camera found on this device');
       } else {
-        setCameraError(err.message || 'Camera access denied');
+        setCameraError(e.message || 'Camera access denied');
       }
       setScanning(false);
     }

@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n api,vite -c yellow,cyan \"node server.js\" \"vite\"",
+    "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test": "vitest run",
@@ -15,9 +15,7 @@
     "@supabase/supabase-js": "^2.99.1",
     "@tailwindcss/vite": "^4.2.1",
     "concurrently": "^10.0.3",
-    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1",
     "framer-motion": "^12.35.0",
     "jsqr": "^1.4.0",
     "lucide-react": "^0.577.0",

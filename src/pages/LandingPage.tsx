@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Users, Globe, Shield, ArrowRight, Zap, Radio, Gamepad2, Palette, Trophy, Volume2, Monitor, Crown, Play, Star, ChevronDown, DoorOpen, QrCode } from 'lucide-react';
+import type { RoomData } from '../types';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
@@ -48,7 +49,7 @@ export default function LandingPage({ role }: { role: 'streamer' | 'viewer' }) {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const y = useTransform(scrollYProgress, [0, 1], [0, 120]);
   const opacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
-  const [rooms, setRooms] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<RoomData[]>([]);
   const [totalViewers, setTotalViewers] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
@@ -59,7 +60,7 @@ export default function LandingPage({ role }: { role: 'streamer' | 'viewer' }) {
       return r.json();
     }).then(data => {
       setRooms(data);
-      setTotalViewers(data.reduce((sum: number, r: any) => sum + (r.viewer_count || 0), 0));
+      setTotalViewers(data.reduce((sum: number, r: RoomData) => sum + (r.viewer_count || 0), 0));
       setApiError(false);
     }).catch(() => {
       setRooms([]);

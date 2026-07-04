@@ -1,42 +1,36 @@
 import { useEffect, useRef } from 'react';
 import supabase from '../lib/supabase';
 
-export function useRealtimeSubscription(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useRealtimeSubscription<T = any>(
   table: string,
   filter?: { column: string; value: string | number },
-  onInsert?: (payload: any) => void,
-  onUpdate?: (payload: any) => void,
-  onDelete?: (payload: any) => void,
+  onInsert?: (payload: T) => void,
+  onUpdate?: (payload: T) => void,
+  onDelete?: (payload: T) => void,
 ) {
   const callbackRef = useRef({ onInsert, onUpdate, onDelete });
   callbackRef.current = { onInsert, onUpdate, onDelete };
 
   useEffect(() => {
     const channelName = `realtime-${table}-${Date.now()}`;
-    const channelConfig: any = {
+    const channelConfig = {
       event: '*',
       schema: 'public',
       table,
-    };
-    if (filter) {
-      channelConfig.filter = `${filter.column}=eq.${filter.value}`;
-    }
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        channelConfig,
-        (payload) => {
-          const cb = callbackRef.current;
-          if (payload.eventType === 'INSERT') cb.onInsert?.(payload.new);
-          if (payload.eventType === 'UPDATE') cb.onUpdate?.(payload.new);
-          if (payload.eventType === 'DELETE') cb.onDelete?.(payload.old);
-        },
-      )
-      .subscribe();
+      filter: filter ? `${filter.column}=eq.${filter.value}` : undefined,
+    } as const;
+    const channel = supabase.channel(channelName).on(
+      'postgres_changes' as never,
+      channelConfig,
+      (payload: { eventType: string; new: T; old: T }) => {
+        const cb = callbackRef.current;
+        if (payload.eventType === 'INSERT') cb.onInsert?.(payload.new);
+        if (payload.eventType === 'UPDATE') cb.onUpdate?.(payload.new);
+        if (payload.eventType === 'DELETE') cb.onDelete?.(payload.old);
+      },
+    ).subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [table, filter?.column, filter?.value]);
 }

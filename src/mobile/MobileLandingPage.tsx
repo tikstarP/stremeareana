@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown, ArrowRight, Radio, Gamepad2, Palette, Users, Star, Zap } from 'lucide-react';
+import type { RoomData } from '../types';
 import MobileHeader from './MobileHeader';
 import MobileHero from './MobileHero';
 import SocialProofBar from './SocialProofBar';
@@ -13,7 +14,7 @@ interface MobileLandingPageProps {
   totalViewers?: number | null;
   loading?: boolean;
   apiError?: boolean;
-  rooms?: any[];
+  rooms?: RoomData[];
   role: 'streamer' | 'viewer';
 }
 
@@ -82,14 +83,14 @@ export default function MobileLandingPage({ totalViewers, loading, apiError, roo
                     </div>
                   ))}
                 </div>
-              ) : apiError || rooms.filter((r: any) => r.is_live).length === 0 ? (
+              ) : apiError || rooms.filter(r => r.is_live).length === 0 ? (
                 <div className="text-center py-8">
                   <Radio className="w-8 h-8 mx-auto text-neutral-400 mb-2" />
                   <p className="text-sm text-neutral-400">No live rooms right now</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {rooms.filter((r: any) => r.is_live).slice(0, 3).map((room: any) => (
+                  {rooms.filter(r => r.is_live).slice(0, 3).map((room: RoomData) => (
                     <Link key={room.id} to={`/room/${room.code}`} className="block bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4 active:scale-[0.97] transition-transform duration-100">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-arcade-purple/20 to-arcade-blue/20 flex items-center justify-center">

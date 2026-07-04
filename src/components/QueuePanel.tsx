@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
+import type { QueueEntry } from '../types';
 
 export default function QueuePanel({ roomId }: { roomId?: number }) {
   const { user, session } = useAuth();
   const { profile, refreshProfile, addToast } = useApp();
-  const [queue, setQueue] = useState<any[]>([]);
+  const [queue, setQueue] = useState<QueueEntry[]>([]);
   const [tab, setTab] = useState('free');
   const [joining, setJoining] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -25,8 +26,8 @@ export default function QueuePanel({ roomId }: { roomId?: number }) {
 
   useEffect(() => { fetchQueue(); }, [fetchQueue]);
 
-  useRealtimeSubscription('queue_entries', roomId ? { column: 'room_id', value: roomId } : undefined,
-    (newEntry: any) => { setQueue(prev => [...prev, newEntry]); },
+  useRealtimeSubscription<QueueEntry>('queue_entries', roomId ? { column: 'room_id', value: roomId } : undefined,
+    (newEntry) => { setQueue(prev => [...prev, newEntry]); },
   );
 
   const freeQueue = queue.filter(q => q.type === 'free');

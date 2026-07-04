@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
 import { Skeleton } from './Skeleton';
+import type { LeaderboardEntry } from '../types';
 
 export default function Leaderboard() {
   const { user } = useAuth();
   const { profile } = useApp();
-  const [entries, setEntries] = useState<any[]>([]);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [period, setPeriod] = useState('all');
   const [loading, setLoading] = useState(true);
 

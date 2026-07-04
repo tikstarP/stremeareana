@@ -35,8 +35,8 @@ export default function ResetPasswordPage() {
       if (error) throw error;
       addToast({ message: 'Password updated! Redirecting...', type: 'success' });
       setTimeout(() => navigate('/login'), 2000);
-    } catch (err: any) {
-      addToast({ message: err?.message || 'Failed to reset password', type: 'error' });
+    } catch (err: unknown) {
+      addToast({ message: err instanceof Error ? err.message : 'Failed to reset password', type: 'error' });
     } finally {
       setLoading(false);
     }

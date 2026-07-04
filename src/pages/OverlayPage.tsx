@@ -4,6 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Users, Crown, Clock, Sparkles, Coins, Star, Smartphone } from 'lucide-react';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 
+interface ApiOverlayEvent {
+  id: number;
+  event_type: string;
+  event_data?: { title?: string; subtitle?: string; [key: string]: unknown };
+  created_at?: string;
+}
+
 type OverlayEvent = {
   id: number;
   type: string;
@@ -84,7 +91,7 @@ export default function OverlayPage() {
     if (!roomId) return;
     fetch(`/api/overlay-events?roomId=${roomId}`).then(r => r.json()).then(data => {
       if (Array.isArray(data) && data.length > 0) {
-        setEvents(data.map((e: any) => ({
+        setEvents(data.map((e: ApiOverlayEvent) => ({
           id: e.id,
           type: e.event_type,
           title: e.event_data?.title || e.event_type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
@@ -100,7 +107,7 @@ export default function OverlayPage() {
   useRealtimeSubscription(
     'overlay_events',
     roomId ? { column: 'room_id', value: roomId } : undefined,
-    (newEvent: any) => {
+    (newEvent: ApiOverlayEvent) => {
       setEvents(prev => [...prev, {
         id: newEvent.id,
         type: newEvent.event_type,

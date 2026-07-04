@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import type { Profile } from '../types';
 
 interface Toast {
   id: string;
@@ -13,7 +14,7 @@ interface AppContextType {
   toasts: Toast[];
   addToast: (t: Omit<Toast, 'id'>) => void;
   removeToast: (id: string) => void;
-  profile: any;
+  profile: Profile | null;
   refreshProfile: () => Promise<void>;
 }
 
@@ -22,7 +23,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const { user, session } = useAuth();
   const [language, setLanguage] = useState('en');
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const refreshProfile = useCallback(async () => {

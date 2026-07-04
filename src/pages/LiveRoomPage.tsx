@@ -15,6 +15,8 @@ import YouTubePlayer from '../components/YouTubePlayer';
 import Leaderboard from '../components/Leaderboard';
 import { Skeleton, CardSkeleton } from '../components/Skeleton';
 
+import type { RoomData, ChatMessage, Profile } from '../types';
+import type { User } from '@supabase/supabase-js';
 import QueuePanel from '../components/QueuePanel';
 import GameArena from '../components/GameArena';
 import FanDropRoom from '../components/FanDropRoom';
@@ -49,7 +51,7 @@ export default function LiveRoomPage() {
   const { user } = useAuth();
   const { addToast, profile, refreshProfile } = useApp();
   const { startWatching } = useLivePlayer();
-  const [room, setRoom] = useState<any>(null);
+  const [room, setRoom] = useState<RoomData | null>(null);
   const videoId = room?.video_id || '';
   const [tab, setTab] = useState('games');
   const [mobileTab, setMobileTab] = useState('stream');
@@ -57,7 +59,7 @@ export default function LiveRoomPage() {
   const [likeCount, setLikeCount] = useState(0);
   const roomStatus = room?.status || 'queue_open';
   const [fanDropState, setFanDropState] = useState('locked');
-  const [activities] = useState<any[]>([]);
+  const [activities] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     if (!roomCode) return;
@@ -65,7 +67,7 @@ export default function LiveRoomPage() {
       if (data?.id) setRoom(data);
       else throw new Error('Room not found');
     }).catch(() => {
-      setRoom({ id: null, code: roomCode, name: 'Live Room', host_name: 'Streamer', host_avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer', is_live: true, viewer_count: 0, video_id: '', status: 'queue_open' });
+      setRoom({ id: null, code: roomCode, name: 'Live Room', host_id: '', host_name: 'Streamer', host_avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer', is_live: true, viewer_count: 0, video_id: '', status: 'queue_open' });
       addToast({ message: 'Could not load room data — showing demo stream', type: 'info' });
     });
   }, [roomCode]);
@@ -87,7 +89,7 @@ export default function LiveRoomPage() {
   }, [roomCode]);
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
-  const roomId = room?.id;
+  const roomId = room?.id ?? undefined;
   const currentStatus = roomStatuses.find(s => s.id === roomStatus);
   const displayName = profile?.username || user?.email?.split('@')[0];
   const avatarUrl = profile?.avatar_url || (user ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}` : null);
@@ -147,7 +149,25 @@ export default function LiveRoomPage() {
   );
 }
 
-function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, fanDropState, setFanDropState, videoId, profile, refreshProfile, isHost }: any) {
+type BaseContentProps = {
+  roomCode: string | undefined; room: RoomData | null;
+  countdown?: number; formatTime?: (s: number) => string;
+  roomId: number | undefined; user: User | null; addToast: (t: { message: string; type: 'success' | 'error' | 'info' | 'warning' }) => void;
+  likeCount: number; setLikeCount: (n: number) => void;
+  roomStatus: string; currentStatus: { id: string; label: string; icon: string; desc: string; color: string; bg: string; border: string } | undefined;
+  viewerCoins: number; viewerPoints: number;
+  streamerName: string; streamerAvatar: string; streamerVerified: boolean;
+  viewerCount: number; subscriberCount: string; streamStarted: string;
+  streamTitle: string;
+  fanDropState: string; setFanDropState: (s: string) => void;
+  videoId: string; profile: Profile | null; refreshProfile: () => Promise<void>; isHost: boolean;
+};
+
+type DesktopContentProps = BaseContentProps & { tab: string; setTab: (t: string) => void };
+type MobileContentProps = BaseContentProps & { mobileTab: string; setMobileTab: (t: string) => void };
+
+
+function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, fanDropState, setFanDropState, videoId, profile, refreshProfile, isHost }: DesktopContentProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -198,7 +218,11 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
   );
 }
 
-function StreamerProfile({ streamerName, streamerAvatar, streamerVerified, subscriberCount, viewerCount, streamStarted, streamTitle, roomCode, isHost }: any) {
+function StreamerProfile({ streamerName, streamerAvatar, streamerVerified, subscriberCount, viewerCount, streamStarted, streamTitle, roomCode, isHost }: {
+  streamerName: string; streamerAvatar: string; streamerVerified: boolean;
+  subscriberCount: string; viewerCount: number; streamStarted: string;
+  streamTitle: string; roomCode: string | undefined; isHost: boolean;
+}) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const navigate = useNavigate();
@@ -282,7 +306,7 @@ function StreamerProfile({ streamerName, streamerAvatar, streamerVerified, subsc
 
 
 
-function TabButton({ id, label, icon: Icon, active, onClick }: { id: string; label: string; icon: any; active: boolean; onClick: () => void }) {
+function TabButton({ id, label, icon: Icon, active, onClick }: { id: string; label: string; icon: React.ComponentType<{ className?: string }>; active: boolean; onClick: () => void }) {
   return (
     <button onClick={onClick}
       aria-label={`${label} tab`}
@@ -301,7 +325,7 @@ function TabButton({ id, label, icon: Icon, active, onClick }: { id: string; lab
   );
 }
 
-function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, setFanDropState, videoId, profile, refreshProfile, isHost }: any) {
+function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, setFanDropState, videoId, profile, refreshProfile, isHost }: MobileContentProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const [minimized, setMinimized] = useState(false);
@@ -422,7 +446,11 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
   );
 }
 
-function StreamerProfileMobile({ streamerName, streamerAvatar, streamerVerified, subscriberCount, viewerCount, streamStarted, streamTitle, roomCode, isHost }: any) {
+function StreamerProfileMobile({ streamerName, streamerAvatar, streamerVerified, subscriberCount, viewerCount, streamStarted, streamTitle, roomCode, isHost }: {
+  streamerName: string; streamerAvatar: string; streamerVerified: boolean;
+  subscriberCount: string; viewerCount: number; streamStarted: string;
+  streamTitle: string; roomCode: string | undefined; isHost: boolean;
+}) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const navigate = useNavigate();
@@ -506,7 +534,7 @@ function StreamerProfileMobile({ streamerName, streamerAvatar, streamerVerified,
 
 
 
-function QueueBanner({ roomStatus, roomCode, user, addToast }: any) {
+function QueueBanner({ roomStatus, roomCode, user, addToast }: { roomStatus: string; roomCode: string | undefined; user: User | null; addToast: (t: { message: string; type: 'success' | 'error' | 'info' | 'warning' }) => void }) {
   const [inQueue, setInQueue] = useState(false);
   const queueOpen = roomStatus === 'queue_open';
   return (
@@ -550,8 +578,8 @@ const aiVoices = [
   { id: 'en-US-Standard-I', label: '🌙 Calm', pitch: 0.8, rate: 0.85 },
 ];
 
-function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
-  const [messages, setMessages] = useState<any[]>([]);
+function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomId: number | undefined; user: User | null; addToast: (t: { message: string; type: 'success' | 'error' | 'info' | 'warning' }) => void; profile: Profile | null; refreshProfile: () => Promise<void> }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [darkFeed, setDarkFeed] = useState(true);
@@ -588,7 +616,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
   }, [loading]);
 
   useRealtimeSubscription('chat_messages', roomId ? { column: 'room_id', value: roomId } : undefined,
-    (newMsg: any) => { setMessages(prev => [...prev, newMsg]); },
+    (newMsg: ChatMessage) => { setMessages(prev => [...prev, newMsg]); },
   );
 
   const sendAIMessage = async () => {
@@ -665,7 +693,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: any) {
 
   const displayMessages = !fetchedOnce && messages.length === 0 ? demoMessages : messages;
 
-  const entries = displayMessages.map((msg: any, i: number) => ({
+  const entries = displayMessages.map((msg: ChatMessage, i: number) => ({
     id: msg.id || i,
     type: msg.type === 'ai' ? 'ai' as const : msg.is_super ? 'youtube_superchat' as const : 'youtube_chat' as const,
     username: msg.username || 'Anonymous',

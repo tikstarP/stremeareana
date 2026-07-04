@@ -46,8 +46,8 @@ export default function SettingsPage() {
       if (error) throw error;
       addToast({ message: 'Password reset email sent!', type: 'success' });
       setShowResetEmail(false);
-    } catch (err: any) {
-      addToast({ message: err?.message || 'Failed to send reset email', type: 'error' });
+    } catch (err: unknown) {
+      addToast({ message: err instanceof Error ? err.message : 'Failed to send reset email', type: 'error' });
     }
   };
 

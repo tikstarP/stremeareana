@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import { Skeleton } from '../components/Skeleton';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
+import type { LeaderboardEntry } from '../types';
 
 const rankIcon = (r: number) => {
   if (r === 1) return <span className="text-lg">🥇</span>;
@@ -24,7 +25,7 @@ const rankBg = (r: number) => {
 export default function LeaderboardPage() {
   const { user } = useAuth();
   const { profile } = useApp();
-  const [entries, setEntries] = useState<any[]>([]);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [period, setPeriod] = useState('all');
   const [loading, setLoading] = useState(true);
 

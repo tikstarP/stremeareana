@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type ComponentType } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -77,7 +77,7 @@ export default function StudioTopBar({
     } catch { addToast({ message: 'Broadcast failed', type: 'error' }); }
   }, [roomCode, roomUrl, roomName, addToast]);
 
-  const StatsBadge = ({ icon: Icon, value, label, color }: { icon: any; value: number | string; label: string; color?: string }) => (
+  const StatsBadge = ({ icon: Icon, value, label, color }: { icon: React.ComponentType<{ className?: string }>; value: number | string; label: string; color?: string }) => (
     <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] group hover:border-white/[0.12] transition-all">
       <Icon className={`w-3.5 h-3.5 ${color || 'text-neutral-400'}`} />
       <span className="text-xs font-bold text-text-primary tabular-nums">{value}</span>
@@ -85,7 +85,7 @@ export default function StudioTopBar({
     </div>
   );
 
-  const ActionButton = ({ icon: Icon, label, onClick, destructive, copied: isCopied }: { icon: any; label: string; onClick: () => void; destructive?: boolean; copied?: boolean }) => (
+  const ActionButton = ({ icon: Icon, label, onClick, destructive, copied: isCopied }: { icon: ComponentType<{ className?: string }>; label: string; onClick: () => void; destructive?: boolean; copied?: boolean }) => (
     <motion.button
       whileTap={{ scale: 0.95 }}
       onClick={onClick}

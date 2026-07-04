@@ -33,6 +33,8 @@ export default defineConfig(async ({ mode }) => {
             'vendor-react': ['react', 'react-dom', 'react-router-dom'],
             'vendor-motion': ['framer-motion'],
             'vendor-icons': ['lucide-react'],
+            'vendor-supabase': ['@supabase/supabase-js'],
+            'vendor-utils': ['jsqr'],
           },
         },
       },
