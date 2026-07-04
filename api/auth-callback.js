@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       // Create profile
       const username = email ? email.split('@')[0] : 'User_' + user_id.substring(0, 6);
       const avatar_url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`;
-      const { data, error } = await supabase.from('profiles').insert({
+const { data, error } = await supabase.from('profiles').insert({
         id: user_id, username, avatar_url, coins: 15, points: 0, streak: 0
       }).select().single();
       if (error) throw error;
