@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getProfile, upsertProfile } from '../lib/api';
 import type { Profile } from '../types';
 
 interface Toast {
@@ -29,23 +30,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refreshProfile = useCallback(async () => {
     if (!user) { setProfile(null); return; }
     try {
-      const res = await fetch(`/api/profiles?userId=${user.id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setProfile(data);
-      }
+      const data = await getProfile(user.id);
+      setProfile(data);
     } catch (err) { console.error('Profile fetch error:', err); }
   }, [user]);
 
   useEffect(() => {
     if (user) {
       refreshProfile();
-      // Ensure profile exists in DB
-      fetch('/api/auth-callback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.id, email: user.email }),
-      }).then(() => refreshProfile());
+      upsertProfile(user.id, user.email).then(() => refreshProfile()).catch(() => {});
     } else {
       setProfile(null);
     }

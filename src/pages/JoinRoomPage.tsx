@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Keyboard, QrCode, Users, Radio, Search, Camera, CameraOff, Loader2 } from 'lucide-react';
+import { getLiveRooms } from '../lib/api';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
@@ -44,7 +45,7 @@ export default function JoinRoomPage() {
   }, [location.search]);
 
   useEffect(() => {
-    fetch('/api/rooms').then(r => r.json()).then(data => setRooms(data.filter((r: RoomData) => r.is_live))).catch(() => { setRooms([]); }).finally(() => setRoomsLoading(false));
+    getLiveRooms().then(data => setRooms(data)).catch(() => { setRooms([]); }).finally(() => setRoomsLoading(false));
   }, []);
 
   useEffect(() => {

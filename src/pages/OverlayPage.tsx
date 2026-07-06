@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Users, Crown, Clock, Sparkles, Coins, Star, Smartphone } from 'lucide-react';
+import { getRoomByCode, getOverlayEvents } from '../lib/api';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 
 interface ApiOverlayEvent {
@@ -81,7 +82,7 @@ export default function OverlayPage() {
   // Fetch room by code
   useEffect(() => {
     if (!roomCode) return;
-    fetch(`/api/rooms?code=${roomCode}`).then(r => r.json()).then(data => {
+    getRoomByCode(roomCode).then(data => {
       if (data?.id) setRoomId(data.id);
     }).catch(() => {});
   }, [roomCode]);
@@ -89,7 +90,7 @@ export default function OverlayPage() {
   // Fetch existing overlay events
   useEffect(() => {
     if (!roomId) return;
-    fetch(`/api/overlay-events?roomId=${roomId}`).then(r => r.json()).then(data => {
+    getOverlayEvents(roomId).then(data => {
       if (Array.isArray(data) && data.length > 0) {
         setEvents(data.map((e: ApiOverlayEvent) => ({
           id: e.id,

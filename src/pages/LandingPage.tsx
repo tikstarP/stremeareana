@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Users, Globe, Shield, ArrowRight, Zap, Radio, Gamepad2, Palette, Trophy, Volume2, Monitor, Crown, Play, Star, ChevronDown, DoorOpen, QrCode } from 'lucide-react';
+import { getLiveRooms } from '../lib/api';
 import type { RoomData } from '../types';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
@@ -55,12 +56,9 @@ export default function LandingPage({ role }: { role: 'streamer' | 'viewer' }) {
   const [apiError, setApiError] = useState(false);
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetch('/api/rooms').then(r => {
-      if (!r.ok) throw new Error('Failed to fetch');
-      return r.json();
-    }).then(data => {
+    getLiveRooms().then(data => {
       setRooms(data);
-      setTotalViewers(data.reduce((sum: number, r: RoomData) => sum + (r.viewer_count || 0), 0));
+      setTotalViewers(data.reduce((sum, r) => sum + (r.viewer_count || 0), 0));
       setApiError(false);
     }).catch(() => {
       setRooms([]);

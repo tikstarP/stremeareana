@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
+import { getQueueEntries, joinQueue } from '../lib/api';
 import type { QueueEntry } from '../types';
 
 export default function QueuePanel({ roomId }: { roomId?: number }) {
@@ -17,9 +18,8 @@ export default function QueuePanel({ roomId }: { roomId?: number }) {
   const fetchQueue = useCallback(async () => {
     if (!roomId) return;
     try {
-      const url = `/api/queue?roomId=${roomId}`;
-      const res = await fetch(url);
-      if (res.ok) setQueue(await res.json());
+      const data = await getQueueEntries(roomId);
+      setQueue(data);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }, [roomId]);
@@ -40,25 +40,18 @@ export default function QueuePanel({ roomId }: { roomId?: number }) {
     if (!roomId) { addToast({ message: 'Room not ready', type: 'error' }); return; }
     setJoining(true);
     try {
-      const res = await fetch('/api/queue', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          room_id: roomId, user_id: user.id,
-          username: profile?.username || user.email?.split('@')[0],
-          avatar_url: profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`,
-          type: tab,
-        }),
+      await joinQueue({
+        room_id: roomId, user_id: user.id,
+        username: profile?.username || user.email?.split('@')[0],
+        avatar_url: profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`,
+        type: tab,
       });
-      if (res.ok) {
-        await refreshProfile();
-        addToast({ message: `Joined ${tab} queue!`, type: 'success' });
-        fetchQueue();
-      } else {
-        const err = await res.json();
-        addToast({ message: err.error || 'Failed to join', type: 'error' });
-      }
-    } catch { addToast({ message: 'Network error', type: 'error' }); }
+      await refreshProfile();
+      addToast({ message: `Joined ${tab} queue!`, type: 'success' });
+      fetchQueue();
+    } catch (err: unknown) {
+      addToast({ message: err instanceof Error ? err.message : 'Failed to join', type: 'error' });
+    }
     finally { setJoining(false); }
   };
 

@@ -6,6 +6,7 @@ import MoltenBackground from '../components/MoltenBackground';
 import Toast from '../components/Toast';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../contexts/AuthContext';
+import { getRoomByCode, updateRoom, updateArtSubmission, deleteArtSubmission, createOverlayEvent, sendChatMessage } from '../lib/api';
 import StudioTopBar from '../components/studio/StudioTopBar';
 import StudioLivePreview from '../components/studio/StudioLivePreview';
 import StudioRoomSetup from '../components/studio/StudioRoomSetup';
@@ -43,7 +44,7 @@ export default function StreamerStudio() {
   const { roomCode } = useParams();
   const navigate = useNavigate();
   const { addToast } = useApp();
-  const { user, session } = useAuth();
+  const { user } = useAuth();
   const code = roomCode || '';
   const overlayUrl = `${window.location.origin}/overlay/${code}`;
 
@@ -100,11 +101,10 @@ export default function StreamerStudio() {
     }
     setRoomLoading(true);
     setRoomError('');
-    fetch(`/api/rooms?code=${encodeURIComponent(code)}`)
-      .then(res => res.json())
+    getRoomByCode(code)
       .then(data => {
-        if (!data || data.error) {
-          setRoomError(data?.error || 'Room not found');
+        if (!data) {
+          setRoomError('Room not found');
           return;
         }
         const r = data as RoomData;
@@ -133,14 +133,10 @@ export default function StreamerStudio() {
     setEndConfirmOpen(false);
     setShowEnded(true);
     if (room) {
-      fetch('/api/rooms', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ id: room.id, is_live: false, status: 'ended' }),
-      }).catch(() => {});
+      updateRoom(room.id, { is_live: false, status: 'ended' } as any).catch(() => {});
     }
     addToast({ message: `Stream ended. ${totalHeld} coins returned.`, type: 'info' });
-  }, [lobbyPlayers, addToast, room, session]);
+  }, [lobbyPlayers, addToast, room]);
 
   const handleStartSelection = useCallback((config: SelectionConfig) => {
     setSelectionActive(true);
@@ -148,11 +144,7 @@ export default function StreamerStudio() {
     setMainGame(config.mainGame);
     setStatus('live');
     if (room) {
-      fetch('/api/rooms', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ id: room.id, status: 'selection' }),
-      }).catch(() => {});
+      updateRoom(room.id, { status: 'selection' } as any).catch(() => {});
     }
     if (!smartSelectionNotified.current) {
       smartSelectionNotified.current = true;
@@ -163,20 +155,16 @@ export default function StreamerStudio() {
       addToast({ message: 'Safe Coin Hold is always on. Coins held when entering priority, spent only if selected, returned otherwise.', type: 'info' });
     }
     addToast({ message: `${config.selectionMethod} started for ${config.mainGame}!`, type: 'success' });
-  }, [addToast, room, session]);
+  }, [addToast, room]);
 
   const handleResetSelection = useCallback(() => {
     setSelectionActive(false);
     setSelectionConfig(null);
     if (room) {
-      fetch('/api/rooms', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ id: room.id, status: 'queue_open' }),
-      }).catch(() => {});
+      updateRoom(room.id, { status: 'queue_open' } as any).catch(() => {});
     }
     addToast({ message: 'Selection cancelled', type: 'info' });
-  }, [addToast, room, session]);
+  }, [addToast, room]);
 
   const handleSelectPlayer = useCallback((id: number) => {
     setLobbyPlayers(prev => prev.map(p => p.id === id ? { ...p, status: 'selected' as const } : p));
@@ -199,14 +187,10 @@ export default function StreamerStudio() {
 
   const handleStartGame = useCallback(() => {
     if (room) {
-      fetch('/api/rooms', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ id: room.id, status: 'playing' }),
-      }).catch(() => {});
+      updateRoom(room.id, { status: 'playing' } as any).catch(() => {});
     }
     addToast({ message: `${mainGame} started!`, type: 'success' });
-  }, [mainGame, addToast, room, session]);
+  }, [mainGame, addToast, room]);
 
   const handleAllowShoutout = useCallback((id: number) => {
     addToast({ message: 'Shoutout allowed and announced', type: 'success' });
@@ -384,11 +368,7 @@ export default function StreamerStudio() {
                   setVideoId(id);
                   setYoutubeUrl(`https://youtube.com/watch?v=${id}`);
                   if (room) {
-                    fetch('/api/rooms', {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-                      body: JSON.stringify({ id: room.id, video_id: id }),
-                    }).catch(() => {});
+                    updateRoom(room.id, { video_id: id } as any).catch(() => {});
                   }
                 }}
                 addToast={addToast}
@@ -422,11 +402,7 @@ export default function StreamerStudio() {
                     onUpdateStreamerMode={setStreamerMode}
                     onSave={() => {
                       if (room) {
-                        fetch('/api/rooms', {
-                          method: 'PUT',
-                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-                          body: JSON.stringify({ id: room.id, name: roomName, video_id: videoId, is_live: status === 'live' }),
-                        }).catch(() => {});
+                        updateRoom(room.id, { name: roomName, video_id: videoId, is_live: status === 'live' } as any).catch(() => {});
                       }
                       addToast({ message: 'Settings saved', type: 'success' });
                     }}
@@ -489,27 +465,27 @@ export default function StreamerStudio() {
                     onUpdateTheme={setFanDropTheme}
                     onApprove={async (id) => {
                       try {
-                        await fetch('/api/art', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status: 'approved' }) });
+                        await updateArtSubmission(id, { status: 'approved' });
                         addToast({ message: 'Approved', type: 'success' });
                       } catch { addToast({ message: 'Failed to approve', type: 'error' }); }
                     }}
                     onReject={async (id) => {
                       try {
-                        await fetch('/api/art', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status: 'rejected' }) });
+                        await updateArtSubmission(id, { status: 'rejected' });
                         addToast({ message: 'Rejected', type: 'error' });
                       } catch { addToast({ message: 'Failed to reject', type: 'error' }); }
                     }}
                     onDelete={async (id) => {
                       try {
-                        await fetch('/api/art', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+                        await deleteArtSubmission(id);
                         addToast({ message: 'Deleted', type: 'info' });
                       } catch { addToast({ message: 'Failed to delete', type: 'error' }); }
                     }}
                     onShowOnOverlay={async (id) => {
                       try {
-                        await fetch('/api/art', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status: 'showing' }) });
+                        await updateArtSubmission(id, { status: 'showing' });
                         if (room) {
-                          await fetch('/api/overlay-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room_id: room.id, event_type: 'fan_drop_show', event_data: { submission_id: id } }) });
+                          await createOverlayEvent({ room_id: room.id, event_type: 'fan_drop_show', event_data: { submission_id: id } });
                         }
                         addToast({ message: 'Showing on overlay', type: 'info' });
                       } catch { addToast({ message: 'Failed to show on overlay', type: 'error' }); }
@@ -520,7 +496,7 @@ export default function StreamerStudio() {
                       try {
                         const sub = pendingSubmissions.find(s => s.id === id);
                         if (sub && room) {
-                          await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room_id: room.id, user_id: 'ai-host', username: '🤖 AI Host', message: `[AI] ${sub.preview}`, color: '#a78bfa', is_super: false }) });
+                          await sendChatMessage({ room_id: room.id, user_id: 'ai-host', username: '🤖 AI Host', message: `[AI] ${sub.preview}`, color: '#a78bfa', is_super: false });
                           addToast({ message: 'AI reading submission aloud', type: 'info' });
                         }
                       } catch { addToast({ message: 'AI read failed', type: 'error' }); }
@@ -562,7 +538,7 @@ export default function StreamerStudio() {
                           <button key={alert} onClick={async () => {
                             if (!room) return;
                             try {
-                              await fetch('/api/overlay-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room_id: room.id, event_type: alert.toLowerCase().replace(/\s+/g, '_'), event_data: {} }) });
+                              await createOverlayEvent({ room_id: room.id, event_type: alert.toLowerCase().replace(/\s+/g, '_'), event_data: {} });
                               addToast({ message: `${alert} sent to overlay!`, type: 'info' });
                             } catch { addToast({ message: `${alert} failed`, type: 'error' }); }
                           }}
@@ -645,7 +621,7 @@ export default function StreamerStudio() {
                     onSpeak={async (msg) => {
                       try {
                         if (room) {
-                          await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room_id: room.id, user_id: 'ai-host', username: '🤖 AI Host', message: `[AI] ${msg}`, color: '#a78bfa', is_super: false }) });
+                          await sendChatMessage({ room_id: room.id, user_id: 'ai-host', username: '🤖 AI Host', message: `[AI] ${msg}`, color: '#a78bfa', is_super: false });
                           addToast({ message: `AI: "${msg}"`, type: 'info' });
                         }
                       } catch { addToast({ message: 'AI speak failed', type: 'error' }); }

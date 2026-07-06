@@ -3,6 +3,7 @@ import { TrendingUp, Flame } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
+import { getLeaderboard } from '../lib/api';
 import { Skeleton } from './Skeleton';
 import type { LeaderboardEntry } from '../types';
 
@@ -17,8 +18,8 @@ export default function Leaderboard() {
     const fetchLeaderboard = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/leaderboard?period=${period}`);
-        if (res.ok) setEntries(await res.json());
+        const data = await getLeaderboard(period);
+        setEntries(data);
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     };

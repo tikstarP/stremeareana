@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { TrendingUp, Flame, Trophy, ArrowLeft, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getLeaderboard } from '../lib/api';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import { Skeleton } from '../components/Skeleton';
@@ -31,7 +32,7 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/leaderboard?period=${period}`).then(r => r.json()).then(data => setEntries(data)).catch(() => setEntries([])).finally(() => setLoading(false));
+    getLeaderboard(period).then(data => setEntries(data)).catch(() => setEntries([])).finally(() => setLoading(false));
   }, [period]);
 
   const totalPlayers = entries.length;

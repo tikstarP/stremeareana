@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowLeft, Zap, Eye, EyeOff, Bug } from 'lucide-react';
 import supabase from '../lib/supabase';
+import { upsertProfile } from '../lib/api';
 import { enableDemoLogin } from '../contexts/AuthContext';
 import MoltenBackground from '../components/MoltenBackground';
 import Toast from '../components/Toast';
@@ -27,11 +28,7 @@ export default function LoginPage() {
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         if (data.user) {
-          await fetch('/api/auth-callback', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: data.user.id, email }),
-          });
+          await upsertProfile(data.user.id, email);
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });

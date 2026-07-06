@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
+import { createRoom } from '../lib/api';
 
 const templates = [
   { label: 'BGMI Battle', icon: Crosshair, name: 'BGMI Battle Royale', desc: 'Classic BGMI tournament — queue up, drop in, and fight for the winner spot.' },
@@ -31,19 +32,12 @@ export default function CreateRoomPage() {
     if (!user) { addToast({ message: 'Sign in to create a room', type: 'warning' }); navigate('/login'); return; }
     setLoading(true);
     try {
-      const res = await fetch('/api/rooms', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ name, description }),
-      });
-      const room = await res.json();
-      if (res.ok) {
-        setCreatedRoom(room);
-        addToast({ message: 'Room created!', type: 'success' });
-      } else {
-        addToast({ message: room.error || 'Failed to create', type: 'error' });
-      }
-    } catch { addToast({ message: 'Network error', type: 'error' }); }
+      const room = await createRoom(name, description);
+      setCreatedRoom(room);
+      addToast({ message: 'Room created!', type: 'success' });
+    } catch (err: unknown) {
+      addToast({ message: err instanceof Error ? err.message : 'Failed to create', type: 'error' });
+    }
     finally { setLoading(false); }
   };
 

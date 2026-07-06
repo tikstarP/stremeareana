@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useLivePlayer } from '../contexts/LivePlayerContext';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
+import { getRoomByCode, getChatMessages, sendChatMessage } from '../lib/api';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import MobileHeader from '../components/MobileHeader';
@@ -63,7 +64,7 @@ export default function LiveRoomPage() {
 
   useEffect(() => {
     if (!roomCode) return;
-    fetch(`/api/rooms?code=${roomCode}`).then(r => r.json()).then(data => {
+    getRoomByCode(roomCode).then(data => {
       if (data?.id) setRoom(data);
       else throw new Error('Room not found');
     }).catch(() => {
@@ -81,7 +82,7 @@ export default function LiveRoomPage() {
   useEffect(() => {
     if (!roomCode) return;
     const i = setInterval(() => {
-      fetch(`/api/rooms?code=${roomCode}`).then(r => r.json()).then(data => {
+      getRoomByCode(roomCode).then(data => {
         if (data?.id) setRoom(data);
       }).catch(() => {});
     }, 10000);
@@ -599,12 +600,9 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
       return;
     }
     try {
-      const res = await fetch(`/api/chat?roomId=${roomId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data);
-        setFetchedOnce(true);
-      }
+      const data = await getChatMessages(roomId);
+      setMessages(data);
+      setFetchedOnce(true);
     } catch { /* silent */ }
     finally { setLoading(false); }
   }, [roomId]);
@@ -625,29 +623,23 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
     if ((profile?.coins ?? 0) < 5) { addToast?.({ message: 'Need 5 coins for AI announcement', type: 'error' }); return; }
     if (!roomId) return;
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          room_id: roomId, user_id: user.id,
-          username: profile?.username || user.email?.split('@')[0],
-          message: `🤖 ${aiText}`, amount: 5, color: '#a78bfa', is_super: false,
-        }),
+      await sendChatMessage({
+        room_id: roomId, user_id: user.id,
+        username: profile?.username || user.email?.split('@')[0],
+        message: `🤖 ${aiText}`, amount: 5, color: '#a78bfa', is_super: false,
       });
-      if (res.ok) {
-        setAiText('');
-        setShowAI(false);
-        await refreshProfile?.();
-        addToast?.({ message: 'AI announcement sent!', type: 'success' });
-        if ('speechSynthesis' in window) {
-          const u = new SpeechSynthesisUtterance(aiText);
-          u.rate = selectedVoice.rate;
-          u.pitch = selectedVoice.pitch;
-          u.voice = speechSynthesis.getVoices().find(v => v.name === selectedVoice.id) || null;
-          window.speechSynthesis.speak(u);
-        }
-        fetchMessages();
+      setAiText('');
+      setShowAI(false);
+      await refreshProfile?.();
+      addToast?.({ message: 'AI announcement sent!', type: 'success' });
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(aiText);
+        u.rate = selectedVoice.rate;
+        u.pitch = selectedVoice.pitch;
+        u.voice = speechSynthesis.getVoices().find(v => v.name === selectedVoice.id) || null;
+        window.speechSynthesis.speak(u);
       }
+      fetchMessages();
     } catch { addToast?.({ message: 'AI announcement failed', type: 'error' }); }
   };
 
@@ -657,35 +649,25 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
     if (isSuper && (profile?.coins ?? 0) < 10) { addToast?.({ message: 'Need 10 coins for Super Chat', type: 'error' }); return; }
     if (!roomId) return;
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          room_id: roomId, user_id: user.id,
-          username: profile?.username || user.email?.split('@')[0],
-          message, amount: isSuper ? 10 : 0,
-          color: isSuper ? '#FFB000' : '#FFF2DD', is_super: isSuper,
-        }),
+      await sendChatMessage({
+        room_id: roomId, user_id: user.id,
+        username: profile?.username || user.email?.split('@')[0],
+        message, amount: isSuper ? 10 : 0,
+        color: isSuper ? '#FFB000' : '#FFF2DD', is_super: isSuper,
       });
-      if (res.ok) {
-        setMessage('');
-        if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); }
-        fetchMessages();
-      }
+      setMessage('');
+      if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); }
+      fetchMessages();
     } catch { addToast?.({ message: 'Send failed', type: 'error' }); }
   };
 
   const sendEmoji = async (emoji: string) => {
     if (!user || !roomId) return;
     try {
-      await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          room_id: roomId, user_id: user.id,
-          username: profile?.username || user.email?.split('@')[0],
-          message: emoji, amount: 0, color: '#FF5A1F', is_super: false,
-        }),
+      await sendChatMessage({
+        room_id: roomId, user_id: user.id,
+        username: profile?.username || user.email?.split('@')[0],
+        message: emoji, amount: 0, color: '#FF5A1F', is_super: false,
       });
       fetchMessages();
     } catch { /* silent */ }

@@ -3,6 +3,7 @@ import { Timer, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
+import { submitScore } from '../lib/api';
 
 const quizQuestions = [
   { question: 'Capital of Japan?', options: ['Beijing', 'Seoul', 'Tokyo', 'Bangkok'], correct: 2 },
@@ -40,14 +41,10 @@ export default function GameArena({ roomId }: { roomId?: number }) {
   const saveScore = useCallback(async (finalScore: number, gameType: string) => {
     if (!user) return;
     try {
-      await fetch('/api/games', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          room_id: roomId || 1, user_id: user.id,
-          username: profile?.username || user.email?.split('@')[0],
-          game_type: gameType, score: finalScore,
-        }),
+      await submitScore({
+        room_id: roomId || 1, user_id: user.id,
+        username: profile?.username || user.email?.split('@')[0],
+        game_type: gameType, score: finalScore,
       });
       refreshProfile();
     } catch (err) { console.error('Save score error:', err); }

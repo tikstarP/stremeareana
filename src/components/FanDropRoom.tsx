@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
+import { getArtSubmissions } from '../lib/api';
 import type { ArtSubmission } from '../types';
 
 const stickers = [
@@ -137,12 +138,8 @@ export default function FanDropRoom({ roomId, isHost, onStateChange }: { roomId?
   const fetchGallery = async () => {
     try {
       if (!roomId) return;
-      const url = `/api/art?roomId=${roomId}`;
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        setGallery(data.filter((a: ArtSubmission) => a.status === 'approved'));
-      }
+      const data = await getArtSubmissions(roomId);
+      setGallery(data.filter((a: ArtSubmission) => a.status === 'approved'));
     } catch { console.warn('Failed to fetch gallery'); }
     finally { setLoading(false); }
   };

@@ -7,9 +7,10 @@ import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
+import { updateProfile } from '../lib/api';
 
 export default function SettingsPage() {
-  const { user, session, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const { profile, refreshProfile, addToast } = useApp();
   const navigate = useNavigate();
   const [username, setUsername] = useState(profile?.username || '');
@@ -21,19 +22,11 @@ export default function SettingsPage() {
     if (!user || !username.trim()) return;
     setSaving(true);
     try {
-      const res = await fetch('/api/profiles', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ username: username.trim() }),
-      });
-      if (res.ok) {
-        await refreshProfile();
-        addToast({ message: 'Profile updated!', type: 'success' });
-      } else {
-        addToast({ message: 'Failed to update', type: 'error' });
-      }
+      await updateProfile(user.id, { username: username.trim() });
+      await refreshProfile();
+      addToast({ message: 'Profile updated!', type: 'success' });
     } catch {
-      addToast({ message: 'Network error', type: 'error' });
+      addToast({ message: 'Failed to update', type: 'error' });
     } finally {
       setSaving(false);
     }
