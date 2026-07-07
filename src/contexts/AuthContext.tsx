@@ -7,10 +7,10 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  loginAsDemo: () => void;
+  loginAsDemo: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, session: null, loading: true, signOut: async () => {}, loginAsDemo: () => {} });
+const AuthContext = createContext<AuthContextType>({ user: null, session: null, loading: true, signOut: async () => {}, loginAsDemo: async () => {} });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => getSavedDemoUser());
@@ -44,10 +44,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
   };
 
-  const loginAsDemo = () => {
+  const loginAsDemo = async () => {
+    const email = 'demo@streamarena.com';
+    const password = 'demo123456';
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error && data?.user) {
+        localStorage.removeItem('fdemo_user');
+        return;
+      }
+    } catch { /* fall through */ }
+
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (!error && data?.user) {
+        localStorage.removeItem('fdemo_user');
+        return;
+      }
+    } catch { /* fall through */ }
+
     const demo: User = {
       id: 'demo-user-001',
-      email: 'demo@streamarena.com',
+      email,
       app_metadata: {},
       user_metadata: {},
       aud: 'authenticated',

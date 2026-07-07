@@ -138,10 +138,10 @@ export default function LoginPage() {
               </motion.button>
             </form>
 
-            <button onClick={() => { loginAsDemo(); navigate('/streamer'); }}
+            <button onClick={async () => { await loginAsDemo(); navigate('/streamer'); }}
               className="w-full py-2.5 rounded-xl bg-arcade-yellow/5 border border-arcade-yellow/20 text-arcade-yellow text-xs font-bold hover:bg-arcade-yellow/10 transition-colors flex items-center justify-center gap-2 min-h-[44px] sm:min-h-auto mt-3"
             >
-              <Bug className="w-3.5 h-3.5" /> Demo Login (offline)
+              <Bug className="w-3.5 h-3.5" /> Demo Login
             </button>
 
             <p className="text-center text-sm text-text-muted mt-6">
