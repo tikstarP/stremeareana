@@ -43,8 +43,8 @@ export async function getLiveRooms(): Promise<RoomData[]> {
   return data || [];
 }
 
-export async function createRoom(name: string, description: string, userId: string): Promise<RoomData> {
-  const code = generateRoomCode();
+export async function createRoom(name: string, description: string, userId: string, code?: string): Promise<RoomData> {
+  if (!code) code = generateRoomCode();
   const { data: profile } = await supabase.from('profiles').select('username, avatar_url').eq('id', userId).maybeSingle();
   const { data, error } = await supabase.from('rooms').insert({
     code, name: name || 'Untitled Room', description: description || '',

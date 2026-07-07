@@ -81,7 +81,7 @@ export default function LiveRoomPage() {
       if (cancelled) return;
       if (user) {
         try {
-          const created = await createRoom(`Room ${roomCode}`, '', user.id);
+          const created = await createRoom(`Room ${roomCode}`, '', user.id, roomCode);
           if (!cancelled) setRoom(created);
           return;
         } catch { /* create failed */ }
