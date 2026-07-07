@@ -24,7 +24,7 @@ export function onTTSStatus(cb: (s: TTSStatus) => void) {
 export function getTTSStatus(): TTSStatus { return _status; }
 export function getLoadedVoices(): string[] { return _loadedVoices; }
 
-async function initTTS(): Promise<void> {
+export async function initTTS(): Promise<void> {
   if (ttsInstance) return;
   if (loadingPromise) return loadingPromise;
 
@@ -82,13 +82,6 @@ export const kokoroVoices: { id: string; label: string; lang: string }[] = [
   { id: 'am_michael', label: 'English US (Male)', lang: 'en' },
   { id: 'bf_emma', label: 'English UK (Female)', lang: 'en' },
   { id: 'bm_george', label: 'English UK (Male)', lang: 'en' },
-  { id: 'ef_dora', label: 'Spanish (Female)', lang: 'es' },
-  { id: 'em_alex', label: 'Spanish (Male)', lang: 'es' },
   { id: 'hf_alpha', label: 'Hindi (Female)', lang: 'hi' },
   { id: 'hm_omega', label: 'Hindi (Male)', lang: 'hi' },
-  { id: 'ff_siwis', label: 'French (Female)', lang: 'fr' },
-  { id: 'if_sara', label: 'Italian (Female)', lang: 'it' },
-  { id: 'pf_dora', label: 'Portuguese (Female)', lang: 'pt' },
-  { id: 'jf_alpha', label: 'Japanese (Female)', lang: 'ja' },
-  { id: 'zf_xiaobei', label: 'Chinese (Female)', lang: 'zh' },
 ];

@@ -21,7 +21,7 @@ import type { User } from '@supabase/supabase-js';
 import QueuePanel from '../components/QueuePanel';
 import GameArena from '../components/GameArena';
 import FanDropRoom from '../components/FanDropRoom';
-import { speak, kokoroVoices, onTTSStatus, getTTSStatus } from '../lib/tts';
+import { speak, initTTS, kokoroVoices, onTTSStatus, getTTSStatus } from '../lib/tts';
 import type { TTSStatus } from '../lib/tts';
 
 function hashId(s: string): number {
@@ -635,6 +635,8 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
   useEffect(() => {
     if (!loading && pinned) scrollToBottom();
   }, [loading]);
+
+  useEffect(() => { initTTS().catch(() => {}); }, []);
 
   useRealtimeSubscription('chat_messages', !isDemo && roomId ? { column: 'room_id', value: roomId } : undefined,
     (newMsg: ChatMessage) => {
