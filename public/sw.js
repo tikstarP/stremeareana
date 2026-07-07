@@ -1,9 +1,6 @@
-const CACHE = 'streamarena-v2';
+const CACHE = 'streamarena-v3';
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(['/'])));
-  self.skipWaiting();
-});
+self.addEventListener('install', () => self.skipWaiting());
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
@@ -15,6 +12,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request).then((r) => r || fetch(event.request)))
+    fetch(event.request)
+      .catch(() => caches.match(event.request))
+      .then(r => { if (r) return r; throw new Error('No network or cache'); })
   );
 });
