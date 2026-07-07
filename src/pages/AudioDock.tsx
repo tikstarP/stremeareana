@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, VolumeX, Headphones, Mic, Play, Activity, Wifi, WifiOff, Speaker, Bell, Radio, Zap } from 'lucide-react';
+import { Volume2, VolumeX, Headphones, Mic, Play, Activity, Wifi, WifiOff, Speaker, Bell, Radio, Zap, Loader2 } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
+import { speak, onTTSStatus, getTTSStatus, kokoroVoices } from '../lib/tts';
+import type { TTSStatus } from '../lib/tts';
 
 interface AudioSource {
   id: string;
@@ -27,6 +29,11 @@ export default function AudioDock() {
   const [levels] = useState(() => Array.from({ length: 12 }, () => Math.random() * 0.8 + 0.1));
   const animRef = useRef<number>(0);
   const barRef = useRef<HTMLDivElement>(null);
+  const [ttsStatus, setTtsStatus] = useState<TTSStatus>(getTTSStatus());
+
+  useEffect(() => {
+    return onTTSStatus(s => setTtsStatus(s));
+  }, []);
 
   useEffect(() => {
     const bars = barRef.current?.querySelectorAll('.audio-bar');
@@ -59,11 +66,7 @@ export default function AudioDock() {
   };
 
   const handleTestVoice = () => {
-    try {
-      const msg = new SpeechSynthesisUtterance('Welcome to the arena!');
-      msg.volume = effectiveVolume(sources[0]) / 100;
-      window.speechSynthesis.speak(msg);
-    } catch { console.warn('Audio not supported'); }
+    speak('Welcome to the arena!', kokoroVoices[0].id).catch(() => {});
   };
 
   const handleTestSound = () => {
@@ -159,9 +162,9 @@ export default function AudioDock() {
 
           {/* Test buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <motion.button whileTap={{ scale: 0.97 }} onClick={handleTestVoice}
-              className="min-h-[52px] rounded-xl bg-gradient-to-r from-arcade-purple/20 to-arcade-blue/20 border border-arcade-purple/30 text-arcade-purple text-xs font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2"
-            ><Mic className="w-4 h-4" /> Test Voice</motion.button>
+            <motion.button whileTap={{ scale: 0.97 }} onClick={handleTestVoice} disabled={ttsStatus === 'loading'}
+              className="min-h-[52px] rounded-xl bg-gradient-to-r from-arcade-purple/20 to-arcade-blue/20 border border-arcade-purple/30 text-arcade-purple text-xs font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+            >{ttsStatus === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />} {ttsStatus === 'loading' ? 'Loading...' : 'Test Voice'}</motion.button>
             <motion.button whileTap={{ scale: 0.97 }} onClick={handleTestSound}
               className="min-h-[52px] rounded-xl bg-gradient-to-r from-arcade-yellow/20 to-arcade-orange/20 border border-arcade-yellow/30 text-arcade-yellow text-xs font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2"
             ><Play className="w-4 h-4" /> Test Sound</motion.button>

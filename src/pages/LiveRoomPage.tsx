@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Volume2, VolumeX, Gamepad2, MessageSquare, Trophy, Coins, Hash, Share2, Heart, Play, Shield, ListOrdered, Sparkles, Clock, BadgeCheck, X, Copy, Sun, Moon, ArrowDown, Send, Star, Eye, Crown, Bot, Smartphone, UserPlus } from 'lucide-react';
+import { Users, Volume2, VolumeX, Gamepad2, MessageSquare, Trophy, Coins, Hash, Share2, Heart, Play, Shield, ListOrdered, Sparkles, Clock, BadgeCheck, X, Copy, Sun, Moon, ArrowDown, Send, Star, Eye, Crown, Bot, Smartphone, UserPlus, Mic } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useLivePlayer } from '../contexts/LivePlayerContext';
@@ -21,6 +21,8 @@ import type { User } from '@supabase/supabase-js';
 import QueuePanel from '../components/QueuePanel';
 import GameArena from '../components/GameArena';
 import FanDropRoom from '../components/FanDropRoom';
+import { speak, kokoroVoices, onTTSStatus, getTTSStatus } from '../lib/tts';
+import type { TTSStatus } from '../lib/tts';
 
 const roomStatuses = [
   { id: 'queue_open', label: 'Queue Open', icon: '📋', desc: 'Join the queue to play', color: 'text-arcade-blue', bg: 'bg-arcade-blue/10', border: 'border-arcade-blue/30' },
@@ -572,12 +574,12 @@ const demoMessages = [
   { id: -11, username: 'Sofia', message: 'just joined, hi everyone!', color: '#FFF2DD', is_super: false, created_at: new Date(Date.now() - 5000).toISOString() },
 ];
 
-const aiVoices = [
-  { id: 'en-US-Standard-F', label: '🎤 Female', pitch: 1.1, rate: 1 },
-  { id: 'en-US-Standard-D', label: '🎙️ Male', pitch: 0.9, rate: 1 },
-  { id: 'en-US-Standard-G', label: '🔥 Energetic', pitch: 1.3, rate: 1.2 },
-  { id: 'en-US-Standard-I', label: '🌙 Calm', pitch: 0.8, rate: 0.85 },
-];
+const aiVoices = kokoroVoices.map(v => ({ id: v.id, label: v.label }));
+
+function AIVoiceLabel({ voice }: { voice: { id: string; label: string } }) {
+  const icon = voice.id.startsWith('af') || voice.id.startsWith('bf') || voice.id.startsWith('ef') || voice.id.startsWith('hf') || voice.id.startsWith('ff') || voice.id.startsWith('if') || voice.id.startsWith('pf') || voice.id.startsWith('jf') || voice.id.startsWith('zf') ? '🎤' : '🎙️';
+  return <>{icon} {voice.label}</>;
+}
 
 function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomId: number | undefined; user: User | null; addToast: (t: { message: string; type: 'success' | 'error' | 'info' | 'warning' }) => void; profile: Profile | null; refreshProfile: () => Promise<void> }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -590,9 +592,13 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
   const scrollRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef(true);
   const [fetchedOnce, setFetchedOnce] = useState(false);
-  const [showAI, setShowAI] = useState(false);
-  const [aiText, setAiText] = useState('');
-  const [selectedVoice, setSelectedVoice] = useState(aiVoices[0]);
+  const [superVoice, setSuperVoice] = useState(aiVoices[0]);
+  const [showSuperVoice, setShowSuperVoice] = useState(false);
+  const [ttsStatus, setTtsStatus] = useState<TTSStatus>(getTTSStatus());
+
+  useEffect(() => {
+    return onTTSStatus(s => setTtsStatus(s));
+  }, []);
 
   const fetchMessages = useCallback(async () => {
     if (!roomId) {
@@ -614,34 +620,11 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
   }, [loading]);
 
   useRealtimeSubscription('chat_messages', roomId ? { column: 'room_id', value: roomId } : undefined,
-    (newMsg: ChatMessage) => { setMessages(prev => [...prev, newMsg]); },
+    (newMsg: ChatMessage) => {
+      setMessages(prev => [...prev, newMsg]);
+      if (newMsg.is_super) speak(newMsg.message, superVoice.id).catch(() => {});
+    },
   );
-
-  const sendAIMessage = async () => {
-    if (!aiText.trim()) return;
-    if (!user) { addToast?.({ message: 'Sign in to use AI Voice', type: 'warning' }); return; }
-    if ((profile?.coins ?? 0) < 5) { addToast?.({ message: 'Need 5 coins for AI announcement', type: 'error' }); return; }
-    if (!roomId) return;
-    try {
-      await sendChatMessage({
-        room_id: roomId, user_id: user.id,
-        username: profile?.username || user.email?.split('@')[0],
-        message: `🤖 ${aiText}`, amount: 5, color: '#a78bfa', is_super: false,
-      });
-      setAiText('');
-      setShowAI(false);
-      await refreshProfile?.();
-      addToast?.({ message: 'AI announcement sent!', type: 'success' });
-      if ('speechSynthesis' in window) {
-        const u = new SpeechSynthesisUtterance(aiText);
-        u.rate = selectedVoice.rate;
-        u.pitch = selectedVoice.pitch;
-        u.voice = speechSynthesis.getVoices().find(v => v.name === selectedVoice.id) || null;
-        window.speechSynthesis.speak(u);
-      }
-      fetchMessages();
-    } catch { addToast?.({ message: 'AI announcement failed', type: 'error' }); }
-  };
 
   const sendMessage = async (isSuper = false) => {
     if (!message.trim()) return;
@@ -656,7 +639,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
         color: isSuper ? '#FFB000' : '#FFF2DD', is_super: isSuper,
       });
       setMessage('');
-      if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); }
+      if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); speak(message, superVoice.id).catch(() => {}); }
       fetchMessages();
     } catch { addToast?.({ message: 'Send failed', type: 'error' }); }
   };
@@ -794,7 +777,6 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
       <div className={`px-3 py-1.5 flex items-center gap-2 text-[8px] justify-center flex-wrap ${darkFeed ? 'border-t border-arcade-pink/10 text-text-muted' : 'border-t border-gray-200 text-gray-400'}`}>
         <span className="flex items-center gap-1"><MessageSquare className="w-2.5 h-2.5 text-red-400" />Chat</span>
         <span className="flex items-center gap-1"><Star className="w-2.5 h-2.5 text-arcade-blue" />Super</span>
-        <span className="flex items-center gap-1"><Bot className="w-2.5 h-2.5 text-arcade-purple" />AI</span>
       </div>
 
       {/* Chat input */}
@@ -809,33 +791,23 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
             className={`flex-1 rounded-xl px-3 py-2 text-sm placeholder:text-text-muted focus:outline-none ${darkFeed ? 'bg-white/[0.04] border border-white/[0.08] text-text-primary focus:border-arcade-pink/40' : 'bg-gray-100 border border-gray-200 text-gray-900 focus:border-arcade-pink'}`} />
           <button onClick={() => sendMessage()} aria-label="Send message" className="min-h-[36px] min-w-[36px] p-2 rounded-lg bg-arcade-blue/20 text-arcade-blue hover:bg-arcade-blue/30"><Send className="w-4 h-4" /></button>
           <button onClick={() => sendMessage(true)} className="min-h-[36px] px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-arcade-blue to-arcade-pink text-white text-[10px] font-bold hover:opacity-90">Super</button>
-          <button onClick={() => setShowAI(p => !p)}
-            className={`min-h-[36px] px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${showAI ? 'bg-arcade-purple text-white' : darkFeed ? 'bg-arcade-purple/15 text-arcade-purple border border-arcade-purple/30 hover:bg-arcade-purple/25' : 'bg-purple-100 text-purple-700 border border-purple-300 hover:bg-purple-200'}`}
-          ><Bot className="w-3 h-3 inline mr-1" />AI</button>
+          <button onClick={() => setShowSuperVoice(p => !p)}
+            className={`min-h-[36px] px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all ${showSuperVoice ? 'bg-arcade-purple text-white' : darkFeed ? 'bg-white/[0.05] border border-white/[0.1] text-neutral-400 hover:text-text-primary' : 'bg-white border border-gray-200 text-gray-600 hover:text-gray-900'}`}
+          ><Mic className="w-3 h-3 inline mr-1" />Voice</button>
         </div>
 
-        {/* AI Announcement Panel */}
         <AnimatePresence>
-          {showAI && (
+          {showSuperVoice && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-              <div className={`p-3 rounded-xl space-y-3 ${darkFeed ? 'bg-arcade-purple/5 border border-arcade-purple/20' : 'bg-purple-50 border border-purple-200'}`}>
-                <div className="flex items-center gap-2">
-                  <Bot className={`w-4 h-4 ${darkFeed ? 'text-arcade-purple' : 'text-purple-600'}`} />
-                  <span className={`text-xs font-semibold ${darkFeed ? 'text-text-primary' : 'text-gray-900'}`}>AI Announcement</span>
-                  <span className="text-[10px] text-neutral-400">5 🎲</span>
-                </div>
-                <textarea value={aiText} onChange={e => setAiText(e.target.value)} placeholder="Type what the AI should announce..."
-                  rows={2} className={`w-full rounded-xl px-3 py-2 text-sm resize-none focus:outline-none ${darkFeed ? 'bg-white/[0.04] border border-white/[0.08] text-text-primary placeholder:text-text-muted focus:border-arcade-purple/40' : 'bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-arcade-purple'}`} />
-                <div className="flex gap-1.5 flex-wrap">
-                  {aiVoices.map(v => (
-                    <button key={v.id} onClick={() => setSelectedVoice(v)}
-                      className={`min-h-[32px] px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${selectedVoice.id === v.id ? 'bg-arcade-purple text-white' : darkFeed ? 'bg-white/[0.05] border border-white/[0.1] text-neutral-300 hover:text-text-primary' : 'bg-white border border-gray-200 text-gray-600 hover:text-gray-900'}`}
-                    >{v.label}</button>
+              <div className={`p-2 rounded-xl ${darkFeed ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-gray-50 border border-gray-200'}`}>
+                {ttsStatus === 'loading' && <div className="text-[10px] text-arcade-purple text-center pb-1">Downloading voice model...</div>}
+                <div className="flex gap-1 flex-wrap">
+                  {aiVoices.slice(0, 6).map(v => (
+                    <button key={v.id} onClick={() => setSuperVoice(v)}
+                      className={`min-h-[28px] px-2 py-0.5 rounded-lg text-[9px] font-bold transition-all ${superVoice.id === v.id ? 'bg-arcade-blue text-white' : darkFeed ? 'bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-text-primary' : 'bg-white border border-gray-200 text-gray-600 hover:text-gray-900'}`}
+                    ><AIVoiceLabel voice={v} /></button>
                   ))}
                 </div>
-                <button onClick={sendAIMessage} disabled={!aiText.trim() || (profile?.coins ?? 0) < 5}
-                  className="w-full min-h-[36px] rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-pink text-white text-xs font-bold hover:opacity-90 disabled:opacity-30 flex items-center justify-center gap-2"
-                ><Bot className="w-3.5 h-3.5" /> Announce (5 🎲)</button>
               </div>
             </motion.div>
           )}
