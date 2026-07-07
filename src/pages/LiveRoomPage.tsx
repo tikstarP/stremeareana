@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useLivePlayer } from '../contexts/LivePlayerContext';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
-import { getRoomByCode, getChatMessages, sendChatMessage } from '../lib/api';
+import { getRoomByCode, getChatMessages, sendChatMessage, createRoom } from '../lib/api';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import MobileHeader from '../components/MobileHeader';
@@ -72,14 +72,27 @@ export default function LiveRoomPage() {
 
   useEffect(() => {
     if (!roomCode) return;
-    getRoomByCode(roomCode).then(data => {
-      if (data?.id) setRoom(data);
-      else throw new Error('Room not found');
-    }).catch(() => {
-      setRoom({ id: -(hashId(roomCode)), code: roomCode, name: 'Live Room', host_id: '', host_name: 'Streamer', host_avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer', is_live: true, viewer_count: 0, video_id: '', status: 'queue_open' });
-      addToast({ message: 'Could not load room data — showing demo stream', type: 'info' });
-    });
-  }, [roomCode]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const existing = await getRoomByCode(roomCode);
+        if (existing?.id) { if (!cancelled) setRoom(existing); return; }
+      } catch { /* not found */ }
+      if (cancelled) return;
+      if (user) {
+        try {
+          const created = await createRoom(`Room ${roomCode}`, '', user.id);
+          if (!cancelled) setRoom(created);
+          return;
+        } catch { /* create failed */ }
+      }
+      if (!cancelled) {
+        setRoom({ id: -(hashId(roomCode)), code: roomCode, name: 'Live Room', host_id: '', host_name: 'Streamer', host_avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer', is_live: true, viewer_count: 0, video_id: '', status: 'queue_open' });
+        addToast({ message: 'Room not found — showing demo', type: 'info' });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [roomCode, user]);
 
   useEffect(() => {
     const interval = setInterval(() => setCountdown(prev => prev <= 1 ? 60 : prev - 1), 1000);
