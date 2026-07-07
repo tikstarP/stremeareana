@@ -1,21 +1,42 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowLeft, Zap, Eye, EyeOff, Bug } from 'lucide-react';
+import { Mail, Lock, ArrowLeft, Zap, Eye, EyeOff, Bug, KeyRound } from 'lucide-react';
 import supabase from '../lib/supabase';
 import { upsertProfile } from '../lib/api';
-import { enableDemoLogin } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useApp } from '../context/AppContext';
+
 import MoltenBackground from '../components/MoltenBackground';
 import Toast from '../components/Toast';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { loginAsDemo } = useAuth();
+  const { addToast } = useApp();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showForgot, setShowForgot] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  const handleForgotPassword = async (email: string) => {
+    if (!email) { setError('Enter your email first'); return; }
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setResetSent(true);
+      setShowForgot(false);
+      addToast({ message: 'Check your email for the reset link', type: 'success' });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to send reset email');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,6 +108,28 @@ export default function LoginPage() {
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+
+              {!isSignUp && !showForgot && (
+                <button type="button" onClick={() => setShowForgot(true)} className="text-xs text-arcade-yellow/70 hover:text-arcade-yellow transition-colors -mt-2">
+                  Forgot password?
+                </button>
+              )}
+
+              {showForgot && !resetSent && (
+                <div className="flex gap-2">
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Enter your email"
+                    className="flex-1 bg-bg-secondary border border-arcade-pink/10 rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-yellow/50 transition-all"
+                  />
+                  <button type="button" onClick={() => handleForgotPassword(email)} className="px-4 py-2.5 rounded-xl bg-arcade-yellow/10 border border-arcade-yellow/30 text-arcade-yellow text-xs font-semibold hover:bg-arcade-yellow/20 transition-colors flex items-center gap-1">
+                    <KeyRound className="w-3.5 h-3.5" /> Send
+                  </button>
+                </div>
+              )}
+
+              {resetSent && (
+                <p className="text-xs text-arcade-green text-center">Reset link sent! Check your email.</p>
+              )}
+
               <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-arcade-pink to-arcade-blue text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px] sm:min-h-auto"
               >
@@ -95,7 +138,7 @@ export default function LoginPage() {
               </motion.button>
             </form>
 
-            <button onClick={() => { const u = enableDemoLogin(); if (u) navigate('/streamer'); }}
+            <button onClick={() => { loginAsDemo(); navigate('/streamer'); }}
               className="w-full py-2.5 rounded-xl bg-arcade-yellow/5 border border-arcade-yellow/20 text-arcade-yellow text-xs font-bold hover:bg-arcade-yellow/10 transition-colors flex items-center justify-center gap-2 min-h-[44px] sm:min-h-auto mt-3"
             >
               <Bug className="w-3.5 h-3.5" /> Demo Login (offline)
