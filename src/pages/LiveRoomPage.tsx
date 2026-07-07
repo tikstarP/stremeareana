@@ -194,9 +194,9 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
 
   return (
     <div ref={scrollRef} className="h-[calc(100vh-72px)] overflow-y-auto no-scrollbar">
-      <YouTubePlayer videoId={videoId} />
       <div className="grid grid-cols-12 gap-5 px-5 pt-4 pb-5">
         <div className="col-span-7 xl:col-span-8 space-y-3 pb-8 flex flex-col">
+          <YouTubePlayer videoId={videoId} />
           <StreamerProfile roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} isHost={isHost} />
           <QueueBanner roomStatus={roomStatus} roomCode={roomCode} user={user} addToast={addToast} />
           <ViewerFeed roomId={roomId} user={user} addToast={addToast} profile={profile} refreshProfile={refreshProfile} />
