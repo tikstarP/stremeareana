@@ -348,30 +348,12 @@ function TabButton({ id, label, icon: Icon, active, onClick }: { id: string; lab
 }
 
 function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, setFanDropState, videoId, profile, refreshProfile, isHost }: MobileContentProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const videoWrapperRef = useRef<HTMLDivElement>(null);
-  const [minimized, setMinimized] = useState(false);
-  const [miniMuted, setMiniMuted] = useState(true);
-  const [miniStarted, setMiniStarted] = useState(false);
-
-  useEffect(() => {
-    const container = scrollRef.current;
-    const videoWrapper = videoWrapperRef.current;
-    if (!container || !videoWrapper) return;
-    const handleScroll = () => {
-      const rect = videoWrapper.getBoundingClientRect();
-      setMinimized(rect.bottom < 60);
-    };
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
-    <div ref={scrollRef} className="h-full overflow-y-auto no-scrollbar">
-        <div ref={videoWrapperRef} className={`sticky top-0 z-10 bg-bg-primary transition-all duration-500 ${minimized ? 'h-0 overflow-hidden opacity-0 pointer-events-none' : ''}`}>
-          <YouTubePlayer videoId={videoId} />
-        </div>
-      <div className={`px-3 ${minimized ? 'pb-[140px]' : 'pb-20'}`}>
+    <div className="h-full overflow-y-auto no-scrollbar">
+      <div className="sticky top-0 z-10 bg-bg-primary">
+        <YouTubePlayer videoId={videoId} />
+      </div>
+      <div className="px-3 pb-20">
         <AnimatePresence mode="wait">
           {mobileTab === 'stream' && (
             <motion.div key="stream" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3 pb-4">
@@ -413,57 +395,6 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
 
         </AnimatePresence>
       </div>
-
-      <AnimatePresence>
-        {minimized && (
-          <motion.div
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 80, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed left-0 right-0 z-50 bg-black/95 border-t border-white/[0.08] backdrop-blur-xl"
-            style={{ height: 80, bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
-          >
-            <div className="flex items-center gap-3 h-full px-3">
-              <div className="relative shrink-0 rounded-lg overflow-hidden bg-black border border-white/[0.06]" style={{ width: 128, height: 72 }}>
-                {miniStarted ? (
-                  <iframe
-                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${miniMuted ? 1 : 0}&rel=0&controls=0`}
-                    className="w-full h-full pointer-events-none"
-                    allow="autoplay"
-                    title="mini"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <button onClick={() => setMiniStarted(true)}>
-                      <Play className="w-4 h-4 text-neutral-400" />
-                    </button>
-                  </div>
-                )}
-                <div className="absolute top-0.5 left-0.5 px-1 py-0.5 rounded bg-red-500/80 text-[7px] font-bold text-white leading-none">LIVE</div>
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-white truncate">{streamTitle || 'Live Stream'}</p>
-                <p className="text-[10px] text-neutral-400">@{roomCode} • {viewerCount || 0} watching</p>
-              </div>
-              <button
-                onClick={() => { setMiniMuted(!miniMuted); if (!miniStarted) setMiniStarted(true); }}
-                aria-label={miniMuted ? 'Unmute mini player' : 'Mute mini player'}
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 text-neutral-400 touch-manipulation"
-              >
-                {miniMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-              </button>
-              <button
-                onClick={() => setMinimized(false)}
-                aria-label="Close mini player"
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 text-neutral-400 touch-manipulation"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

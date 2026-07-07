@@ -3,7 +3,7 @@ import { Play, Volume2, VolumeX, PictureInPicture2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function YouTubePlayer({ videoId = '' }: { videoId?: string }) {
-  const [pip, setPip] = useState(true);
+  const [pip, setPip] = useState(false);
   const [muted, setMuted] = useState(true);
   const [started, setStarted] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
