@@ -24,6 +24,12 @@ import FanDropRoom from '../components/FanDropRoom';
 import { speak, kokoroVoices, onTTSStatus, getTTSStatus } from '../lib/tts';
 import type { TTSStatus } from '../lib/tts';
 
+function hashId(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i), h |= 0;
+  return Math.abs(h) + 1;
+}
+
 const roomStatuses = [
   { id: 'queue_open', label: 'Queue Open', icon: '📋', desc: 'Join the queue to play', color: 'text-arcade-blue', bg: 'bg-arcade-blue/10', border: 'border-arcade-blue/30' },
   { id: 'quiz_active', label: 'Quiz Active', icon: '🎮', desc: 'Answer the quiz question', color: 'text-arcade-purple', bg: 'bg-arcade-purple/10', border: 'border-arcade-purple/30' },
@@ -70,7 +76,7 @@ export default function LiveRoomPage() {
       if (data?.id) setRoom(data);
       else throw new Error('Room not found');
     }).catch(() => {
-      setRoom({ id: null, code: roomCode, name: 'Live Room', host_id: '', host_name: 'Streamer', host_avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer', is_live: true, viewer_count: 0, video_id: '', status: 'queue_open' });
+      setRoom({ id: -(hashId(roomCode)), code: roomCode, name: 'Live Room', host_id: '', host_name: 'Streamer', host_avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer', is_live: true, viewer_count: 0, video_id: '', status: 'queue_open' });
       addToast({ message: 'Could not load room data — showing demo stream', type: 'info' });
     });
   }, [roomCode]);
@@ -595,12 +601,23 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
   const [superVoice, setSuperVoice] = useState(aiVoices[0]);
   const [showSuperVoice, setShowSuperVoice] = useState(false);
   const [ttsStatus, setTtsStatus] = useState<TTSStatus>(getTTSStatus());
+  const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
+  const localRef = useRef(localMessages);
+  localRef.current = localMessages;
+
+  const isDemo = roomId !== undefined && roomId < 0;
 
   useEffect(() => {
     return onTTSStatus(s => setTtsStatus(s));
   }, []);
 
   const fetchMessages = useCallback(async () => {
+    if (isDemo) {
+      setMessages([...localRef.current]);
+      setFetchedOnce(true);
+      setLoading(false);
+      return;
+    }
     if (!roomId) {
       setLoading(false);
       return;
@@ -611,7 +628,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
       setFetchedOnce(true);
     } catch { /* silent */ }
     finally { setLoading(false); }
-  }, [roomId]);
+  }, [roomId, isDemo]);
 
   useEffect(() => { fetchMessages(); }, [fetchMessages]);
 
@@ -619,7 +636,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
     if (!loading && pinned) scrollToBottom();
   }, [loading]);
 
-  useRealtimeSubscription('chat_messages', roomId ? { column: 'room_id', value: roomId } : undefined,
+  useRealtimeSubscription('chat_messages', !isDemo && roomId ? { column: 'room_id', value: roomId } : undefined,
     (newMsg: ChatMessage) => {
       setMessages(prev => [...prev, newMsg]);
       if (newMsg.is_super) speak(newMsg.message, superVoice.id).catch(() => {});
@@ -631,10 +648,31 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
     if (!user) { addToast?.({ message: 'Sign in to chat', type: 'warning' }); return; }
     if (isSuper && (profile?.coins ?? 0) < 10) { addToast?.({ message: 'Need 10 coins for Super Chat', type: 'error' }); return; }
     if (!roomId) return;
+
+    const msg: ChatMessage = {
+      id: -(Date.now()), room_id: roomId, user_id: user.id,
+      username: profile?.username || user.email?.split('@')[0] || 'Anonymous',
+      message, amount: isSuper ? 10 : 0,
+      color: isSuper ? '#FFB000' : '#FFF2DD', is_super: isSuper,
+      created_at: new Date().toISOString(),
+    };
+
+    if (isDemo) {
+      setLocalMessages(m => {
+        const next = [...m, msg];
+        localRef.current = next;
+        return next;
+      });
+      setMessage('');
+      if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); speak(message, superVoice.id).catch(() => {}); }
+      fetchMessages();
+      return;
+    }
+
     try {
       await sendChatMessage({
         room_id: roomId, user_id: user.id,
-        username: profile?.username || user.email?.split('@')[0],
+        username: profile?.username || user.email?.split('@')[0] || 'Anonymous',
         message, amount: isSuper ? 10 : 0,
         color: isSuper ? '#FFB000' : '#FFF2DD', is_super: isSuper,
       });
@@ -646,10 +684,28 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
 
   const sendEmoji = async (emoji: string) => {
     if (!user || !roomId) return;
+
+    const msg: ChatMessage = {
+      id: -(Date.now()), room_id: roomId, user_id: user.id,
+      username: profile?.username || user.email?.split('@')[0] || 'Anonymous',
+      message: emoji, amount: 0, color: '#FF5A1F', is_super: false,
+      created_at: new Date().toISOString(),
+    };
+
+    if (isDemo) {
+      setLocalMessages(m => {
+        const next = [...m, msg];
+        localRef.current = next;
+        return next;
+      });
+      fetchMessages();
+      return;
+    }
+
     try {
       await sendChatMessage({
         room_id: roomId, user_id: user.id,
-        username: profile?.username || user.email?.split('@')[0],
+        username: profile?.username || user.email?.split('@')[0] || 'Anonymous',
         message: emoji, amount: 0, color: '#FF5A1F', is_super: false,
       });
       fetchMessages();
