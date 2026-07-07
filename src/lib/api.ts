@@ -74,11 +74,11 @@ export async function getChatMessages(roomId: number, limit = 100): Promise<Chat
 }
 
 export async function sendChatMessage(msg: {
-  room_id: number; user_id: string; username: string; message: string;
+  room_id: number; user_id: string; username?: string; message: string;
   amount?: number; color?: string; is_super?: boolean;
 }): Promise<ChatMessage> {
   const { data, error } = await supabase.from('chat_messages').insert({
-    room_id: msg.room_id, user_id: msg.user_id, username: msg.username,
+    room_id: msg.room_id, user_id: msg.user_id, username: msg.username || 'Anonymous',
     message: msg.message, amount: msg.amount || 0,
     color: msg.color || '#FF5A1F', is_super: msg.is_super || false,
   }).select().single();
@@ -132,13 +132,14 @@ export async function getQueueEntries(roomId: number): Promise<QueueEntry[]> {
 }
 
 export async function joinQueue(entry: {
-  room_id: number; user_id: string; username: string; avatar_url: string; type?: string;
+  room_id: number; user_id: string; username?: string; avatar_url: string; type?: string;
 }): Promise<QueueEntry> {
   const { count } = await supabase
     .from('queue_entries').select('*', { count: 'exact', head: true }).eq('room_id', entry.room_id);
   const position = (count || 0) + 1;
   const { data, error } = await supabase.from('queue_entries').insert({
-    ...entry, type: entry.type || 'free', position,
+    room_id: entry.room_id, user_id: entry.user_id, username: entry.username || 'Anonymous',
+    avatar_url: entry.avatar_url, type: entry.type || 'free', position,
   }).select().single();
   if (error) throw error;
   return data;
@@ -150,10 +151,11 @@ export async function leaveQueue(id: number): Promise<void> {
 }
 
 export async function submitScore(score: {
-  room_id: number; user_id: string; username: string; game_type: string; score: number;
+  room_id: number; user_id: string; username?: string; game_type: string; score: number;
 }): Promise<void> {
+  const username = score.username || 'Anonymous';
   const { error } = await supabase.from('game_scores').insert({
-    room_id: score.room_id, user_id: score.user_id, username: score.username,
+    room_id: score.room_id, user_id: score.user_id, username,
     game_type: score.game_type, score: score.score || 0,
   }).select().single();
   if (error) throw error;
@@ -166,13 +168,13 @@ export async function submitScore(score: {
       total_points: existing.total_points + score.score,
       games_won: existing.games_won + won,
       streak: won ? existing.streak + 1 : 0,
-      username: score.username,
+      username,
     }).eq('id', existing.id);
   } else {
     await supabase.from('leaderboard_entries').insert({
-      user_id: score.user_id, username: score.username, total_points: score.score,
+      user_id: score.user_id, username, total_points: score.score,
       games_won: won, streak: won ? 1 : 0, period: 'all',
-      avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(score.username)}`,
+      avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`,
     });
   }
 
