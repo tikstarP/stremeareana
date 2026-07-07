@@ -52,29 +52,33 @@ async function rawAudioToBlob(audio: RawAudio): Promise<Blob> {
   return audio.toBlob();
 }
 
-let currentAudio: HTMLAudioElement | null = null;
+const queue: Array<() => Promise<void>> = [];
+let playing = false;
+
+async function tick(): Promise<void> {
+  if (playing || queue.length === 0) return;
+  playing = true;
+  const task = queue.shift()!;
+  try { await task(); } catch { /* silent */ }
+  playing = false;
+  tick();
+}
 
 export async function speak(text: string, voice: string = 'af_heart'): Promise<void> {
-  try {
+  queue.push(async () => {
     await initTTS();
     if (!ttsInstance) throw new Error('TTS not initialized');
-
     const audio = await ttsInstance.generate(text, { voice: voice as any, speed: 1 });
     const blob = await rawAudioToBlob(audio);
     const url = URL.createObjectURL(blob);
-
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-
     const el = new Audio(url);
-    currentAudio = el;
     el.play();
-
-    el.onended = () => { URL.revokeObjectURL(url); if (currentAudio === el) currentAudio = null; };
-    el.onerror = () => { URL.revokeObjectURL(url); if (currentAudio === el) currentAudio = null; };
-  } catch (err) {
-    console.error('TTS speak failed:', err);
-    throw err;
-  }
+    await new Promise<void>(done => {
+      el.onended = () => { URL.revokeObjectURL(url); done(); };
+      el.onerror = () => { URL.revokeObjectURL(url); done(); };
+    });
+  });
+  if (!playing) tick();
 }
 
 export const kokoroVoices: { id: string; label: string; lang: string }[] = [
