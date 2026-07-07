@@ -1,4 +1,4 @@
-import { KokoroTTS } from 'kokoro-js';
+import type { KokoroTTS } from 'kokoro-js';
 import type { RawAudio } from '@huggingface/transformers';
 
 let ttsInstance: KokoroTTS | null = null;
@@ -31,6 +31,7 @@ export async function initTTS(): Promise<void> {
   notify('loading');
   loadingPromise = (async () => {
     try {
+      const { KokoroTTS } = await import('kokoro-js');
       ttsInstance = await KokoroTTS.from_pretrained(
         'onnx-community/Kokoro-82M-v1.0-ONNX',
         { dtype: 'q8', device: 'wasm' }

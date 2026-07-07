@@ -641,7 +641,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
   useRealtimeSubscription('chat_messages', !isDemo && roomId ? { column: 'room_id', value: roomId } : undefined,
     (newMsg: ChatMessage) => {
       setMessages(prev => [...prev, newMsg]);
-      if (newMsg.is_super) speak(newMsg.message, superVoice.id).catch(() => {});
+      if (newMsg.is_super) speak(newMsg.message, superVoice.id).catch(() => addToast?.({ message: 'Voice announcement failed', type: 'error' }));
     },
   );
 
@@ -666,7 +666,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
         return next;
       });
       setMessage('');
-      if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); speak(message, superVoice.id).catch(() => {}); }
+      if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); speak(message, superVoice.id).catch(() => addToast?.({ message: 'Voice announcement failed', type: 'error' })); }
       fetchMessages();
       return;
     }
@@ -679,7 +679,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
         color: isSuper ? '#FFB000' : '#FFF2DD', is_super: isSuper,
       });
       setMessage('');
-      if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); speak(message, superVoice.id).catch(() => {}); }
+      if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); speak(message, superVoice.id).catch(() => addToast?.({ message: 'Voice announcement failed', type: 'error' })); }
       fetchMessages();
     } catch { addToast?.({ message: 'Send failed', type: 'error' }); }
   };
