@@ -151,10 +151,6 @@ export default function LoginPage() {
               </button>
             </p>
           </div>
-
-          <p className="text-center text-xs text-text-muted mt-4">
-            Demo: demo@streamarena.com / demo123456
-          </p>
         </motion.div>
       </div>
     </div>
