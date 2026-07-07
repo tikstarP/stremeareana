@@ -43,16 +43,14 @@ export async function getLiveRooms(): Promise<RoomData[]> {
   return data || [];
 }
 
-export async function createRoom(name: string, description: string): Promise<RoomData> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
+export async function createRoom(name: string, description: string, userId: string): Promise<RoomData> {
   const code = generateRoomCode();
-  const { data: profile } = await supabase.from('profiles').select('username, avatar_url').eq('id', user.id).maybeSingle();
+  const { data: profile } = await supabase.from('profiles').select('username, avatar_url').eq('id', userId).maybeSingle();
   const { data, error } = await supabase.from('rooms').insert({
     code, name: name || 'Untitled Room', description: description || '',
-    host_id: user.id,
-    host_name: profile?.username || user.email?.split('@')[0] || 'Streamer',
-    host_avatar: profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`,
+    host_id: userId,
+    host_name: profile?.username || 'Streamer',
+    host_avatar: profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
     is_live: true, viewer_count: 0,
   }).select().single();
   if (error) throw error;

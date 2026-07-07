@@ -32,7 +32,7 @@ export default function CreateRoomPage() {
     if (!user) { addToast({ message: 'Sign in to create a room', type: 'warning' }); navigate('/login'); return; }
     setLoading(true);
     try {
-      const room = await createRoom(name, description);
+      const room = await createRoom(name, description, user.id);
       setCreatedRoom(room);
       addToast({ message: 'Room created!', type: 'success' });
     } catch (err: unknown) {
