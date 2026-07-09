@@ -12,7 +12,8 @@ export default function EntryPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate('/streamer', { replace: true });
+      const savedRole = localStorage.getItem('streamarena_role');
+      navigate(savedRole === 'viewer' ? '/viewer' : '/streamer', { replace: true });
     }
   }, [user, loading, navigate]);
 
