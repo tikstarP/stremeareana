@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useLivePlayer } from '../contexts/LivePlayerContext';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
-import { getRoomByCode, getChatMessages, sendChatMessage, createRoom, followUser, unfollowUser, checkFollowStatus, likeRoom, unlikeRoom, checkRoomLiked } from '../lib/api';
+import { getRoomByCode, getChatMessages, sendChatMessage, createRoom, followUser, unfollowUser, checkFollowStatus, likeRoom, unlikeRoom, checkRoomLiked, joinQueue, leaveQueue } from '../lib/api';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import MobileHeader from '../components/MobileHeader';
@@ -198,7 +198,7 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
         <div className="col-span-7 xl:col-span-8 space-y-3 pb-8 flex flex-col">
           <YouTubePlayer videoId={videoId} />
           <StreamerProfile user={user} hostId={room?.host_id} roomId={roomId} roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} isHost={isHost} likes={(room as any)?.likes ?? 0} />
-          <QueueBanner roomStatus={roomStatus} roomCode={roomCode} user={user} addToast={addToast} />
+              <QueueBanner roomStatus={roomStatus} roomCode={roomCode} roomId={roomId} user={user} profile={profile} addToast={addToast} />
           <ViewerFeed roomId={roomId} user={user} addToast={addToast} profile={profile} refreshProfile={refreshProfile} />
         </div>
         <div className="col-span-5 xl:col-span-4">
@@ -404,7 +404,7 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
           {mobileTab === 'stream' && (
             <motion.div key="stream" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3 pb-4">
               <StreamerProfileMobile user={user} hostId={room?.host_id} roomId={roomId} roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} isHost={isHost} likes={(room as any)?.likes ?? 0} />
-              <QueueBanner roomStatus={roomStatus} roomCode={roomCode} user={user} addToast={addToast} />
+          <QueueBanner roomStatus={roomStatus} roomCode={roomCode} roomId={roomId} user={user} profile={profile} addToast={addToast} />
               <ViewerFeed roomId={roomId} user={user} addToast={addToast} profile={profile} refreshProfile={refreshProfile} />
             </motion.div>
           )}
@@ -578,9 +578,36 @@ function StreamerProfileMobile({ user, hostId, roomId, streamerName, streamerAva
 
 
 
-function QueueBanner({ roomStatus, roomCode, user, addToast }: { roomStatus: string; roomCode: string | undefined; user: User | null; addToast: (t: { message: string; type: 'success' | 'error' | 'info' | 'warning' }) => void }) {
+function QueueBanner({ roomStatus, roomCode, roomId, user, profile, addToast }: { roomStatus: string; roomCode: string | undefined; roomId: number | undefined; user: User | null; profile: Profile | null; addToast: (t: { message: string; type: 'success' | 'error' | 'info' | 'warning' }) => void }) {
   const [inQueue, setInQueue] = useState(false);
+  const [queueEntryId, setQueueEntryId] = useState<number | null>(null);
   const queueOpen = roomStatus === 'queue_open';
+
+  const handleQueueToggle = async () => {
+    if (!user) { addToast?.({ message: 'Sign in to join queue', type: 'warning' }); return; }
+    if (!roomId || roomId < 0) { addToast?.({ message: 'Room not available', type: 'error' }); return; }
+    if (inQueue && queueEntryId) {
+      try {
+        await leaveQueue(queueEntryId);
+        setInQueue(false);
+        setQueueEntryId(null);
+        addToast?.({ message: 'Left queue', type: 'success' });
+      } catch { addToast?.({ message: 'Failed to leave queue', type: 'error' }); }
+    } else {
+      try {
+        const entry = await joinQueue({
+          room_id: roomId, user_id: user.id,
+          username: profile?.username || user.email?.split('@')[0] || 'Anonymous',
+          avatar_url: profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`,
+          type: 'free',
+        });
+        setInQueue(true);
+        setQueueEntryId(entry.id);
+        addToast?.({ message: 'Joined queue!', type: 'success' });
+      } catch { addToast?.({ message: 'Failed to join queue', type: 'error' }); }
+    }
+  };
+
   return (
     <AnimatePresence>
       {queueOpen && (
@@ -591,7 +618,7 @@ function QueueBanner({ roomStatus, roomCode, user, addToast }: { roomStatus: str
               <span className="text-xs font-semibold text-text-primary truncate">Queue is open!</span>
               <span className="hidden sm:inline text-[10px] text-neutral-400">@{roomCode}</span>
             </div>
-            <button onClick={() => { if (!user) { addToast?.({ message: 'Sign in to join queue', type: 'warning' }); return; } setInQueue(p => !p); addToast?.({ message: inQueue ? 'Left queue' : 'Joined queue!', type: 'success' }); }}
+            <button onClick={handleQueueToggle}
               className={`shrink-0 min-h-[32px] px-3 py-1 rounded-lg text-[10px] font-bold transition-all active:scale-[0.97] touch-manipulation ${inQueue ? 'bg-arcade-green/20 text-arcade-green border border-arcade-green/30' : 'bg-gradient-to-r from-arcade-purple to-arcade-blue text-white'}`}
             >{inQueue ? '✓ In Queue' : 'Join Queue'}</button>
           </div>
