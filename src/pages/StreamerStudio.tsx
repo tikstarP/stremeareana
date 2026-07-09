@@ -6,7 +6,7 @@ import MoltenBackground from '../components/MoltenBackground';
 import Toast from '../components/Toast';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../contexts/AuthContext';
-import { getRoomByCode, updateRoom, updateArtSubmission, deleteArtSubmission, createOverlayEvent, sendChatMessage } from '../lib/api';
+import { getRoomByCode, updateRoom, getArtSubmissions, updateArtSubmission, deleteArtSubmission, createOverlayEvent, sendChatMessage } from '../lib/api';
 import StudioTopBar from '../components/studio/StudioTopBar';
 import StudioLivePreview from '../components/studio/StudioLivePreview';
 import StudioRoomSetup from '../components/studio/StudioRoomSetup';
@@ -20,10 +20,22 @@ import type { SelectionConfig } from '../components/studio/SelectionArena';
 import PlayerLobby from '../components/studio/PlayerLobby';
 import type { LobbyPlayer } from '../components/studio/PlayerLobby';
 import LiveFeed from '../components/studio/LiveFeed';
+import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
+import type { ArtSubmission } from '../types';
 
 interface FanDropSubmission {
   id: number; username: string; avatar_url: string; type: string;
   preview: string; submitted_at: string; likes: number; status: 'pending' | 'approved' | 'rejected';
+}
+
+function toFanDropSubmission(a: ArtSubmission): FanDropSubmission {
+  return {
+    id: a.id, username: a.username, avatar_url: a.avatar_url || '',
+    type: a.type || a.content_type || 'text',
+    preview: a.message || a.image_url || a.emoji || '',
+    submitted_at: a.created_at || '', likes: a.likes || 0,
+    status: (a.status as 'pending' | 'approved' | 'rejected') || 'pending',
+  };
 }
 
 interface RoomData {
@@ -43,7 +55,7 @@ interface RoomData {
 export default function StreamerStudio() {
   const { roomCode } = useParams();
   const navigate = useNavigate();
-  const { addToast } = useApp();
+  const { addToast, profile } = useApp();
   const { user } = useAuth();
   const code = roomCode || '';
   const overlayUrl = `${window.location.origin}/overlay/${code}`;
@@ -88,10 +100,31 @@ export default function StreamerStudio() {
   const [lobbyPlayers, setLobbyPlayers] = useState<LobbyPlayer[]>([]);
   const [mainGame, setMainGame] = useState('BGMI');
 
-  const [pendingSubmissions] = useState<FanDropSubmission[]>([
-    { id: 1, username: 'Neha', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=neha', type: 'image', preview: 'sketch_001.png', submitted_at: '2m ago', likes: 0, status: 'pending' },
-    { id: 2, username: 'Rahul', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rahul', type: 'text', preview: 'Check out!', submitted_at: '4m ago', likes: 0, status: 'pending' },
-  ]);
+  const [pendingSubmissions, setPendingSubmissions] = useState<FanDropSubmission[]>([]);
+  const [artSubmissions, setArtSubmissions] = useState<ArtSubmission[]>([]);
+
+  useEffect(() => {
+    if (!room?.id) return;
+    getArtSubmissions(room.id).then(data => {
+      setArtSubmissions(data);
+      setPendingSubmissions(data.map(toFanDropSubmission));
+    }).catch(() => {});
+  }, [room?.id]);
+
+  useRealtimeSubscription<ArtSubmission>('art_submissions', room?.id ? { column: 'room_id', value: room.id } : undefined,
+    (newArt) => {
+      setArtSubmissions(prev => [newArt, ...prev]);
+      setPendingSubmissions(prev => [toFanDropSubmission(newArt), ...prev]);
+    },
+    (updatedArt) => {
+      setArtSubmissions(prev => prev.map(a => a.id === updatedArt.id ? updatedArt : a));
+      setPendingSubmissions(prev => prev.map(a => a.id === updatedArt.id ? toFanDropSubmission(updatedArt) : a));
+    },
+    (deletedArt) => {
+      setArtSubmissions(prev => prev.filter(a => a.id !== deletedArt.id));
+      setPendingSubmissions(prev => prev.filter(a => a.id !== deletedArt.id));
+    },
+  );
 
   useEffect(() => {
     if (!code) {
@@ -458,6 +491,7 @@ export default function StreamerStudio() {
                     </button>
                   </div>
                   <StudioFanDropPanel
+                    roomId={room?.id}
                     fanDropStatus={fanDropStatus}
                     fanDropTheme={fanDropTheme}
                     pendingSubmissions={pendingSubmissions}
@@ -635,10 +669,10 @@ export default function StreamerStudio() {
                     onSpeak={async (msg) => {
                       try {
                         if (room) {
-                          await sendChatMessage({ room_id: room.id, user_id: 'ai-host', username: '🤖 AI Host', message: `[AI] ${msg}`, color: '#a78bfa', is_super: false });
-                          addToast({ message: `AI: "${msg}"`, type: 'info' });
+                          await createOverlayEvent({ room_id: room.id, event_type: 'announcement', event_data: { streamer: profile?.username || 'Streamer', message: msg } });
+                          addToast({ message: `Announcement sent!`, type: 'info' });
                         }
-                      } catch { addToast({ message: 'AI speak failed', type: 'error' }); }
+                      } catch { addToast({ message: 'Announcement failed', type: 'error' }); }
                     }}
                     addToast={addToast}
                   />

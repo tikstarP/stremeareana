@@ -102,10 +102,14 @@ export async function getArtSubmissions(roomId: number): Promise<ArtSubmission[]
 }
 
 export async function createArtSubmission(sub: {
-  room_id: number; user_id: string; username: string; avatar_url: string; image_url: string;
+  room_id: number; user_id: string; username: string; avatar_url?: string;
+  content_type?: string; message?: string; image_url?: string; emoji?: string;
 }): Promise<ArtSubmission> {
   const { data, error } = await supabase.from('art_submissions').insert({
-    ...sub, status: 'pending',
+    room_id: sub.room_id, user_id: sub.user_id, username: sub.username,
+    avatar_url: sub.avatar_url || null, content_type: sub.content_type || 'text',
+    message: sub.message || null, image_url: sub.image_url || null,
+    emoji: sub.emoji || null, status: 'pending',
   }).select().single();
   if (error) throw error;
   return data;
@@ -120,6 +124,27 @@ export async function updateArtSubmission(id: number, updates: { status?: string
 export async function deleteArtSubmission(id: number): Promise<void> {
   const { error } = await supabase.from('art_submissions').delete().eq('id', id);
   if (error) throw error;
+}
+
+export async function likeSubmission(submissionId: number, userId: string): Promise<void> {
+  const { error } = await supabase.from('submission_likes').insert({ submission_id: submissionId, user_id: userId });
+  if (error && !error.message?.includes('duplicate')) throw error;
+}
+
+export async function unlikeSubmission(submissionId: number, userId: string): Promise<void> {
+  const { error } = await supabase.from('submission_likes').delete().eq('submission_id', submissionId).eq('user_id', userId);
+  if (error) throw error;
+}
+
+export async function getLikeCount(submissionId: number): Promise<number> {
+  const { count } = await supabase.from('submission_likes').select('*', { count: 'exact', head: true }).eq('submission_id', submissionId);
+  return count || 0;
+}
+
+export async function getUserLikedSubmissions(userId: string, submissionIds: number[]): Promise<number[]> {
+  if (submissionIds.length === 0) return [];
+  const { data } = await supabase.from('submission_likes').select('submission_id').eq('user_id', userId).in('submission_id', submissionIds);
+  return (data || []).map(d => d.submission_id);
 }
 
 export async function getQueueEntries(roomId: number): Promise<QueueEntry[]> {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Users, Crown, Clock, Sparkles, Coins, Star, Smartphone } from 'lucide-react';
+import { Trophy, Users, Crown, Clock, Sparkles, Coins, Star, Smartphone, Zap, Volume2 } from 'lucide-react';
 import { getRoomByCode, getOverlayEvents } from '../lib/api';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 
@@ -24,16 +24,57 @@ type OverlayEvent = {
 const eventIcons: Record<string, typeof Trophy> = {
   selection: Trophy, winner: Crown, countdown: Clock, shoutout: Star,
   coin: Coins, player_join: Users, fan_drop: Sparkles, fan_drop_show: Sparkles,
+  announcement: Zap,
 };
 
 const eventColors: Record<string, string> = {
   selection: '#10b981', winner: '#f59e0b', countdown: '#3b82f6',
   shoutout: '#a855f7', coin: '#eab308', player_join: '#06b6d4',
-  fan_drop: '#ec4899', fan_drop_show: '#ec4899',
+  fan_drop: '#ec4899', fan_drop_show: '#ec4899', announcement: '#f59e0b',
 };
 
 function OverlayEventDisplay({ event }: { event: OverlayEvent }) {
   const Icon = event.icon;
+  const isAnnouncement = event.type === 'announcement';
+
+  if (isAnnouncement) {
+    return (
+      <motion.div
+        key={event.id}
+        initial={{ opacity: 0, scale: 0.3, y: -40 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 1.2, y: -60 }}
+        transition={{ type: 'spring', damping: 12, stiffness: 120 }}
+        className="flex flex-col items-center justify-center text-center px-8"
+      >
+        <motion.div
+          animate={{ scale: [1, 1.05, 1], rotate: [0, -2, 2, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          className="mb-6 relative"
+        >
+          <div className="absolute inset-0 blur-3xl opacity-40" style={{ backgroundColor: event.color }} />
+          <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-yellow-500/30 to-orange-500/20 border-2 border-yellow-400/40 flex items-center justify-center">
+            <Volume2 className="w-12 h-12 text-yellow-400" />
+          </div>
+        </motion.div>
+        <motion.h1
+          animate={{ textShadow: ['0 0 20px rgba(245,158,11,0.3)', '0 0 40px rgba(245,158,11,0.6)', '0 0 20px rgba(245,158,11,0.3)'] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="text-6xl font-black text-white mb-3 tracking-tight drop-shadow-lg"
+        >
+          {event.title}
+        </motion.h1>
+        <motion.p
+          animate={{ y: [0, -4, 0], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          className="text-3xl text-yellow-300/80 font-bold drop-shadow-lg"
+        >
+          {event.subtitle}
+        </motion.p>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       key={event.id}
@@ -85,8 +126,8 @@ export default function OverlayPage() {
         setEvents(data.map((e: ApiOverlayEvent) => ({
           id: e.id,
           type: e.event_type,
-          title: e.event_data?.title || e.event_type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
-          subtitle: e.event_data?.subtitle || '',
+          title: e.event_type === 'announcement' ? `${e.event_data?.streamer || 'Streamer'} says:` : (e.event_data?.title || e.event_type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())),
+          subtitle: e.event_type === 'announcement' ? (e.event_data?.message as string || '') : (e.event_data?.subtitle || ''),
           icon: eventIcons[e.event_type] || Sparkles,
           color: eventColors[e.event_type] || '#a78bfa',
         })));
@@ -102,8 +143,8 @@ export default function OverlayPage() {
       setEvents(prev => [...prev, {
         id: newEvent.id,
         type: newEvent.event_type,
-        title: newEvent.event_data?.title || newEvent.event_type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
-        subtitle: newEvent.event_data?.subtitle || '',
+        title: newEvent.event_type === 'announcement' ? `${newEvent.event_data?.streamer || 'Streamer'} says:` : (newEvent.event_data?.title || newEvent.event_type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())),
+        subtitle: newEvent.event_type === 'announcement' ? (newEvent.event_data?.message as string || '') : (newEvent.event_data?.subtitle || ''),
         icon: eventIcons[newEvent.event_type] || Sparkles,
         color: eventColors[newEvent.event_type] || '#a78bfa',
       }]);

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
-import { getArtSubmissions } from '../lib/api';
+import { getArtSubmissions, createArtSubmission, likeSubmission, unlikeSubmission, getLikeCount, getUserLikedSubmissions } from '../lib/api';
 import type { ArtSubmission } from '../types';
 
 const stickers = [
@@ -184,16 +184,28 @@ export default function FanDropRoom({ roomId, isHost, onStateChange }: { roomId?
   };
 
   const handleSubmit = async () => {
-    if (!user) { addToast({ message: 'Sign in to submit', type: 'warning' }); return; }
+    if (!user || !roomId) { addToast({ message: 'Sign in to submit', type: 'warning' }); return; }
     if (selectedType === 'text' && (!textInput.trim() || textInput.length > 280)) {
       addToast({ message: 'Text must be 1-280 characters', type: 'error' }); return;
     }
-    addToast({ message: 'Submission sent!', type: 'success' });
-    setSelectedType(null);
-    setTextInput('');
-    setSelectedFile(null);
-    setPreview(null);
-    setSelectedSticker(null);
+    try {
+      const payload: { room_id: number; user_id: string; username: string; avatar_url?: string; content_type: string; message?: string; emoji?: string; image_url?: string } = {
+        room_id: roomId, user_id: user.id, username: profile?.username || user.email?.split('@')[0] || 'Anonymous',
+        content_type: selectedType || 'text',
+      };
+      if (selectedType === 'text') payload.message = textInput.trim();
+      else if (selectedType === 'emoji') payload.emoji = textInput.trim();
+      else if (selectedType === 'sticker') payload.emoji = selectedSticker || undefined;
+      else if (selectedType === 'image' || selectedType === 'gif') payload.image_url = preview || undefined;
+      if (profile?.avatar_url) payload.avatar_url = profile.avatar_url;
+      await createArtSubmission(payload);
+      addToast({ message: 'Submission sent for review!', type: 'success' });
+      setSelectedType(null);
+      setTextInput('');
+      setSelectedFile(null);
+      setPreview(null);
+      setSelectedSticker(null);
+    } catch { addToast({ message: 'Submission failed', type: 'error' }); }
   };
 
   const handleDoubleTap = (id: number) => {
@@ -203,13 +215,16 @@ export default function FanDropRoom({ roomId, isHost, onStateChange }: { roomId?
     setLastTap(now);
   };
 
-  const toggleLike = (id: number) => {
-    if (!config.allowHearts) return;
-    setLikedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
+  const toggleLike = async (id: number) => {
+    if (!config.allowHearts || !user) return;
+    const alreadyLiked = likedIds.has(id);
+    if (alreadyLiked) {
+      setLikedIds(prev => { const n = new Set(prev); n.delete(id); return n; });
+      try { await unlikeSubmission(id, user.id); } catch { /* revert handled below */ }
+    } else {
+      setLikedIds(prev => { const n = new Set(prev); n.add(id); return n; });
+      try { await likeSubmission(id, user.id); } catch { /* revert handled below */ }
+    }
   };
 
   const renderGalleryCard = (item: ArtSubmission) => {
@@ -270,10 +285,12 @@ export default function FanDropRoom({ roomId, isHost, onStateChange }: { roomId?
     );
   };
 
-  const renderGallery = () => (
+  const renderGallery = () => {
+    const ranked = [...gallery].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-xs font-semibold text-text-primary">Recent Gallery</h4>
+        <h4 className="text-xs font-semibold text-text-primary">Gallery</h4>
         <span className="text-[10px] text-neutral-500">{gallery.length} items</span>
       </div>
       {gallery.length === 0 ? (
@@ -282,11 +299,23 @@ export default function FanDropRoom({ roomId, isHost, onStateChange }: { roomId?
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2">
-          {gallery.map(item => renderGalleryCard(item))}
+          {ranked.map((item, idx) => (
+            <div key={item.id} className="relative">
+              {idx < 3 && (
+                <div className={`absolute -top-1 -left-1 z-10 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black ${
+                  idx === 0 ? 'bg-yellow-400 text-black' : idx === 1 ? 'bg-gray-300 text-black' : 'bg-amber-600 text-white'
+                }`}>
+                  {idx + 1}
+                </div>
+              )}
+              {renderGalleryCard(item)}
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
+  };
 
   const renderSubmissionForm = () => {
     if (!selectedType) {
