@@ -86,7 +86,7 @@ export default function StudioLivePreview({
           />
         </div>
       ) : (
-        <div className="flex items-center gap-2 p-3">
+        <div className="flex items-center gap-2 p-2">
           <Monitor className="w-4 h-4 text-neutral-500 shrink-0" />
           <input
             type="text" value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyDown={handleKeyDown}

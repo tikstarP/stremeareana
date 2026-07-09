@@ -30,12 +30,14 @@ export default function GameArena({ roomId }: { roomId?: number }) {
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
+  const [numberTarget, setNumberTarget] = useState(0);
 
   const startGame = (id: string) => {
     const time = id === 'fastest' ? 10 : 30;
     setActiveGame(id); setTimeLeft(time); setTotalTime(time);
     setQIndex(0); setSelected(null); setGuessInput(''); setTypeInput('');
     setResult(null); setScore(0);
+    if (id === 'guess') setNumberTarget(Math.floor(Math.random() * 100) + 1);
   };
 
   const saveScore = useCallback(async (finalScore: number, gameType: string) => {
@@ -66,7 +68,7 @@ export default function GameArena({ roomId }: { roomId?: number }) {
     if (!activeGame || timeLeft <= 0) return;
     const interval = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev <= 1) { clearInterval(interval); if (activeGame !== 'fastest') endGame('lose'); return 0; }
+        if (prev <= 1) { clearInterval(interval); endGame('lose'); return 0; }
         return prev - 1;
       });
     }, 1000);
@@ -87,8 +89,7 @@ export default function GameArena({ roomId }: { roomId?: number }) {
   const handleGuess = () => {
     const num = parseInt(guessInput);
     if (isNaN(num)) return;
-    const target = Math.floor(Math.random() * 100) + 1;
-    if (Math.abs(num - target) <= 5) { setScore(200); endGame('win'); } else endGame('lose');
+    if (Math.abs(num - numberTarget) <= 5) { setScore(200); endGame('win'); } else endGame('lose');
   };
 
   const handleType = () => {

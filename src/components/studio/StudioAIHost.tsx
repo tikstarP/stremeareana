@@ -16,9 +16,11 @@ interface StudioAIHostProps {
   aiEnabled: boolean;
   voiceVolume: number;
   voiceMode: string;
+  moderationMode: string;
   onToggleAI: () => void;
   onVolumeChange: (v: number) => void;
   onVoiceModeChange: (v: string) => void;
+  onModerationModeChange: (v: string) => void;
   onSpeak: (text: string) => void;
   addToast: (t: { message: string; type: 'success' | 'error' | 'info' | 'warning' }) => void;
 }
@@ -37,14 +39,15 @@ export default function StudioAIHost({
   aiEnabled,
   voiceVolume,
   voiceMode,
+  moderationMode,
   onToggleAI,
   onVolumeChange,
   onVoiceModeChange,
+  onModerationModeChange,
   onSpeak,
   addToast,
 }: StudioAIHostProps) {
   const [customMessage, setCustomMessage] = useState('');
-  const [moderationMode, setModerationMode] = useState('Safe');
 
   const handleSpeak = () => {
     if (!customMessage.trim()) {
@@ -123,7 +126,7 @@ export default function StudioAIHost({
           <ModerationIcon className="w-4 h-4 text-white/60 shrink-0" />
           <select
             value={moderationMode}
-            onChange={(e) => setModerationMode(e.target.value)}
+            onChange={(e) => onModerationModeChange(e.target.value)}
             disabled={!aiEnabled}
             className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-sm text-white/80 outline-none focus:border-purple-500/50 disabled:opacity-40"
           >

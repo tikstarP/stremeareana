@@ -137,7 +137,7 @@ export default function LiveRoomPage() {
       <div className="hidden md:block"><Navbar /></div>
       <div className="md:hidden"><MobileHeader /></div>
       <div className="hidden md:block relative z-10 pt-20 px-4 max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-12 gap-5">
+        <div className="grid grid-cols-12 gap-4">
           <div className="col-span-7 xl:col-span-8 space-y-4">
             <Skeleton className="aspect-video w-full rounded-2xl" />
             <CardSkeleton />
@@ -194,15 +194,15 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
 
   return (
     <div ref={scrollRef} className="h-[calc(100vh-72px)] overflow-y-auto no-scrollbar">
-      <div className="grid grid-cols-12 gap-5 px-5 pt-4 pb-5">
-        <div className="col-span-7 xl:col-span-8 space-y-3 pb-8 flex flex-col">
+      <div className="grid grid-cols-12 gap-4 px-4 pt-4 pb-4">
+        <div className="col-span-7 xl:col-span-8 space-y-3 pb-4 flex flex-col">
           <YouTubePlayer videoId={videoId} />
           <StreamerProfile user={user} hostId={room?.host_id} roomId={roomId} roomCode={roomCode} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} subscriberCount={subscriberCount} viewerCount={viewerCount} streamStarted={streamStarted} streamTitle={streamTitle} isHost={isHost} likes={(room as any)?.likes ?? 0} />
               <QueueBanner roomStatus={roomStatus} roomCode={roomCode} roomId={roomId} user={user} profile={profile} addToast={addToast} />
           <ViewerFeed roomId={roomId} user={user} addToast={addToast} profile={profile} refreshProfile={refreshProfile} />
         </div>
         <div className="col-span-5 xl:col-span-4">
-          <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] flex flex-col h-full min-h-[450px]">
+          <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] flex flex-col h-full min-h-[350px]">
             <div className="flex items-center gap-1.5 p-2 border-b border-white/[0.06] overflow-x-auto no-scrollbar">
               {rightPanelTabs.map(t => (
                 <TabButton key={t.id} id={t.id} label={t.id === 'art' ? `Fan Drop ${fanDropBadgeIcon(fanDropState)}` : t.label} icon={t.icon} active={tab === t.id} onClick={() => setTab(t.id)} />
@@ -399,7 +399,7 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
       <div className="sticky top-0 z-10 bg-bg-primary">
         <YouTubePlayer videoId={videoId} />
       </div>
-      <div className="px-3 pb-20">
+      <div className="px-3 pb-16">
         <AnimatePresence mode="wait">
           {mobileTab === 'stream' && (
             <motion.div key="stream" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3 pb-4">
@@ -771,7 +771,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
         username: profile?.username || user.email?.split('@')[0] || 'Anonymous',
         message: emoji, amount: 0, color: '#FF5A1F', is_super: false,
       });
-    } catch { /* silent */ }
+    } catch { addToast?.({ message: 'Emoji send failed', type: 'error' }); }
   };
 
   const displayMessages = !fetchedOnce && messages.length === 0 ? demoMessages : messages;
@@ -785,7 +785,8 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
     amount: msg.amount || undefined,
   }));
 
-  const filteredEntries = filter === 'all' ? entries : entries.filter(() => filter === 'chat');
+  const filterMap: Record<string, string> = { chat: 'youtube_chat', arena: 'ai', alerts: 'youtube_superchat' };
+  const filteredEntries = filter === 'all' ? entries : entries.filter(e => e.type === filterMap[filter]);
 
   const scrollToBottom = useCallback((smooth = false) => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
@@ -898,7 +899,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
       </div>
 
       {/* Chat input */}
-      <div className={`p-3 border-t ${darkFeed ? 'border-arcade-pink/10' : 'border-gray-200'} space-y-2`}>
+      <div className={`p-2 border-t ${darkFeed ? 'border-arcade-pink/10' : 'border-gray-200'} space-y-1.5`}>
         <div className="flex gap-1 overflow-x-auto no-scrollbar pb-1">
           {quickEmojis.map((e, i) => (
             <button key={i} onClick={() => sendEmoji(e.emoji)} aria-label={`Send ${e.emoji}`} className="min-w-[36px] min-h-[36px] w-8 h-8 rounded-lg bg-white/[0.04] hover:bg-white/10 flex items-center justify-center text-sm transition-colors shrink-0">{e.emoji}</button>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Radio, Copy, Check, Crosshair, Brain, Palette, Puzzle } from 'lucide-react';
@@ -10,10 +10,10 @@ import { useApp } from '../context/AppContext';
 import { createRoom } from '../lib/api';
 
 const templates = [
-  { label: 'BGMI Battle', icon: Crosshair, name: 'BGMI Battle Royale', desc: 'Classic BGMI tournament — queue up, drop in, and fight for the winner spot.' },
-  { label: 'Quiz Show', icon: Brain, name: 'Quiz Show Live', desc: 'Test your knowledge with live trivia. Fastest answer wins coins!' },
-  { label: 'Art Jam', icon: Palette, name: 'Art Jam Session', desc: 'Submit your sketches live. Streamer rates and picks the best.' },
-  { label: 'Custom', icon: Puzzle, name: 'Custom Room', desc: 'Start from scratch — set your own rules and games.' },
+  { label: 'BGMI Battle', icon: Crosshair, name: 'BGMI Battle Royale', desc: 'Classic BGMI tournament — queue up, drop in, and fight for the winner spot.', custom: false },
+  { label: 'Quiz Show', icon: Brain, name: 'Quiz Show Live', desc: 'Test your knowledge with live trivia. Fastest answer wins coins!', custom: false },
+  { label: 'Art Jam', icon: Palette, name: 'Art Jam Session', desc: 'Submit your sketches live. Streamer rates and picks the best.', custom: false },
+  { label: 'Custom', icon: Puzzle, name: 'Custom Room', desc: 'Start from scratch — set your own rules and games.', custom: true },
 ];
 
 export default function CreateRoomPage() {
@@ -40,6 +40,13 @@ export default function CreateRoomPage() {
     }
     finally { setLoading(false); }
   };
+
+  useEffect(() => {
+    if (createdRoom) {
+      const t = setTimeout(() => navigate(`/studio/${createdRoom.code}`), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [createdRoom]);
 
   const copyCode = () => {
     if (createdRoom) {
@@ -99,11 +106,11 @@ export default function CreateRoomPage() {
                       const Icon = t.icon;
                       const active = selectedTemplate === i;
                       return (
-                        <button key={i} onClick={() => {
-                          setSelectedTemplate(i);
-                          if (i < templates.length - 1) { setName(t.name); setDescription(t.desc); }
-                          else { setName(''); setDescription(''); }
-                        }}
+                          <button key={i} onClick={() => {
+                            setSelectedTemplate(i);
+                            if (t.custom) { setName(''); setDescription(''); }
+                            else { setName(t.name); setDescription(t.desc); }
+                          }}
                           className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-all min-h-[44px] ${
                             active ? 'border-arcade-purple/60 bg-arcade-purple/10' : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05]'
                           }`}

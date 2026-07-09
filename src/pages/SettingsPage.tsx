@@ -14,15 +14,17 @@ export default function SettingsPage() {
   const { profile, refreshProfile, addToast } = useApp();
   const navigate = useNavigate();
   const [username, setUsername] = useState(profile?.username || '');
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
   const [saving, setSaving] = useState(false);
   const [showResetEmail, setShowResetEmail] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [resettingPassword, setResettingPassword] = useState(false);
 
   const handleSave = async () => {
     if (!user || !username.trim()) return;
     setSaving(true);
     try {
-      await updateProfile(user.id, { username: username.trim() });
+      await updateProfile(user.id, { username: username.trim(), avatar_url: avatarUrl.trim() || undefined });
       await refreshProfile();
       addToast({ message: 'Profile updated!', type: 'success' });
     } catch {
@@ -34,6 +36,7 @@ export default function SettingsPage() {
 
   const handleResetPassword = async () => {
     if (!resetEmail.trim()) { addToast({ message: 'Enter your email', type: 'error' }); return; }
+    setResettingPassword(true);
     try {
       const { error } = await (await import('../lib/supabase')).default.auth.resetPasswordForEmail(resetEmail, { redirectTo: `${window.location.origin}/reset-password` });
       if (error) throw error;
@@ -41,6 +44,8 @@ export default function SettingsPage() {
       setShowResetEmail(false);
     } catch (err: unknown) {
       addToast({ message: err instanceof Error ? err.message : 'Failed to send reset email', type: 'error' });
+    } finally {
+      setResettingPassword(false);
     }
   };
 
@@ -76,8 +81,12 @@ export default function SettingsPage() {
               {/* Profile Card */}
               <div className="bg-white/[0.03] rounded-2xl p-6 border border-arcade-pink/10">
                 <div className="flex items-center gap-4 mb-5">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-arcade-purple to-arcade-blue flex items-center justify-center text-2xl font-bold text-white shrink-0">
-                    {(profile?.username || user.email || '?')[0].toUpperCase()}
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-arcade-purple to-arcade-blue flex items-center justify-center text-2xl font-bold text-white shrink-0 overflow-hidden">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).parentElement!.innerText = (profile?.username || user.email || '?')[0].toUpperCase(); }} />
+                    ) : (
+                      (profile?.username || user.email || '?')[0].toUpperCase()
+                    )}
                   </div>
                   <div className="min-w-0">
                     <h1 className="text-lg font-bold text-text-primary truncate">{profile?.username || 'User'}</h1>
@@ -109,12 +118,18 @@ export default function SettingsPage() {
               {/* Edit Username */}
               <div className="bg-white/[0.03] rounded-2xl p-6 border border-arcade-pink/10 space-y-4">
                 <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2"><User className="w-4 h-4 text-arcade-purple" /> Edit Profile</h3>
-                <div>
-                  <label className="text-[10px] text-text-muted block mb-1">Username</label>
-                  <input type="text" value={username} onChange={e => setUsername(e.target.value)}
-                    className="w-full bg-bg-secondary border border-arcade-pink/10 rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-purple/50 transition-all"
-                  />
-                </div>
+                  <div>
+                    <label className="text-[10px] text-text-muted block mb-1">Username</label>
+                    <input type="text" value={username} onChange={e => setUsername(e.target.value)}
+                      className="w-full bg-bg-secondary border border-arcade-pink/10 rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-purple/50 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-text-muted block mb-1">Avatar URL</label>
+                    <input type="text" value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} placeholder="https://example.com/avatar.png"
+                      className="w-full bg-bg-secondary border border-arcade-pink/10 rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-purple/50 transition-all"
+                    />
+                  </div>
                 <button onClick={handleSave} disabled={saving || !username.trim()}
                   className="min-h-[44px] px-5 py-2 rounded-xl bg-gradient-to-r from-arcade-purple to-arcade-blue text-white text-xs font-bold hover:opacity-90 disabled:opacity-30 transition-all flex items-center gap-2"
                 >
@@ -133,7 +148,10 @@ export default function SettingsPage() {
                     />
                     <div className="flex gap-2">
                       <button onClick={() => setShowResetEmail(false)} className="min-h-[44px] px-4 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-neutral-400 text-xs font-semibold">Cancel</button>
-                      <button onClick={handleResetPassword} className="min-h-[44px] px-4 py-2 rounded-xl bg-gradient-to-r from-arcade-yellow to-arcade-orange text-black text-xs font-bold">Send Reset Email</button>
+                      <button onClick={handleResetPassword} disabled={resettingPassword} className="min-h-[44px] px-4 py-2 rounded-xl bg-gradient-to-r from-arcade-yellow to-arcade-orange text-black text-xs font-bold disabled:opacity-50 flex items-center gap-2">
+                        {resettingPassword ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} className="w-3.5 h-3.5 border-2 border-black/20 border-t-black rounded-full" /> : null}
+                        Send Reset Email
+                      </button>
                     </div>
                   </div>
                 ) : (

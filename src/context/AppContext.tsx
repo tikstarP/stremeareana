@@ -38,7 +38,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (user) {
       refreshProfile();
-      upsertProfile(user.id, user.email).then(() => refreshProfile()).catch(() => {});
+      upsertProfile(user.id, user.email).then(() => refreshProfile()).catch(() => addToast({ message: 'Profile setup failed', type: 'error' }));
     } else {
       setProfile(null);
     }

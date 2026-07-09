@@ -133,7 +133,7 @@ export default function StreamerStudio() {
     setEndConfirmOpen(false);
     setShowEnded(true);
     if (room) {
-      updateRoom(room.id, { is_live: false, status: 'ended' } as any).catch(() => {});
+      updateRoom(room.id, { is_live: false, status: 'ended' } as any).catch(() => addToast({ message: 'Failed to end stream', type: 'error' }));
     }
     addToast({ message: `Stream ended. ${totalHeld} coins returned.`, type: 'info' });
   }, [lobbyPlayers, addToast, room]);
@@ -144,7 +144,7 @@ export default function StreamerStudio() {
     setMainGame(config.mainGame);
     setStatus('live');
     if (room) {
-      updateRoom(room.id, { status: 'selection' } as any).catch(() => {});
+      updateRoom(room.id, { status: 'selection' } as any).catch(() => addToast({ message: 'Failed to start selection', type: 'error' }));
     }
     if (!smartSelectionNotified.current) {
       smartSelectionNotified.current = true;
@@ -161,7 +161,7 @@ export default function StreamerStudio() {
     setSelectionActive(false);
     setSelectionConfig(null);
     if (room) {
-      updateRoom(room.id, { status: 'queue_open' } as any).catch(() => {});
+      updateRoom(room.id, { status: 'queue_open' } as any).catch(() => addToast({ message: 'Failed to reset queue', type: 'error' }));
     }
     addToast({ message: 'Selection cancelled', type: 'info' });
   }, [addToast, room]);
@@ -358,7 +358,7 @@ export default function StreamerStudio() {
           <div className="grid grid-cols-12 gap-4" style={{ minHeight: 'calc(100vh - 90px)' }}>
 
             {/* LEFT COLUMN (4/12) */}
-            <div className="col-span-4 space-y-2 overflow-y-auto pr-1 no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
+            <div className="col-span-4 space-y-2 overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
               <StudioLivePreview
                 videoId={videoId}
                 isMuted={isMuted}
@@ -378,7 +378,7 @@ export default function StreamerStudio() {
                 onAllowShoutout={handleAllowShoutout}
                 onRejectShoutout={handleRejectShoutout}
                 addToast={addToast}
-                height="calc(100vh - 440px)"
+                height="calc(100vh - 400px)"
               />
               <CollapsibleSection title="Room Setup" icon={Eye} defaultOpen={false}>
                 <div className="p-4">
@@ -414,7 +414,7 @@ export default function StreamerStudio() {
             </div>
 
             {/* CENTER COLUMN (5/12) */}
-            <div className="col-span-5 space-y-2 overflow-y-auto px-1 no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
+            <div className="col-span-5 space-y-2 overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
               <SelectionArena
                 onStartSelection={handleStartSelection}
                 onResetSelection={handleResetSelection}
@@ -439,7 +439,7 @@ export default function StreamerStudio() {
             </div>
 
             {/* RIGHT COLUMN (3/12) */}
-            <div className="col-span-3 space-y-2 overflow-y-auto pl-1 no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
+            <div className="col-span-3 space-y-2 overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
               {/* Smart systems active indicator */}
               <div className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-arcade-green/5 border border-arcade-green/20">
                 <Zap className="w-3 h-3 text-arcade-green" />
@@ -551,6 +551,18 @@ export default function StreamerStudio() {
                   <button onClick={() => window.open(`/audio/${code}`, '_blank')}
                     className="w-full min-h-[40px] py-2 rounded-xl bg-white/[0.05] border border-white/[0.08] text-neutral-400 text-[10px] font-bold hover:text-text-primary transition-all flex items-center justify-center gap-1.5"
                   ><Headphones className="w-3.5 h-3.5" /> Open Audio Dock</button>
+                  <details className="group">
+                    <summary className="text-[10px] font-semibold text-text-muted cursor-pointer hover:text-text-primary transition-all list-none flex items-center gap-1">
+                      OBS Setup Guide <Zap className="w-3 h-3 group-open:rotate-180 transition-transform" />
+                    </summary>
+                    <div className="mt-2 space-y-2 text-[9px] text-text-muted leading-relaxed">
+                      <p>1. In OBS, add a new Browser Source</p>
+                      <p>2. URL: <span className="text-arcade-blue font-mono">{overlayUrl}</span></p>
+                      <p>3. Set width: 1920, height: 1080</p>
+                      <p>4. For audio, add a Browser Source with URL: <span className="text-arcade-blue font-mono">{`${window.location.origin}/audio-dock/${code}`}</span></p>
+                      <p>5. Check "Control audio via OBS" and uncheck "Shutdown source when not visible"</p>
+                    </div>
+                  </details>
                 </div>
               </CollapsibleSection>
 
@@ -615,9 +627,11 @@ export default function StreamerStudio() {
                     aiEnabled={smartVoice}
                     voiceVolume={voiceVolume}
                     voiceMode={aiVoiceStyle}
+                    moderationMode={moderationMode === 'safe' ? 'Safe' : moderationMode === 'review' ? 'Review' : moderationMode === 'manual_read' ? 'Manual Read' : 'Loose'}
                     onToggleAI={() => setSmartVoice(p => !p)}
                     onVolumeChange={setVoiceVolume}
                     onVoiceModeChange={setAiVoiceStyle}
+                    onModerationModeChange={(v) => setModerationMode(v === 'Safe' ? 'safe' : v === 'Review' ? 'review' : v === 'Manual Read' ? 'manual_read' : 'loose')}
                     onSpeak={async (msg) => {
                       try {
                         if (room) {

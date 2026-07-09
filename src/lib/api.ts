@@ -72,20 +72,21 @@ export async function getChatMessages(roomId: number, limit = 100): Promise<Chat
 }
 
 export async function sendChatMessage(msg: {
-  room_id: number; user_id: string; username?: string; message: string;
+  room_id: number; user_id: string | null; username?: string; message: string;
   amount?: number; color?: string; is_super?: boolean;
 }): Promise<ChatMessage> {
+  const uid = msg.user_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(msg.user_id) ? msg.user_id : null;
   const { data, error } = await supabase.from('chat_messages').insert({
-    room_id: msg.room_id, user_id: msg.user_id, username: msg.username || 'Anonymous',
+    room_id: msg.room_id, user_id: uid, username: msg.username || 'Anonymous',
     message: msg.message, amount: msg.amount || 0,
     color: msg.color || '#FF5A1F', is_super: msg.is_super || false,
   }).select().single();
   if (error) throw error;
 
-  if (msg.is_super && msg.amount && msg.user_id) {
-    const { data: profile } = await supabase.from('profiles').select('*').eq('id', msg.user_id).maybeSingle();
+  if (msg.is_super && msg.amount && uid) {
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle();
     if (profile && profile.coins >= msg.amount) {
-      await supabase.from('profiles').update({ coins: profile.coins - msg.amount }).eq('id', msg.user_id);
+      await supabase.from('profiles').update({ coins: profile.coins - msg.amount }).eq('id', uid);
     }
   }
 

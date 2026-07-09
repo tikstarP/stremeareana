@@ -21,6 +21,10 @@ html {
   scroll-behavior: smooth;
 }
 
+* { -webkit-tap-highlight-color: transparent; }
+.min-h-screen { min-height: 100dvh; }
+.h-screen { height: 100dvh; }
+
 /* =============================================
    BASE LAYER — Deep obsidian
    ============================================= */

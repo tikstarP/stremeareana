@@ -21,16 +21,6 @@ type OverlayEvent = {
   color: string;
 };
 
-const mockEvents: OverlayEvent[] = [
-  { id: 1, type: 'selection', title: 'Next Round Starting', subtitle: 'BGMI · Round 3 of 5', icon: Trophy, color: '#10b981' },
-  { id: 2, type: 'winner', title: 'Winner: Priya', subtitle: 'AI Quiz · 95% accuracy', icon: Crown, color: '#f59e0b' },
-  { id: 3, type: 'countdown', title: 'Round 4', subtitle: 'Starts in 10...', icon: Clock, color: '#3b82f6' },
-  { id: 4, type: 'shoutout', title: 'Shoutout: RajGamer', subtitle: '50 coins donated', icon: Star, color: '#a855f7' },
-  { id: 5, type: 'coin', title: 'Vikram held 50 coins', subtitle: 'Coin Priority active', icon: Coins, color: '#eab308' },
-  { id: 6, type: 'player_join', title: 'Sofia joined the lobby', subtitle: 'Waiting for selection', icon: Users, color: '#06b6d4' },
-  { id: 7, type: 'fan_drop', title: 'Fan Drop: sketch.png', subtitle: 'New submission from Neha', icon: Sparkles, color: '#ec4899' },
-];
-
 const eventIcons: Record<string, typeof Trophy> = {
   selection: Trophy, winner: Crown, countdown: Clock, shoutout: Star,
   coin: Coins, player_join: Users, fan_drop: Sparkles, fan_drop_show: Sparkles,
@@ -77,7 +67,7 @@ export default function OverlayPage() {
   const [connected] = useState(true);
   const [showQR, setShowQR] = useState(false);
   const qrTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const displayEvents = events.length > 0 ? events : mockEvents;
+  const displayEvents = events;
 
   // Fetch room by code
   useEffect(() => {
@@ -152,8 +142,8 @@ export default function OverlayPage() {
 
       <div className="relative w-full max-w-3xl flex items-center justify-center" style={{ minHeight: '240px' }}>
         <AnimatePresence mode="wait">
-          {displayEvents.length > 0 && (
-            <OverlayEventDisplay key={displayEvents[currentIndex]?.id || 0} event={displayEvents[currentIndex] || mockEvents[0]} />
+          {displayEvents.length > 0 && displayEvents[currentIndex] && (
+            <OverlayEventDisplay key={displayEvents[currentIndex].id} event={displayEvents[currentIndex]} />
           )}
         </AnimatePresence>
       </div>

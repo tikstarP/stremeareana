@@ -17,7 +17,18 @@ interface AudioSource {
 
 export default function AudioDock() {
   const { roomCode } = useParams();
-  const [connected] = useState(true);
+  const [connected, setConnected] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const goOnline = () => setConnected(true);
+    const goOffline = () => setConnected(false);
+    window.addEventListener('online', goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online', goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
+  }, []);
   const [masterMuted, setMasterMuted] = useState(false);
   const [masterVolume, setMasterVolume] = useState(80);
   const [sources, setSources] = useState<AudioSource[]>([
