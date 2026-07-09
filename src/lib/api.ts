@@ -190,6 +190,19 @@ export async function getLeaderboard(period = 'all'): Promise<LeaderboardEntry[]
   return (data || []).map((entry, i) => ({ ...entry, rank: i + 1 }));
 }
 
+export async function followUser(followerId: string, followingId: string): Promise<void> {
+  await supabase.from('follows').insert({ follower_id: followerId, following_id: followingId }).maybeSingle();
+}
+
+export async function unfollowUser(followerId: string, followingId: string): Promise<void> {
+  await supabase.from('follows').delete().eq('follower_id', followerId).eq('following_id', followingId);
+}
+
+export async function checkFollowStatus(followerId: string, followingId: string): Promise<boolean> {
+  const { data } = await supabase.from('follows').select('follower_id').eq('follower_id', followerId).eq('following_id', followingId).maybeSingle();
+  return !!data;
+}
+
 export async function getOverlayEvents(roomId: number, since?: string): Promise<OverlayEvent[]> {
   let query = supabase.from('overlay_events').select('*').order('created_at', { ascending: false }).limit(50);
   query = query.eq('room_id', roomId);
