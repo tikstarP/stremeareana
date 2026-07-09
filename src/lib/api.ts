@@ -203,6 +203,27 @@ export async function checkFollowStatus(followerId: string, followingId: string)
   return !!data;
 }
 
+export async function likeRoom(roomId: number, userId: string): Promise<number> {
+  await supabase.from('room_likes').insert({ room_id: roomId, user_id: userId }).maybeSingle();
+  const { data } = await supabase.from('rooms').select('likes').eq('id', roomId).single();
+  const newCount = (data?.likes ?? 0) + 1;
+  await supabase.from('rooms').update({ likes: newCount }).eq('id', roomId);
+  return newCount;
+}
+
+export async function unlikeRoom(roomId: number, userId: string): Promise<number> {
+  await supabase.from('room_likes').delete().eq('room_id', roomId).eq('user_id', userId);
+  const { data } = await supabase.from('rooms').select('likes').eq('id', roomId).single();
+  const newCount = Math.max(0, (data?.likes ?? 0) - 1);
+  await supabase.from('rooms').update({ likes: newCount }).eq('id', roomId);
+  return newCount;
+}
+
+export async function checkRoomLiked(roomId: number, userId: string): Promise<boolean> {
+  const { data } = await supabase.from('room_likes').select('user_id').eq('room_id', roomId).eq('user_id', userId).maybeSingle();
+  return !!data;
+}
+
 export async function getOverlayEvents(roomId: number, since?: string): Promise<OverlayEvent[]> {
   let query = supabase.from('overlay_events').select('*').order('created_at', { ascending: false }).limit(50);
   query = query.eq('room_id', roomId);
