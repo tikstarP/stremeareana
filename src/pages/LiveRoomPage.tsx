@@ -742,7 +742,6 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
       });
       setMessage('');
       if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); speak(message, superVoice.id).catch(() => addToast?.({ message: 'Voice announcement failed', type: 'error' })); }
-      fetchMessages();
     } catch { addToast?.({ message: 'Send failed', type: 'error' }); }
   };
 
@@ -772,7 +771,6 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
         username: profile?.username || user.email?.split('@')[0] || 'Anonymous',
         message: emoji, amount: 0, color: '#FF5A1F', is_super: false,
       });
-      fetchMessages();
     } catch { /* silent */ }
   };
 
