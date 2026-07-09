@@ -115,7 +115,7 @@ export default function LiveRoomPage() {
   const currentStatus = roomStatuses.find(s => s.id === roomStatus);
   const displayName = profile?.username || user?.email?.split('@')[0];
   const avatarUrl = profile?.avatar_url || (user ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}` : null);
-  const viewerCoins = profile?.coins ?? 15;
+  const viewerCoins = profile?.coins ?? 50;
   const viewerPoints = profile?.points ?? 0;
 
   const streamerName = room?.host_name || 'Simp';

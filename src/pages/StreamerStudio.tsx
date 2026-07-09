@@ -65,8 +65,8 @@ export default function StreamerStudio() {
   const [endConfirmOpen, setEndConfirmOpen] = useState(false);
 
   const [viewerCount, setViewerCount] = useState(0);
-  const [coinsSpent] = useState(150);
-  const [coinsHeld, setCoinsHeld] = useState(15);
+  const [coinsSpent] = useState(50);
+  const [coinsHeld, setCoinsHeld] = useState(50);
   const [fanDropStatus, setFanDropStatus] = useState<'locked' | 'scheduled' | 'open' | 'closed'>('locked');
   const [fanDropTheme, setFanDropTheme] = useState('Show us your art!');
   const [selectionActive, setSelectionActive] = useState(false);

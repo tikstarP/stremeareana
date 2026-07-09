@@ -19,7 +19,7 @@ export async function upsertProfile(userId: string, email?: string): Promise<Pro
   const username = email ? email.split('@')[0] : 'User_' + userId.substring(0, 6);
   const avatar_url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`;
   const { data, error } = await supabase.from('profiles').insert({
-    id: userId, username, avatar_url, coins: 15, points: 0, streak: 0,
+    id: userId, username, avatar_url, coins: 50, points: 0, streak: 0,
   }).select().single();
   if (error) throw error;
   return data;

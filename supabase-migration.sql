@@ -11,7 +11,7 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   username text,
   avatar_url text,
-  coins integer not null default 200,
+  coins integer not null default 50,
   points integer not null default 0,
   streak integer not null default 0,
   created_at timestamptz not null default now()
