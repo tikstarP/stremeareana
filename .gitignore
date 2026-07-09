@@ -25,3 +25,6 @@ dist-ssr
 .vite-source-tags.js
 .vercel
 .env
+
+# Local Netlify folder
+.netlify
