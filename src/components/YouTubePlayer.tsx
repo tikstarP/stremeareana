@@ -122,7 +122,7 @@ export default function YouTubePlayer({ videoId = '' }: { videoId?: string }) {
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className="fixed z-50 w-64 rounded-xl overflow-hidden bg-black border border-white/10 shadow-2xl cursor-grab active:cursor-grabbing"
+            className="fixed z-50 w-64 max-w-[calc(100vw-2rem)] rounded-xl overflow-hidden bg-black border border-white/10 shadow-2xl cursor-grab active:cursor-grabbing"
             style={{ touchAction: 'none', bottom: 'calc(5rem + env(safe-area-inset-bottom))', right: 'calc(1rem + env(safe-area-inset-right))' }}
             onPointerDown={handlePiPDragStart}
           >

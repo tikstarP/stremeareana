@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Headphones, Mic, Play, Activity, Wifi, WifiOff, Speaker, Bell, Radio, Zap, Loader2 } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
+import { useApp } from '../contexts/AppContext';
 import { speak, onTTSStatus, getTTSStatus, kokoroVoices } from '../lib/tts';
 import type { TTSStatus } from '../lib/tts';
 
@@ -17,6 +18,7 @@ interface AudioSource {
 
 export default function AudioDock() {
   const { roomCode } = useParams();
+  const { addToast } = useApp();
   const [connected, setConnected] = useState(navigator.onLine);
 
   useEffect(() => {
@@ -77,7 +79,7 @@ export default function AudioDock() {
   };
 
   const handleTestVoice = () => {
-    speak('Welcome to the arena!', kokoroVoices[0].id).catch(() => {});
+    speak('Welcome to the arena!', kokoroVoices[0].id).catch(() => addToast({ message: 'Voice test failed — TTS unavailable', type: 'error' }));
   };
 
   const handleTestSound = () => {
@@ -92,7 +94,7 @@ export default function AudioDock() {
       g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
       o.start();
       o.stop(ctx.currentTime + 0.3);
-    } catch { console.warn('Audio not supported'); }
+    } catch { addToast({ message: 'Audio not supported on this browser', type: 'error' }); }
   };
 
   return (

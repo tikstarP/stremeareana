@@ -49,7 +49,7 @@ export default function GlobalFloatingPlayer() {
         initial={{ opacity: 0, scale: 0.8, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.8, y: 20 }}
-        className="fixed z-[100] w-56 rounded-xl overflow-hidden bg-black border border-white/10 shadow-2xl cursor-grab active:cursor-grabbing"
+        className="fixed z-[100] w-56 max-w-[calc(100vw-2rem)] rounded-xl overflow-hidden bg-black border border-white/10 shadow-2xl cursor-grab active:cursor-grabbing"
         style={{ touchAction: 'none', bottom: 'calc(1rem + env(safe-area-inset-bottom))', right: 'calc(1rem + env(safe-area-inset-right))' }}
         onPointerDown={handleDragStart}
         onClick={handleExpand}

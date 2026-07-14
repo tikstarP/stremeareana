@@ -52,22 +52,10 @@ const typeConfig: Record<string, { icon: typeof MessageSquare; color: string; pr
   join_link: { icon: Smartphone, color: 'text-arcade-green', prefix: 'Join', group: 'alerts' },
 };
 
-const mockEntries: FeedEntry[] = [
-  { id: 1, type: 'youtube_chat', username: 'RajGamer', text: 'bhai next match?', time: 'now' },
-  { id: 2, type: 'youtube_superchat', username: 'Priya', text: 'great stream!', time: '30s', amount: 100 },
-  { id: 3, type: 'arena_join', username: 'Rahul', text: 'joined Player Lobby', time: '1m' },
-  { id: 4, type: 'arena_shoutout', username: 'Neha', text: 'pick me next!', time: '1m', amount: 50, moderation: { level: 'safe' } },
-  { id: 5, type: 'coin', username: 'Vikram', text: '50 coins held', time: '1m', amount: 50 },
-  { id: 6, type: 'selection', username: 'Priya', text: 'selected for main game', time: '2m' },
-  { id: 7, type: 'arena_shoutout', username: 'Anon', text: 'you are a terrible streamer and i hope you fail', time: '3m', amount: 30, moderation: { level: 'restricted', reason: 'Negative language detected' } },
-  { id: 8, type: 'fan_drop', username: 'Sofia', text: 'submitted image "sketch.png"', time: '3m' },
-  { id: 9, type: 'ai', username: 'AI Host', text: 'Round 2 finished — Aman leading', time: '4m' },
-  { id: 10, type: 'moderation', username: 'System', text: 'Severe message blocked automatically', time: '5m', moderation: { level: 'severe' } },
-  { id: 11, type: 'moderation', username: 'System', text: 'Suspicious link blocked from SpamBot', time: '6m', moderation: { level: 'severe' } },
-];
+// Mock data removed — empty state shows "No items" when entries are empty
 
 export default function LiveFeed({ entries: _entries, onAllowShoutout, onRejectShoutout, addToast, roomCode }: LiveFeedProps) {
-  const [entries, setEntries] = useState<FeedEntry[]>(_entries && _entries.length > 0 ? _entries : mockEntries);
+  const [entries, setEntries] = useState<FeedEntry[]>(_entries || []);
   const [filter, setFilter] = useState<FilterTab>('all');
   const [darkFeed, setDarkFeed] = useState(true);
   const [pinned, setPinned] = useState(true);

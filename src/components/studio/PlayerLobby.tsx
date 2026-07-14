@@ -49,25 +49,7 @@ const tabs = [
   { id: 'history', label: 'History', icon: Clock },
 ];
 
-const mockStats: PlayerStats[] = [
-  { skillScore: 72, winRate: 58, gamesPlayed: 124, coinsEarned: 3400, streak: 3, rank: 'Gold', accuracy: 82, avgScore: 78, lastGames: ['win', 'win', 'loss', 'win', 'draw'], topGame: 'BGMI' },
-  { skillScore: 95, winRate: 82, gamesPlayed: 312, coinsEarned: 12500, streak: 7, rank: 'Diamond', accuracy: 94, avgScore: 91, lastGames: ['win', 'win', 'win', 'win', 'win'], topGame: 'BGMI' },
-  { skillScore: 68, winRate: 52, gamesPlayed: 89, coinsEarned: 2100, streak: 1, rank: 'Silver', accuracy: 71, avgScore: 65, lastGames: ['loss', 'win', 'loss', 'win', 'loss'], topGame: 'Free Fire' },
-  { skillScore: 81, winRate: 65, gamesPlayed: 178, coinsEarned: 5600, streak: 2, rank: 'Gold', accuracy: 79, avgScore: 74, lastGames: ['win', 'loss', 'win', 'win', 'loss'], topGame: 'BGMI' },
-  { skillScore: 55, winRate: 40, gamesPlayed: 45, coinsEarned: 900, streak: 0, rank: 'Bronze', accuracy: 58, avgScore: 52, lastGames: ['loss', 'loss', 'win', 'loss', 'loss'], topGame: 'Free Fire' },
-  { skillScore: 88, winRate: 73, gamesPlayed: 201, coinsEarned: 8900, streak: 4, rank: 'Platinum', accuracy: 88, avgScore: 85, lastGames: ['win', 'win', 'win', 'loss', 'win'], topGame: 'Valorant' },
-  { skillScore: 42, winRate: 28, gamesPlayed: 32, coinsEarned: 450, streak: 0, rank: 'Bronze', accuracy: 45, avgScore: 38, lastGames: ['loss', 'loss', 'loss', 'draw', 'loss'], topGame: 'BGMI' },
-];
-
-const mockPlayers: LobbyPlayer[] = [
-  { id: 1, username: 'Aman', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=aman', method: 'Random Pick', status: 'waiting', joined_at: '2m ago', stats: mockStats[0] },
-  { id: 2, username: 'Priya', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=priya', method: 'AI Quiz (95%)', score: 95, status: 'selected', team: 'Team A', joined_at: '1m ago', stats: mockStats[1] },
-  { id: 3, username: 'Vikram', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=vikram', method: 'AI Quiz (88%)', score: 88, status: 'selected', team: 'Team B', coins_held: 50, joined_at: '3m ago', stats: mockStats[2] },
-  { id: 4, username: 'Sofia', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sofia', method: 'AI Quiz (82%)', score: 82, status: 'selected', team: 'Team A', joined_at: '4m ago', stats: mockStats[3] },
-  { id: 5, username: 'Neha', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=neha', method: 'Coin Priority', coins_held: 75, status: 'waiting', joined_at: '5m ago', stats: mockStats[4] },
-  { id: 6, username: 'Rahul', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rahul', method: 'Fastest Finger', score: 100, status: 'waiting', joined_at: '6m ago', stats: mockStats[5] },
-  { id: 7, username: 'Raja', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=raja', coins_held: 30, status: 'replaced', joined_at: '8m ago', stats: mockStats[6] },
-];
+// Mock data removed — empty states below handle no-data gracefully
 
 const teamNames = ['Team A', 'Team B', 'Team C', 'Team D'];
 
@@ -76,7 +58,7 @@ export default function PlayerLobby({
   onInvite, onStartGame, gameActive, mainGame, addToast,
 }: PlayerLobbyProps) {
   const [activeTab, setActiveTab] = useState('selected');
-  const players = _players.length > 0 ? _players : mockPlayers;
+  const players = _players;
 
   const selected = players.filter(p => p.status === 'selected');
   const waiting = players.filter(p => p.status === 'waiting');

@@ -25,14 +25,14 @@ const rankBg = (r: number) => {
 
 export default function LeaderboardPage() {
   const { user } = useAuth();
-  const { profile } = useApp();
+  const { profile, addToast } = useApp();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [period, setPeriod] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    getLeaderboard(period).then(data => setEntries(data)).catch(() => setEntries([])).finally(() => setLoading(false));
+    getLeaderboard(period).then(data => setEntries(data)).catch(() => { setEntries([]); addToast({ message: 'Failed to load leaderboard', type: 'error' }); }).finally(() => setLoading(false));
   }, [period]);
 
   const totalPlayers = entries.length;

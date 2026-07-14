@@ -101,21 +101,30 @@ export default function StudioMobileView({
   );
 
   const [pipOpen, setPipOpen] = useState(true);
+  const [pipExpanded, setPipExpanded] = useState(false);
 
   const pipPreview = videoId && pipOpen ? (
-    <div className="fixed bottom-[72px] right-3 z-50 w-[45vw] max-w-[200px] rounded-xl overflow-hidden bg-black border border-white/15 shadow-2xl" style={{ touchAction: 'none' }}>
-      {/* Clickable overlay for toggle */}
-      <button onClick={() => setPipOpen(false)} className="absolute -top-1.5 -right-1.5 z-10 w-5 h-5 rounded-full bg-black/80 border border-white/20 flex items-center justify-center">
-        <X className="w-3 h-3 text-white" />
-      </button>
-      <button onClick={(e) => { e.stopPropagation(); onToggleMute(); }} className="absolute top-1 left-1 z-10 w-5 h-5 rounded bg-black/60 flex items-center justify-center">
+    <div className={`fixed z-50 rounded-xl overflow-hidden bg-black border border-white/15 shadow-2xl transition-all duration-300 ${
+      pipExpanded
+        ? 'inset-x-3 top-28 bottom-24'
+        : 'bottom-[72px] right-3 w-[55vw] max-w-[280px]'
+    }`} style={{ touchAction: 'none' }}>
+      <div className="absolute top-1 right-1 z-10 flex gap-1">
+        <button onClick={() => setPipExpanded(p => !p)} className="w-6 h-6 rounded bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors">
+          <Monitor className="w-3 h-3 text-white" />
+        </button>
+        <button onClick={() => { setPipOpen(false); setPipExpanded(false); }} className="w-6 h-6 rounded bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors">
+          <X className="w-3 h-3 text-white" />
+        </button>
+      </div>
+      <button onClick={(e) => { e.stopPropagation(); onToggleMute(); }} className="absolute top-1 left-1 z-10 w-6 h-6 rounded bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors">
         {isMuted ? <VolumeX className="w-3 h-3 text-white" /> : <Volume2 className="w-3 h-3 text-white" />}
       </button>
-      <div className="relative bg-black" style={{ aspectRatio: '16/9' }}>
+      <div className="relative bg-black w-full h-full">
         <iframe src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0&controls=0`}
           className="w-full h-full pointer-events-none" allow="autoplay" title="pip"
         />
-        <div className="absolute top-1 left-6 px-1 py-0.5 rounded bg-red-500/80 text-[7px] font-bold text-white leading-none">LIVE</div>
+        <div className="absolute top-1 left-9 px-1.5 py-0.5 rounded bg-red-500/80 text-[8px] font-bold text-white leading-none">LIVE</div>
       </div>
     </div>
   ) : videoId ? (
