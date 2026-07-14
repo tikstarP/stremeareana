@@ -5,18 +5,17 @@ import { AppProvider } from './contexts/AppContext';
 import { LivePlayerProvider } from './contexts/LivePlayerContext';
 import GlobalFloatingPlayer from './components/GlobalFloatingPlayer';
 import ErrorBoundary from './components/ErrorBoundary';
-import EntryPage from './pages/EntryPage';
-import StreamerLanding from './pages/StreamerLanding';
-import ViewerLanding from './pages/ViewerLanding';
-import PrivacyPage from './pages/PrivacyPage';
-import TermsPage from './pages/TermsPage';
-import ContactPage from './pages/ContactPage';
-import AboutPage from './pages/AboutPage';
-import JoinRoomPage from './pages/JoinRoomPage';
-import FanGalleryPage from './pages/FanGalleryPage';
-import LiveRoomPage from './pages/LiveRoomPage';
-import LoginPage from './pages/LoginPage';
-
+const EntryPage = lazy(() => import('./pages/EntryPage'));
+const StreamerLanding = lazy(() => import('./pages/StreamerLanding'));
+const ViewerLanding = lazy(() => import('./pages/ViewerLanding'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const JoinRoomPage = lazy(() => import('./pages/JoinRoomPage'));
+const FanGalleryPage = lazy(() => import('./pages/FanGalleryPage'));
+const LiveRoomPage = lazy(() => import('./pages/LiveRoomPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 const CreateRoomPage = lazy(() => import('./pages/CreateRoomPage'));
 const AudioDock = lazy(() => import('./pages/AudioDock'));
 const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
@@ -46,20 +45,20 @@ function App() {
           <ErrorBoundary>
           <Routes>
             <Route path="/" element={<Navigate to="/entry" replace />} />
-            <Route path="/entry" element={<EntryPage />} />
-            <Route path="/streamer" element={<StreamerLanding />} />
-            <Route path="/viewer" element={<ViewerLanding />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/about" element={<AboutPage />} />
+            <Route path="/entry" element={<LazyRoute><EntryPage /></LazyRoute>} />
+            <Route path="/streamer" element={<LazyRoute><StreamerLanding /></LazyRoute>} />
+            <Route path="/viewer" element={<LazyRoute><ViewerLanding /></LazyRoute>} />
+            <Route path="/privacy" element={<LazyRoute><PrivacyPage /></LazyRoute>} />
+            <Route path="/terms" element={<LazyRoute><TermsPage /></LazyRoute>} />
+            <Route path="/contact" element={<LazyRoute><ContactPage /></LazyRoute>} />
+            <Route path="/about" element={<LazyRoute><AboutPage /></LazyRoute>} />
             <Route path="/leaderboard" element={<LazyRoute><LeaderboardPage /></LazyRoute>} />
             <Route path="/settings" element={<LazyRoute><SettingsPage /></LazyRoute>} />
             <Route path="/reset-password" element={<LazyRoute><ResetPasswordPage /></LazyRoute>} />
             <Route path="/verify-email" element={<LazyRoute><VerifyEmailPage /></LazyRoute>} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/join" element={<JoinRoomPage />} />
-            <Route path="/room/:roomCode" element={<LiveRoomPage />} />
+            <Route path="/login" element={<LazyRoute><LoginPage /></LazyRoute>} />
+            <Route path="/join" element={<LazyRoute><JoinRoomPage /></LazyRoute>} />
+            <Route path="/room/:roomCode" element={<LazyRoute><LiveRoomPage /></LazyRoute>} />
             <Route path="/create-room" element={<LazyRoute><CreateRoomPage /></LazyRoute>} />
             <Route path="/studio/:roomCode" element={<LazyRoute><StreamerStudio /></LazyRoute>} />
             <Route path="/audio/:roomCode" element={<LazyRoute><AudioDock /></LazyRoute>} />
