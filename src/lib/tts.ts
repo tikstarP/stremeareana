@@ -1,14 +1,9 @@
-import type { KokoroTTS } from 'kokoro-js';
-import type { RawAudio } from '@huggingface/transformers';
-
-let ttsInstance: KokoroTTS | null = null;
-let loadingPromise: Promise<void> | null = null;
-
 export type TTSStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 let _status: TTSStatus = 'idle';
 let _listeners: Array<(s: TTSStatus) => void> = [];
 let _loadedVoices: string[] = [];
+let _voiceMap: Record<string, SpeechSynthesisVoice> = {};
 
 function notify(s: TTSStatus) {
   _status = s;
@@ -25,32 +20,31 @@ export function getTTSStatus(): TTSStatus { return _status; }
 export function getLoadedVoices(): string[] { return _loadedVoices; }
 
 export async function initTTS(): Promise<void> {
-  if (ttsInstance) return;
-  if (loadingPromise) return loadingPromise;
-
+  if (_status === 'ready' || _status === 'loading') return;
   notify('loading');
-  loadingPromise = (async () => {
-    try {
-      const { KokoroTTS } = await import('kokoro-js');
-      ttsInstance = await KokoroTTS.from_pretrained(
-        'onnx-community/Kokoro-82M-v1.0-ONNX',
-        { dtype: 'q8', device: 'wasm' }
-      );
-      const v = ttsInstance.list_voices() as any;
-      _loadedVoices = Object.keys(v);
+  if (!window.speechSynthesis) {
+    notify('error');
+    throw new Error('Speech synthesis not supported');
+  }
+  const check = () => {
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      _voiceMap = {};
+      for (const v of voices) {
+        const key = `${v.lang}_${v.name.replace(/\s+/g, '_').toLowerCase()}`;
+        _voiceMap[key] = v;
+        if (!_loadedVoices.includes(key)) _loadedVoices.push(key);
+      }
       notify('ready');
-    } catch (err) {
-      console.error('TTS init failed:', err);
-      notify('error');
-      throw err;
     }
-  })();
-
-  return loadingPromise;
-}
-
-async function rawAudioToBlob(audio: RawAudio): Promise<Blob> {
-  return audio.toBlob();
+  };
+  check();
+  if (_loadedVoices.length === 0) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      check();
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }
 }
 
 const queue: Array<() => Promise<void>> = [];
@@ -65,28 +59,29 @@ async function tick(): Promise<void> {
   tick();
 }
 
-export async function speak(text: string, voice: string = 'af_heart'): Promise<void> {
+export async function speak(text: string, voice: string = 'google_english'): Promise<void> {
   queue.push(async () => {
     await initTTS();
-    if (!ttsInstance) throw new Error('TTS not initialized');
-    const audio = await ttsInstance.generate(text, { voice: voice as any, speed: 1 });
-    const blob = await rawAudioToBlob(audio);
-    const url = URL.createObjectURL(blob);
-    const el = new Audio(url);
-    el.play();
+    const u = new SpeechSynthesisUtterance(text);
+    const matched = _voiceMap[voice];
+    if (matched) u.voice = matched;
+    u.lang = matched ? matched.lang : 'en-US';
+    u.rate = 1.1;
+    u.pitch = 1;
+    u.volume = 1;
+    window.speechSynthesis.speak(u);
     await new Promise<void>(done => {
-      el.onended = () => { URL.revokeObjectURL(url); done(); };
-      el.onerror = () => { URL.revokeObjectURL(url); done(); };
+      u.onend = () => done();
+      u.onerror = () => done();
     });
   });
   if (!playing) tick();
 }
 
 export const kokoroVoices: { id: string; label: string; lang: string }[] = [
-  { id: 'af_heart', label: 'English US (Female)', lang: 'en' },
-  { id: 'am_michael', label: 'English US (Male)', lang: 'en' },
-  { id: 'bf_emma', label: 'English UK (Female)', lang: 'en' },
-  { id: 'bm_george', label: 'English UK (Male)', lang: 'en' },
-  { id: 'hf_alpha', label: 'Hindi (Female)', lang: 'hi' },
-  { id: 'hm_omega', label: 'Hindi (Male)', lang: 'hi' },
+  { id: 'google_english', label: 'English (Default)', lang: 'en' },
+  { id: 'google_hindi', label: 'Hindi (Default)', lang: 'hi' },
+  { id: 'google_spanish', label: 'Spanish (Default)', lang: 'es' },
+  { id: 'en-US_Google_Us_English', label: 'English US (Female)', lang: 'en' },
+  { id: 'hi-IN_Google_Hindi', label: 'Hindi (Female)', lang: 'hi' },
 ];
