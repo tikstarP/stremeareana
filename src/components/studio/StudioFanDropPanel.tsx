@@ -60,10 +60,10 @@ export default function StudioFanDropPanel({
                 <p className="text-[8px] text-text-muted truncate">{sub.preview}</p>
               </div>
               <div className="flex gap-0.5 shrink-0">
-                <button onClick={() => onApprove(sub.id)} className="p-1 rounded hover:bg-arcade-green/20 text-arcade-green"><Check className="w-3 h-3" /></button>
-                <button onClick={() => onReject(sub.id)} className="p-1 rounded hover:bg-red-500/20 text-red-400"><X className="w-3 h-3" /></button>
-                <button onClick={() => onShowOnOverlay(sub.id)} className="p-1 rounded hover:bg-arcade-blue/20 text-arcade-blue"><Eye className="w-3 h-3" /></button>
-                <button onClick={() => onDelete(sub.id)} className="p-1 rounded hover:bg-red-500/20 text-red-400"><Trash2 className="w-3 h-3" /></button>
+                <button onClick={() => onApprove(sub.id)} className="p-1 rounded hover:bg-arcade-green/20 text-arcade-green focus-visible:ring-2 focus-visible:ring-arcade-green/50"><Check className="w-3 h-3" /></button>
+                <button onClick={() => onReject(sub.id)} className="p-1 rounded hover:bg-red-500/20 text-red-400 focus-visible:ring-2 focus-visible:ring-red-500/50"><X className="w-3 h-3" /></button>
+                <button onClick={() => onShowOnOverlay(sub.id)} className="p-1 rounded hover:bg-arcade-blue/20 text-arcade-blue focus-visible:ring-2 focus-visible:ring-arcade-blue/50"><Eye className="w-3 h-3" /></button>
+                <button onClick={() => onDelete(sub.id)} className="p-1 rounded hover:bg-red-500/20 text-red-400 focus-visible:ring-2 focus-visible:ring-red-500/50"><Trash2 className="w-3 h-3" /></button>
               </div>
             </motion.div>
           ))}

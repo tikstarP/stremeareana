@@ -45,7 +45,7 @@ export default function JoinRoomPage() {
   }, [location.search]);
 
   useEffect(() => {
-    getLiveRooms().then(data => setRooms(data)).catch(() => { setRooms([]); }).finally(() => setRoomsLoading(false));
+    getLiveRooms().then(data => setRooms(data)).catch(() => { setRooms([]); addToast({ message: 'Could not load live rooms', type: 'error' }); }).finally(() => setRoomsLoading(false));
   }, []);
 
   useEffect(() => {

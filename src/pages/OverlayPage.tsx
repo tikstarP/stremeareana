@@ -105,17 +105,20 @@ export default function OverlayPage() {
   const [roomId, setRoomId] = useState<number | null>(null);
   const [events, setEvents] = useState<OverlayEvent[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [connected] = useState(true);
+  const [connected, setConnected] = useState(true);
   const [showQR, setShowQR] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const qrTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const displayEvents = events;
 
   // Fetch room by code
   useEffect(() => {
     if (!roomCode) return;
+    setFetching(true);
     getRoomByCode(roomCode).then(data => {
       if (data?.id) setRoomId(data.id);
-    }).catch(() => {});
+    }).catch(() => { setConnected(false); console.error('Overlay: room fetch failed'); })
+      .finally(() => setFetching(false));
   }, [roomCode]);
 
   // Fetch existing overlay events
@@ -132,7 +135,7 @@ export default function OverlayPage() {
           color: eventColors[e.event_type] || '#a78bfa',
         })));
       }
-    }).catch(() => {});
+    }).catch(() => console.error('Overlay: events fetch failed'));
   }, [roomId]);
 
   // Realtime subscription for new events
@@ -171,7 +174,7 @@ export default function OverlayPage() {
         }
       };
       return () => { ch.close(); if (qrTimeoutRef.current) clearTimeout(qrTimeoutRef.current); };
-    } catch { return; }
+    } catch { console.warn('BroadcastChannel not supported'); }
   }, [code]);
 
   return (
@@ -183,8 +186,22 @@ export default function OverlayPage() {
 
       <div className="relative w-full max-w-3xl flex items-center justify-center" style={{ minHeight: '240px' }}>
         <AnimatePresence mode="wait">
-          {displayEvents.length > 0 && displayEvents[currentIndex] && (
+          {fetching ? (
+            <motion.div key="connecting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-2">
+              <div className="w-6 h-6 border-2 border-white/20 border-t-arcade-green rounded-full animate-spin" />
+              <span className="text-white/40 text-xs">Connecting...</span>
+            </motion.div>
+          ) : !connected ? (
+            <motion.div key="disconnected" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-2">
+              <span className="text-red-400/60 text-xs">Disconnected</span>
+            </motion.div>
+          ) : displayEvents.length > 0 && displayEvents[currentIndex] ? (
             <OverlayEventDisplay key={displayEvents[currentIndex].id} event={displayEvents[currentIndex]} />
+          ) : (
+            <motion.div key="waiting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-2">
+              <div className="w-2 h-2 bg-arcade-green/40 rounded-full animate-pulse" />
+              <span className="text-white/30 text-xs">Waiting for events...</span>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
@@ -204,7 +221,7 @@ export default function OverlayPage() {
             transition={{ type: 'spring', damping: 20, stiffness: 200 }}
             className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent pt-12 px-6" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
           >
-            <div className="max-w-2xl mx-auto flex items-center gap-6">
+            <div className="max-w-2xl mx-auto flex items-center gap-6 flex-wrap justify-center">
               <div className="shrink-0">
                 <img src={qrUrl} alt="QR" className="w-24 h-24 rounded-xl bg-white p-1.5 shadow-lg shadow-black/40"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />

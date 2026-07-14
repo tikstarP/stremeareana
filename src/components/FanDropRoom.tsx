@@ -35,7 +35,7 @@ export default function FanDropRoom({ roomId }: { roomId?: number }) {
     getArtSubmissions(roomId).then(data => {
       setSubmissions(data);
       data.forEach(s => setLikeCounts(p => ({ ...p, [s.id]: s.likes || 0 })));
-    }).catch(() => {});
+    }).catch(() => addToast({ message: 'Failed to load submissions', type: 'error' }));
   }, [roomId]);
 
   useEffect(() => {
@@ -87,7 +87,11 @@ export default function FanDropRoom({ roomId }: { roomId?: number }) {
     setLikedSet(p => { const n = new Set(p); already ? n.delete(id) : n.add(id); return n; });
     setLikeCounts(p => ({ ...p, [id]: (p[id] || 0) + (already ? -1 : 1) }));
     try { if (already) await unlikeSubmission(id, user.id); else await likeSubmission(id, user.id); }
-    catch { /* revert */ }
+    catch {
+      setLikedSet(p => { const n = new Set(p); already ? n.add(id) : n.delete(id); return n; });
+      setLikeCounts(p => ({ ...p, [id]: (p[id] || 0) + (already ? 1 : -1) }));
+      addToast({ message: 'Failed to update like', type: 'error' });
+    }
   };
 
   return (

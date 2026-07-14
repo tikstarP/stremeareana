@@ -107,7 +107,7 @@ export default function StreamerStudio() {
     getArtSubmissions(room.id).then(data => {
       setArtSubmissions(data);
       setPendingSubmissions(data.map(toFanDropSubmission));
-    }).catch(() => {});
+    }).catch(() => addToast({ message: 'Failed to load submissions', type: 'error' }));
   }, [room?.id]);
 
   useRealtimeSubscription<ArtSubmission>('art_submissions', room?.id ? { column: 'room_id', value: room.id } : undefined,
@@ -219,7 +219,7 @@ export default function StreamerStudio() {
 
   const handleStartGame = useCallback(() => {
     if (room) {
-      updateRoom(room.id, { status: 'playing' } as any).catch(() => {});
+      updateRoom(room.id, { status: 'playing' } as any).catch(() => addToast({ message: 'Failed to update room status', type: 'error' }));
     }
     addToast({ message: `${mainGame} started!`, type: 'success' });
   }, [mainGame, addToast, room]);
@@ -390,7 +390,7 @@ export default function StreamerStudio() {
           <div className="grid grid-cols-12 gap-4" style={{ minHeight: 'calc(100vh - 90px)' }}>
 
             {/* LEFT COLUMN (4/12) */}
-            <div className="col-span-4 space-y-2 overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
+            <div className="col-span-4 min-w-0 space-y-2 overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
               <StudioLivePreview
                 videoId={videoId}
                 isMuted={isMuted}
@@ -400,7 +400,7 @@ export default function StreamerStudio() {
                   setVideoId(id);
                   setYoutubeUrl(`https://youtube.com/watch?v=${id}`);
                   if (room) {
-                    updateRoom(room.id, { video_id: id } as any).catch(() => {});
+                    updateRoom(room.id, { video_id: id } as any).catch(() => addToast({ message: 'Failed to save video ID', type: 'error' }));
                   }
                 }}
                 addToast={addToast}
@@ -434,7 +434,7 @@ export default function StreamerStudio() {
                     onUpdateStreamerMode={setStreamerMode}
                     onSave={() => {
                       if (room) {
-                        updateRoom(room.id, { name: roomName, video_id: videoId, is_live: status === 'live' } as any).catch(() => {});
+                        updateRoom(room.id, { name: roomName, video_id: videoId, is_live: status === 'live' } as any).catch(() => addToast({ message: 'Failed to save settings', type: 'error' }));
                       }
                       addToast({ message: 'Settings saved', type: 'success' });
                     }}
@@ -446,7 +446,7 @@ export default function StreamerStudio() {
             </div>
 
             {/* CENTER COLUMN (5/12) */}
-            <div className="col-span-5 space-y-2 overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
+            <div className="col-span-5 min-w-0 space-y-2 overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
               <SelectionArena
                 onStartSelection={handleStartSelection}
                 onResetSelection={handleResetSelection}
@@ -471,7 +471,7 @@ export default function StreamerStudio() {
             </div>
 
             {/* RIGHT COLUMN (3/12) */}
-            <div className="col-span-3 space-y-2 overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
+            <div className="col-span-3 min-w-0 space-y-2 overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 90px)' }}>
               {/* Smart systems active indicator */}
               <div className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-arcade-green/5 border border-arcade-green/20">
                 <Zap className="w-3 h-3 text-arcade-green" />

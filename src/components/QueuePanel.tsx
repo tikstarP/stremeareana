@@ -20,7 +20,7 @@ export default function QueuePanel({ roomId }: { roomId?: number }) {
     try {
       const data = await getQueueEntries(roomId);
       setQueue(data);
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error(err); addToast({ message: 'Failed to load queue', type: 'error' }); }
     finally { setLoading(false); }
   }, [roomId]);
 

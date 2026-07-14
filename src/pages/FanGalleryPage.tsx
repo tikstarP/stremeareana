@@ -25,18 +25,23 @@ export default function FanGalleryPage() {
   const [roomId, setRoomId] = useState<number | null>(null);
   const [likedSet, setLikedSet] = useState<Set<number>>(new Set());
   const [likeCounts, setLikeCounts] = useState<Record<number, number>>({});
+  const [loadingSubs, setLoadingSubs] = useState(true);
 
   useEffect(() => {
     if (!roomCode) return;
+    setLoadingSubs(true);
     getRoomByCode(roomCode).then(data => {
       if (data?.id) {
         setRoomId(data.id);
         getArtSubmissions(data.id).then(subs => {
           setSubmissions(subs);
           subs.forEach(s => setLikeCounts(p => ({ ...p, [s.id]: s.likes || 0 })));
-        }).catch(() => {});
+        }).catch(() => addToast({ message: 'Failed to load submissions', type: 'error' }))
+          .finally(() => setLoadingSubs(false));
+      } else {
+        setLoadingSubs(false);
       }
-    }).catch(() => addToast({ message: 'Room not found', type: 'error' }));
+    }).catch(() => { addToast({ message: 'Room not found', type: 'error' }); setLoadingSubs(false); });
   }, [roomCode]);
 
   useRealtimeSubscription<ArtSubmission>('art_submissions', roomId ? { column: 'room_id', value: roomId } : undefined,
@@ -107,7 +112,19 @@ export default function FanGalleryPage() {
       </div>
 
       <div className="relative z-10 pt-20 pb-8 px-4 max-w-6xl mx-auto">
-        {ranked.length === 0 ? (
+        {loadingSubs ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden animate-pulse">
+                <div className="aspect-video bg-white/[0.06]" />
+                <div className="p-2.5 space-y-2">
+                  <div className="h-3 bg-white/[0.06] rounded w-2/3" />
+                  <div className="h-3 bg-white/[0.06] rounded w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : ranked.length === 0 ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center justify-center h-[60vh] gap-3"
           >

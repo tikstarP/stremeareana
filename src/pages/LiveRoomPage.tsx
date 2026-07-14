@@ -79,7 +79,7 @@ export default function LiveRoomPage() {
           const created = await createRoom(`Room ${roomCode}`, '', user.id, roomCode);
           if (!cancelled) setRoom(created);
           return;
-        } catch { /* create failed */ }
+        } catch { addToast({ message: 'Could not create room', type: 'error' }); }
       }
       if (!cancelled) {
         setRoom({ id: -(hashId(roomCode)), code: roomCode, name: 'Live Room', host_id: '', host_name: 'Streamer', host_avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer', is_live: true, viewer_count: 0, video_id: '', status: 'queue_open' });
@@ -197,7 +197,7 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
           <ViewerFeed roomId={roomId} user={user} addToast={addToast} profile={profile} refreshProfile={refreshProfile} />
         </div>
         <div className="col-span-5 xl:col-span-4">
-          <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] flex flex-col h-full min-h-[350px]">
+          <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] flex flex-col h-full min-h-[250px] lg:min-h-[350px]">
             <div className="flex items-center gap-1.5 p-2 border-b border-white/[0.06] overflow-x-auto no-scrollbar">
               {rightPanelTabs.map(t => (
                 <TabButton key={t.id} id={t.id} label={t.id === 'art' ? `Fan Drop ${fanDropBadgeIcon}` : t.label} icon={t.icon} active={tab === t.id} onClick={() => setTab(t.id)} />
@@ -252,13 +252,13 @@ function StreamerProfile({ user, hostId, roomId, streamerName, streamerAvatar, s
 
   useEffect(() => {
     if (user && hostId && user.id !== hostId) {
-      checkFollowStatus(user.id, hostId).then(setIsFollowing).catch(() => {});
+      checkFollowStatus(user.id, hostId).then(setIsFollowing).catch(() => addToast({ message: 'Failed to check follow status', type: 'error' }));
     }
   }, [user, hostId]);
 
   useEffect(() => {
     if (user && roomId && roomId > 0) {
-      checkRoomLiked(roomId, user.id).then(setLiked).catch(() => {});
+      checkRoomLiked(roomId, user.id).then(setLiked).catch(() => addToast({ message: 'Failed to check like status', type: 'error' }));
     }
   }, [user, roomId]);
 
@@ -457,13 +457,13 @@ function StreamerProfileMobile({ user, hostId, roomId, streamerName, streamerAva
 
   useEffect(() => {
     if (user && hostId && user.id !== hostId) {
-      checkFollowStatus(user.id, hostId).then(setIsFollowing).catch(() => {});
+      checkFollowStatus(user.id, hostId).then(setIsFollowing).catch(() => addToast({ message: 'Failed to check follow status', type: 'error' }));
     }
   }, [user, hostId]);
 
   useEffect(() => {
     if (user && roomId && roomId > 0) {
-      checkRoomLiked(roomId, user.id).then(setLiked).catch(() => {});
+      checkRoomLiked(roomId, user.id).then(setLiked).catch(() => addToast({ message: 'Failed to check like status', type: 'error' }));
     }
   }, [user, roomId]);
 
@@ -707,7 +707,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
       const data = await getChatMessages(roomId);
       setMessages(data);
       setFetchedOnce(true);
-    } catch { /* silent */ }
+    } catch { console.warn('Failed to fetch chat messages'); }
     finally { setLoading(false); }
   }, [roomId, isDemo]);
 

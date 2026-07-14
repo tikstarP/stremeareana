@@ -83,10 +83,10 @@ export default function Navbar() {
             <div className="px-4 py-4 space-y-3">
               {isHome && (
                 <>
-                  <a href="#features" onClick={() => setMobileOpen(false)} className="block text-neutral-400 hover:text-arcade-pink min-h-[44px] sm:min-h-auto py-2">Features</a>
-                  <a href="#how-it-works" onClick={() => setMobileOpen(false)} className="block text-neutral-400 hover:text-arcade-pink min-h-[44px] sm:min-h-auto py-2">How It Works</a>
-                  <a href="#art" onClick={() => setMobileOpen(false)} className="block text-neutral-400 hover:text-arcade-pink min-h-[44px] sm:min-h-auto py-2">Art Arena</a>
-                  <a href="#faq" onClick={() => setMobileOpen(false)} className="block text-neutral-400 hover:text-arcade-pink min-h-[44px] sm:min-h-auto py-2">FAQ</a>
+                  <a href="#features" onClick={() => setMobileOpen(false)} className="block text-neutral-400 hover:text-arcade-pink min-h-[44px] sm:min-h-auto py-2 touch-manipulation">Features</a>
+                  <a href="#how-it-works" onClick={() => setMobileOpen(false)} className="block text-neutral-400 hover:text-arcade-pink min-h-[44px] sm:min-h-auto py-2 touch-manipulation">How It Works</a>
+                  <a href="#art" onClick={() => setMobileOpen(false)} className="block text-neutral-400 hover:text-arcade-pink min-h-[44px] sm:min-h-auto py-2 touch-manipulation">Art Arena</a>
+                  <a href="#faq" onClick={() => setMobileOpen(false)} className="block text-neutral-400 hover:text-arcade-pink min-h-[44px] sm:min-h-auto py-2 touch-manipulation">FAQ</a>
                 </>
               )}
               <div className="flex items-center gap-4 py-2">

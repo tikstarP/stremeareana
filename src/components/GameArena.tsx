@@ -49,7 +49,7 @@ export default function GameArena({ roomId }: { roomId?: number }) {
         game_type: gameType, score: finalScore,
       });
       refreshProfile();
-    } catch (err) { console.error('Save score error:', err); }
+    } catch (err) { console.error('Save score error:', err); addToast({ message: 'Failed to save score', type: 'error' }); }
   }, [user, roomId, profile, refreshProfile]);
 
   const endGame = useCallback((r: 'win' | 'lose') => {
