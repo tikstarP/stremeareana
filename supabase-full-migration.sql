@@ -292,8 +292,8 @@ language plpgsql
 security definer
 as $$
 begin
-  delete from public.room_likes where room_id = increment_room_likes.room_id and user_id = increment_room_likes.user_id;
-  update public.rooms set likes = greatest(0, likes - 1) where id = room_id;
+  delete from public.room_likes where room_id = decrement_room_likes.room_id and user_id = decrement_room_likes.user_id;
+  update public.rooms set likes = greatest(0, likes - 1) where id = decrement_room_likes.room_id;
   return (select likes from public.rooms where id = room_id);
 end;
 $$;
