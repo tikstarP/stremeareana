@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { KeyRound, Eye, EyeOff } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
 import Toast from '../components/Toast';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();

@@ -6,7 +6,7 @@ import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import { Skeleton } from '../components/Skeleton';
 import { useAuth } from '../contexts/AuthContext';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 import type { LeaderboardEntry } from '../types';
 
 const rankIcon = (r: number) => {

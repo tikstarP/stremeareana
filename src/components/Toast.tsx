@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { CircleCheckBig, CircleX, Info, TriangleAlert, X } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 
 const icons = { success: CircleCheckBig, error: CircleX, info: Info, warning: TriangleAlert };
 const colors = {

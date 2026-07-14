@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import { Bot, Lock, Sparkles, Eye, Monitor, Shield, Volume2, Headphones, Zap, ChevronDown, Check } from 'lucide-react';
 import MoltenBackground from '../components/MoltenBackground';
 import Toast from '../components/Toast';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 import { useAuth } from '../contexts/AuthContext';
-import { getRoomByCode, updateRoom, getArtSubmissions, updateArtSubmission, deleteArtSubmission, createOverlayEvent, sendChatMessage } from '../lib/api';
+import { getRoomByCode, updateRoom, getArtSubmissions, updateArtSubmission, deleteArtSubmission, createOverlayEvent } from '../lib/api';
 import StudioTopBar from '../components/studio/StudioTopBar';
 import StudioLivePreview from '../components/studio/StudioLivePreview';
 import StudioRoomSetup from '../components/studio/StudioRoomSetup';
@@ -25,15 +25,15 @@ import type { ArtSubmission } from '../types';
 
 interface FanDropSubmission {
   id: number; username: string; avatar_url: string; type: string;
-  preview: string; submitted_at: string; likes: number; status: 'pending' | 'approved' | 'rejected';
+  preview: string; submitted_at: string; status: 'pending' | 'approved' | 'rejected';
 }
 
 function toFanDropSubmission(a: ArtSubmission): FanDropSubmission {
   return {
     id: a.id, username: a.username, avatar_url: a.avatar_url || '',
-    type: a.type || a.content_type || 'text',
+    type: a.content_type || 'text',
     preview: a.message || a.image_url || a.emoji || '',
-    submitted_at: a.created_at || '', likes: a.likes || 0,
+    submitted_at: a.created_at || '',
     status: (a.status as 'pending' | 'approved' | 'rejected') || 'pending',
   };
 }
@@ -79,14 +79,13 @@ export default function StreamerStudio() {
   const [viewerCount, setViewerCount] = useState(0);
   const [coinsSpent] = useState(50);
   const [coinsHeld, setCoinsHeld] = useState(50);
-  const [fanDropStatus, setFanDropStatus] = useState<'locked' | 'scheduled' | 'open' | 'closed'>('locked');
-  const [fanDropTheme, setFanDropTheme] = useState('Show us your art!');
+  const [fanDropStatus, setFanDropStatus] = useState<'locked' | 'open' | 'closed'>('locked');
   const [selectionActive, setSelectionActive] = useState(false);
   const [selectionConfig, setSelectionConfig] = useState<SelectionConfig | null>(null);
   const [smartModeration, setSmartModeration] = useState(true);
   const [smartVoice, setSmartVoice] = useState(true);
   const [smartVoiceMode, setSmartVoiceMode] = useState<'important' | 'normal' | 'hype' | 'manual'>('important');
-  const [smartReview, setSmartReview] = useState(true);
+
   const [smartSound, setSmartSound] = useState(true);
   const [smartSoundMode, setSmartSoundMode] = useState<'off' | 'low' | 'normal' | 'hype'>('normal');
   const [masterVolume, setMasterVolume] = useState(80);
@@ -482,61 +481,30 @@ export default function StreamerStudio() {
               {/* Fan Drops */}
               <CollapsibleSection title="Fan Drops" icon={Sparkles} iconColor="text-arcade-pink" defaultOpen={false}>
                 <div className="p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-text-muted">Smart Review</span>
-                    <button onClick={() => setSmartReview(p => !p)}
-                      className={`relative w-10 h-5 rounded-full transition-all ${smartReview ? 'bg-arcade-purple' : 'bg-white/[0.1]'}`}
-                    >
-                      <div className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 shadow transition-all ${smartReview ? 'left-[22px]' : 'left-[2px]'}`} />
-                    </button>
-                  </div>
                   <StudioFanDropPanel
-                    roomId={room?.id}
+                    roomCode={code}
                     fanDropStatus={fanDropStatus}
-                    fanDropTheme={fanDropTheme}
                     pendingSubmissions={pendingSubmissions}
                     onSetStatus={setFanDropStatus}
-                    onUpdateTheme={setFanDropTheme}
                     onApprove={async (id) => {
-                      try {
-                        await updateArtSubmission(id, { status: 'approved' });
-                        addToast({ message: 'Approved', type: 'success' });
-                      } catch { addToast({ message: 'Failed to approve', type: 'error' }); }
+                      try { await updateArtSubmission(id, { status: 'approved' }); addToast({ message: 'Approved', type: 'success' }); }
+                      catch { addToast({ message: 'Failed to approve', type: 'error' }); }
                     }}
                     onReject={async (id) => {
-                      try {
-                        await updateArtSubmission(id, { status: 'rejected' });
-                        addToast({ message: 'Rejected', type: 'error' });
-                      } catch { addToast({ message: 'Failed to reject', type: 'error' }); }
+                      try { await updateArtSubmission(id, { status: 'rejected' }); addToast({ message: 'Rejected', type: 'error' }); }
+                      catch { addToast({ message: 'Failed to reject', type: 'error' }); }
                     }}
                     onDelete={async (id) => {
-                      try {
-                        await deleteArtSubmission(id);
-                        addToast({ message: 'Deleted', type: 'info' });
-                      } catch { addToast({ message: 'Failed to delete', type: 'error' }); }
+                      try { await deleteArtSubmission(id); addToast({ message: 'Deleted', type: 'info' }); }
+                      catch { addToast({ message: 'Failed to delete', type: 'error' }); }
                     }}
                     onShowOnOverlay={async (id) => {
                       try {
                         await updateArtSubmission(id, { status: 'showing' });
-                        if (room) {
-                          await createOverlayEvent({ room_id: room.id, event_type: 'fan_drop_show', event_data: { submission_id: id } });
-                        }
+                        if (room) { await createOverlayEvent({ room_id: room.id, event_type: 'fan_drop_show', event_data: { submission_id: id } }); }
                         addToast({ message: 'Showing on overlay', type: 'info' });
                       } catch { addToast({ message: 'Failed to show on overlay', type: 'error' }); }
                     }}
-                    onRate={(id) => addToast({ message: 'Rating submitted', type: 'info' })}
-                    onAwardPoints={(id) => addToast({ message: 'Points awarded', type: 'success' })}
-                    onAIRead={async (id) => {
-                      try {
-                        const sub = pendingSubmissions.find(s => s.id === id);
-                        if (sub && room) {
-                          await sendChatMessage({ room_id: room.id, user_id: 'ai-host', username: '🤖 AI Host', message: `[AI] ${sub.preview}`, color: '#a78bfa', is_super: false });
-                          addToast({ message: 'AI reading submission aloud', type: 'info' });
-                        }
-                      } catch { addToast({ message: 'AI read failed', type: 'error' }); }
-                    }}
-                    onClearPending={() => addToast({ message: 'Pending cleared', type: 'info' })}
-                    addToast={addToast}
                   />
                 </div>
               </CollapsibleSection>

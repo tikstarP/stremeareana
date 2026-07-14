@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Timer, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 import { submitScore } from '../lib/api';
 
 const quizQuestions = [

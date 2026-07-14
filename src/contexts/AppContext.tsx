@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getProfile, upsertProfile } from '../lib/api';
+import { t as translate } from '../lib/translations';
 import type { Profile } from '../types';
 
 interface Toast {
@@ -12,6 +13,7 @@ interface Toast {
 interface AppContextType {
   language: string;
   setLanguage: (l: string) => void;
+  t: (key: string) => string;
   toasts: Toast[];
   addToast: (t: Omit<Toast, 'id'>) => void;
   removeToast: (id: string) => void;
@@ -44,6 +46,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [user, refreshProfile]);
 
+  const t = useCallback((key: string) => translate(key, language), [language]);
+
   const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts(prev => [...prev, { ...toast, id }]);
@@ -56,7 +60,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={{
-      language, setLanguage, toasts, addToast, removeToast, profile, refreshProfile,
+      language, setLanguage, t, toasts, addToast, removeToast, profile, refreshProfile,
     }}>
       {children}
     </AppContext.Provider>

@@ -6,7 +6,7 @@ import { getLiveRooms } from '../lib/api';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 import { RoomCardSkeleton } from '../components/Skeleton';
 import type { RoomData } from '../types';
 import jsQR from 'jsqr';

@@ -84,10 +84,8 @@ export async function sendChatMessage(msg: {
   if (error) throw error;
 
   if (msg.is_super && msg.amount && uid) {
-    const { data: profile } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle();
-    if (profile && profile.coins >= msg.amount) {
-      await supabase.from('profiles').update({ coins: profile.coins - msg.amount }).eq('id', uid);
-    }
+    const { error: coinError } = await supabase.rpc('deduct_coins', { user_id: uid, amount: msg.amount });
+    if (coinError) throw coinError;
   }
 
   return data;
@@ -105,6 +103,9 @@ export async function createArtSubmission(sub: {
   room_id: number; user_id: string; username: string; avatar_url?: string;
   content_type?: string; message?: string; image_url?: string; emoji?: string;
 }): Promise<ArtSubmission> {
+  if (sub.message && sub.message.length > 500) throw new Error('Message too long (max 500 chars)');
+  if (sub.emoji && sub.emoji.length > 20) throw new Error('Emoji too long');
+  if (sub.image_url && sub.image_url.length > 2048) throw new Error('Image URL too long');
   const { data, error } = await supabase.from('art_submissions').insert({
     room_id: sub.room_id, user_id: sub.user_id, username: sub.username,
     avatar_url: sub.avatar_url || null, content_type: sub.content_type || 'text',
@@ -177,35 +178,12 @@ export async function leaveQueue(id: number): Promise<void> {
 export async function submitScore(score: {
   room_id: number; user_id: string; username?: string; game_type: string; score: number;
 }): Promise<void> {
-  const username = score.username || 'Anonymous';
-  const { error } = await supabase.from('game_scores').insert({
-    room_id: score.room_id, user_id: score.user_id, username,
-    game_type: score.game_type, score: score.score || 0,
-  }).select().single();
+  const { error } = await supabase.rpc('submit_score', {
+    p_room_id: score.room_id, p_user_id: score.user_id,
+    p_username: score.username || 'Anonymous',
+    p_game_type: score.game_type, p_score: score.score || 0,
+  });
   if (error) throw error;
-
-  const { data: existing } = await supabase.from('leaderboard_entries')
-    .select('*').eq('user_id', score.user_id).eq('period', 'all').maybeSingle();
-  const won = score.score >= 100 ? 1 : 0;
-  if (existing) {
-    await supabase.from('leaderboard_entries').update({
-      total_points: existing.total_points + score.score,
-      games_won: existing.games_won + won,
-      streak: won ? existing.streak + 1 : 0,
-      username,
-    }).eq('id', existing.id);
-  } else {
-    await supabase.from('leaderboard_entries').insert({
-      user_id: score.user_id, username, total_points: score.score,
-      games_won: won, streak: won ? 1 : 0, period: 'all',
-      avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`,
-    });
-  }
-
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', score.user_id).maybeSingle();
-  if (profile) {
-    await supabase.from('profiles').update({ points: profile.points + score.score }).eq('id', score.user_id);
-  }
 }
 
 export async function getLeaderboard(period = 'all'): Promise<LeaderboardEntry[]> {
@@ -217,7 +195,8 @@ export async function getLeaderboard(period = 'all'): Promise<LeaderboardEntry[]
 }
 
 export async function followUser(followerId: string, followingId: string): Promise<void> {
-  await supabase.from('follows').insert({ follower_id: followerId, following_id: followingId }).maybeSingle();
+  const { error } = await supabase.from('follows').insert({ follower_id: followerId, following_id: followingId });
+  if (error && !error.message?.includes('duplicate')) throw error;
 }
 
 export async function unfollowUser(followerId: string, followingId: string): Promise<void> {
@@ -230,19 +209,15 @@ export async function checkFollowStatus(followerId: string, followingId: string)
 }
 
 export async function likeRoom(roomId: number, userId: string): Promise<number> {
-  await supabase.from('room_likes').insert({ room_id: roomId, user_id: userId }).maybeSingle();
-  const { data } = await supabase.from('rooms').select('likes').eq('id', roomId).single();
-  const newCount = (data?.likes ?? 0) + 1;
-  await supabase.from('rooms').update({ likes: newCount }).eq('id', roomId);
-  return newCount;
+  const { data, error } = await supabase.rpc('increment_room_likes', { room_id: roomId, user_id: userId });
+  if (error) throw error;
+  return data as number;
 }
 
 export async function unlikeRoom(roomId: number, userId: string): Promise<number> {
-  await supabase.from('room_likes').delete().eq('room_id', roomId).eq('user_id', userId);
-  const { data } = await supabase.from('rooms').select('likes').eq('id', roomId).single();
-  const newCount = Math.max(0, (data?.likes ?? 0) - 1);
-  await supabase.from('rooms').update({ likes: newCount }).eq('id', roomId);
-  return newCount;
+  const { data, error } = await supabase.rpc('decrement_room_likes', { room_id: roomId, user_id: userId });
+  if (error) throw error;
+  return data as number;
 }
 
 export async function checkRoomLiked(roomId: number, userId: string): Promise<boolean> {
@@ -270,7 +245,9 @@ export async function createOverlayEvent(event: {
 }
 
 export async function uploadFile(fileName: string, fileBase64: string, contentType?: string): Promise<string> {
-  const buffer = Uint8Array.from(atob(fileBase64), c => c.charCodeAt(0));
+  const decoded = atob(fileBase64);
+  if (decoded.length > 5 * 1024 * 1024) throw new Error('File too large (max 5MB)');
+  const buffer = Uint8Array.from(decoded, c => c.charCodeAt(0));
   const { error } = await supabase.storage.from('art-uploads').upload(fileName, buffer, { contentType, upsert: true });
   if (error) throw error;
   const { data: urlData } = supabase.storage.from('art-uploads').getPublicUrl(fileName);

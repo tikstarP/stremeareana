@@ -54,7 +54,6 @@ export default function MobileLandingPage({ totalViewers, loading, apiError, roo
         loading={loading}
         apiError={apiError}
         role={role}
-        onSwitchRole={switchRole}
       />
       <SocialProofBar />
       <FeatureCarousel role={role} />

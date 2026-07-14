@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Zap, Menu, X, Trophy, Coins, LogIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 import LanguageSelector from './LanguageSelector';
 
 export default function Navbar() {

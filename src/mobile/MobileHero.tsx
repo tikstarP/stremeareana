@@ -6,7 +6,6 @@ interface MobileHeroProps {
   loading?: boolean;
   apiError?: boolean;
   role: 'streamer' | 'viewer';
-  onSwitchRole: () => void;
 }
 
 export default function MobileHero({ totalViewers, loading, apiError, role }: MobileHeroProps) {

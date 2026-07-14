@@ -1,13 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Globe, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useApp } from '../context/AppContext';
-
-const languages = [
-  { code: 'en', label: 'English', flag: '🇺🇸' },
-  { code: 'hi', label: 'Hindi', flag: '🇮🇳' },
-  { code: 'es', label: 'Spanish', flag: '🇪🇸' },
-];
+import { useApp } from '../contexts/AppContext';
+import { supportedLangs } from '../lib/translations';
 
 export default function LanguageSelector({ compact = false }: { compact?: boolean }) {
   const { language, setLanguage } = useApp();
@@ -22,7 +17,7 @@ export default function LanguageSelector({ compact = false }: { compact?: boolea
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const current = languages.find(l => l.code === language);
+  const current = supportedLangs.find(l => l.code === language);
 
   return (
     <div ref={ref} className="relative">
@@ -45,7 +40,7 @@ export default function LanguageSelector({ compact = false }: { compact?: boolea
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             className="absolute right-0 mt-2 glass-strong rounded-xl overflow-hidden min-w-[160px] z-50"
           >
-            {languages.map(lang => (
+            {supportedLangs.map(lang => (
               <button
                 key={lang.code}
                 onClick={() => { setLanguage(lang.code); setOpen(false); }}

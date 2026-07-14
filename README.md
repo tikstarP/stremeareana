@@ -1,38 +1,41 @@
-# finalSTREAm — Live Interactive Streaming Platform
+# StreamArena — Live Interactive Streaming Platform
 
 ## Project Structure
 
 ```
 finalSTREAm/
 │
-├── index.html              # Entry HTML file (title, fonts, meta tags)
+├── index.html              # Entry HTML file
 ├── vite.config.ts          # Vite build config
 ├── package.json            # Dependencies & scripts
 ├── tsconfig.json           # TypeScript root config
 ├── tsconfig.app.json       # TypeScript app config
 ├── tsconfig.node.json      # TypeScript node config
 ├── eslint.config.js        # Linting rules
-├── vercel.json             # Vercel deploy config + env vars
-├── .env                    # Local environment variables (placeholders)
+├── .env                    # Local environment variables
 │
 ├── src/                    # ─── FRONTEND (React app) ───
 │   ├── main.tsx            # App entry point
 │   ├── App.tsx             # Router setup (all page routes)
-│   ├── index.css           # Global styles + Tailwind + background effects
+│   ├── index.css           # Global styles + Tailwind
 │   │
 │   ├── pages/              # Page components (one per route)
 │   │   ├── EntryPage.tsx         # Role selector (viewer / streamer)
-│   │   ├── LandingPage.tsx       # Homepage (role-based)
+│   │   ├── LandingPage.tsx       # Homepage (role-based, used internally)
 │   │   ├── ViewerLanding.tsx     # Viewer landing wrapper
 │   │   ├── StreamerLanding.tsx   # Streamer landing wrapper
 │   │   ├── LoginPage.tsx         # Sign in / Sign up / Demo login
-│   │   ├── DashboardPage.tsx     # User dashboard (not protected)
-│   │   ├── CreateRoomPage.tsx    # Create a room (not protected)
+│   │   ├── CreateRoomPage.tsx    # Create a room
 │   │   ├── JoinRoomPage.tsx      # Join a room by code
 │   │   ├── LiveRoomPage.tsx      # Live room (viewer + streamer)
 │   │   ├── StreamerStudio.tsx    # Full streamer control panel
 │   │   ├── OverlayPage.tsx       # OBS overlay (events + QR)
 │   │   ├── AudioDock.tsx         # Audio capture for OBS
+│   │   ├── FanGalleryPage.tsx    # Fan art gallery
+│   │   ├── LeaderboardPage.tsx   # Global leaderboard
+│   │   ├── SettingsPage.tsx      # User settings
+│   │   ├── ResetPasswordPage.tsx # Password reset
+│   │   ├── VerifyEmailPage.tsx   # Email verification
 │   │   ├── AboutPage.tsx         # About page
 │   │   ├── PrivacyPage.tsx       # Privacy policy
 │   │   ├── TermsPage.tsx         # Terms of service
@@ -50,8 +53,7 @@ finalSTREAm/
 │   │   ├── QueuePanel.tsx        # Room queue UI
 │   │   ├── Leaderboard.tsx       # Ranked leaderboard
 │   │   ├── GameArena.tsx         # Mini-games area
-│   │   ├── InteractionHub.tsx    # Chat + Super Chat + TTS
-│   │   ├── FanDropRoom.tsx       # Fan drop submissions (text/emoji/image/video)
+│   │   ├── FanDropRoom.tsx       # Fan drop submissions
 │   │   ├── FloatingAssistant.tsx # Floating CTA button
 │   │   └── GlobalFloatingPlayer.tsx # Global PiP overlay
 │   │
@@ -80,10 +82,8 @@ finalSTREAm/
 │   │
 │   ├── contexts/           # React context providers
 │   │   ├── AuthContext.tsx       # Auth state (Supabase + demo fallback)
+│   │   ├── AppContext.tsx        # App state (profile, toasts, language)
 │   │   └── LivePlayerContext.tsx  # Global PiP video state
-│   │
-│   ├── context/            # Additional contexts
-│   │   └── AppContext.tsx        # App state (profile, toasts, language)
 │   │
 │   ├── hooks/              # Custom React hooks
 │   │   ├── useScrollPosition.ts       # Track scroll position (RAF)
@@ -92,29 +92,21 @@ finalSTREAm/
 │   │
 │   └── lib/                # Utility / library files
 │       ├── supabase.ts          # Supabase client init
-│       └── googleAuth.ts        # Google OAuth flow
+│       └── api.ts               # All Supabase CRUD operations
 │
-├── api/                    # ─── BACKEND (Vercel serverless) ───
-│   ├── db-client.js        # Supabase admin client (service role)
-│   ├── db-wake.js          # Auto-restore DB on 500 errors
-│   ├── auth-callback.js    # Create profile after signup
-│   ├── rooms.js            # CRUD live rooms
-│   ├── profiles.js         # GET/PUT user profiles
-│   ├── queue.js            # CRUD queue entries
-│   ├── chat.js             # Chat messages + super chat
-│   ├── games.js            # Game scores + leaderboard update
-│   ├── leaderboard.js      # Ranked leaderboard
-│   ├── art.js              # Art submissions CRUD
-│   └── upload.js           # File upload to Supabase Storage
+├── functions/              # ─── BACKEND (Cloudflare Functions) ───
+│   └── api/
+│       └── tts.ts               # TTS proxy (Google Translate)
 │
 ├── public/                 # Public static files
 │   ├── favicon.svg
-│   ├── vite.svg
-│   └── art/                # Landing page showcase images
+│   ├── manifest.json
+│   ├── sw.js                   # Service worker (PWA)
+│   └── art/                    # Landing page showcase images
 │       ├── showcase-1.png
 │       └── showcase-2.png
 │
-└── node_modules/           # Dependencies (auto-installed)
+└── supabase-full-migration.sql  # Consolidated DB schema + RLS + triggers
 ```
 
 ## Tech Stack
@@ -127,8 +119,8 @@ finalSTREAm/
 | Database | Supabase PostgreSQL | Free tier (500MB) |
 | Auth | Supabase Auth | Free tier (50k users) |
 | Storage | Supabase Storage | Free tier (2GB) |
-| Hosting | Vercel | Free tier (100GB) |
-| API Functions | Vercel Serverless | Free tier |
+| Hosting | Cloudflare Pages | Free tier |
+| TTS Proxy | Cloudflare Pages Function | Free tier |
 
 ## Commands
 
@@ -136,9 +128,13 @@ finalSTREAm/
 - `npm run build` — Build for production
 - `npm run preview` — Preview production build
 - `npm run lint` — Check code quality
+- `npm run test` — Run tests
+- `npm run deploy:cf` — Deploy to Cloudflare Pages (preview)
+- `npm run deploy:cf:prod` — Deploy to Cloudflare Pages (production)
 
 ## Key Notes
 
 - **Mobile-first**: All UI is designed for mobile users first
-- **API routes**: Backend endpoints at `/api/*` run as Vercel serverless functions
-- **Env vars**: Real keys in `vercel.json`, local placeholders in `.env`
+- **Database**: All CRUD runs client-side via Supabase JS SDK with RLS. Run `supabase-full-migration.sql` in Supabase SQL Editor to set up the schema.
+- **TTS endpoint**: `/api/tts` (POST) runs as a Cloudflare Pages Function
+- **Env vars**: Required — `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`

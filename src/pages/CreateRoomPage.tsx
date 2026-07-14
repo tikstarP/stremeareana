@@ -6,7 +6,7 @@ import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
 import { useAuth } from '../contexts/AuthContext';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 import { createRoom } from '../lib/api';
 
 const templates = [

@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Volume2, VolumeX, Gamepad2, MessageSquare, Trophy, Coins, Hash, Share2, Heart, Play, Shield, ListOrdered, Sparkles, Clock, BadgeCheck, X, Copy, Sun, Moon, ArrowDown, Send, Star, Eye, Crown, Bot, Smartphone, UserPlus, Mic } from 'lucide-react';
+import { Users, Volume2, VolumeX, Gamepad2, MessageSquare, Trophy, Coins, Hash, Share2, Heart, Play, Shield, ListOrdered, Sparkles, Clock, BadgeCheck, X, Copy, Sun, Moon, ArrowDown, Send, Star, Eye, Crown, Bot, Smartphone, UserPlus, Mic, ChevronDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 import { useLivePlayer } from '../contexts/LivePlayerContext';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 import { getRoomByCode, getChatMessages, sendChatMessage, createRoom, followUser, unfollowUser, checkFollowStatus, likeRoom, unlikeRoom, checkRoomLiked, joinQueue, leaveQueue } from '../lib/api';
@@ -21,8 +21,7 @@ import type { User } from '@supabase/supabase-js';
 import QueuePanel from '../components/QueuePanel';
 import GameArena from '../components/GameArena';
 import FanDropRoom from '../components/FanDropRoom';
-import { speak, initTTS, kokoroVoices, onTTSStatus, getTTSStatus } from '../lib/tts';
-import type { TTSStatus } from '../lib/tts';
+import { speakSuperChat, ttsLanguages, voiceStyles } from '../lib/ttsProxy';
 
 function hashId(s: string): number {
   let h = 0;
@@ -42,11 +41,7 @@ const roomStatuses = [
   { id: 'ended', label: 'Ended', icon: '🔴', desc: 'Thanks for watching!', color: 'text-arcade-pink', bg: 'bg-arcade-pink/15', border: 'border-arcade-pink/40' },
 ];
 
-const fanDropBadgeIcon = (state: string) => {
-  if (state === 'open') return '🟢';
-  if (state === 'scheduled') return '⏰';
-  return '🔒';
-};
+const fanDropBadgeIcon = '📥';
 
 const rightPanelTabs = [
   { id: 'games', label: 'Play', icon: Gamepad2 },
@@ -67,7 +62,7 @@ export default function LiveRoomPage() {
   const [countdown, setCountdown] = useState(45);
   const [likeCount, setLikeCount] = useState(0);
   const roomStatus = room?.status || 'queue_open';
-  const [fanDropState, setFanDropState] = useState('locked');
+
   const [activities] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
@@ -120,11 +115,11 @@ export default function LiveRoomPage() {
 
   const streamerName = room?.host_name || 'Simp';
   const streamerAvatar = room?.host_avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=streamer';
-  const streamerVerified = room?.host_verified ?? true;
+  const streamerVerified = true;
   const viewerCount = useMemo(() => room?.viewer_count ?? Math.floor(Math.random() * 500) + 100, [room?.viewer_count]);
-  const subscriberCount = room?.subscriber_count?.toLocaleString() || '12.4K';
-  const streamStarted = useMemo(() => room?.stream_started_at ? Math.floor((Date.now() - new Date(room.stream_started_at).getTime()) / 3600000) + 'h ago' : '2h ago', [room?.stream_started_at]);
-  const streamTitle = room?.stream_title || 'GRIND FOR BGMS | SIMP IS LIVE 🍑';
+  const subscriberCount = '12.4K';
+  const streamStarted = '2h ago';
+  const streamTitle = 'GRIND FOR BGMS | SIMP IS LIVE 🍑';
   const isHost = user?.id === room?.host_id;
 
   useEffect(() => {
@@ -161,10 +156,10 @@ export default function LiveRoomPage() {
       <div className="md:hidden"><MobileHeader /></div>
       <Toast />
       <div className="hidden md:block relative z-10 pt-20 px-4 max-w-[1600px] mx-auto">
-        <DesktopContent roomCode={roomCode} room={room} tab={tab} setTab={setTab} countdown={countdown} formatTime={formatTime} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} setFanDropState={setFanDropState} videoId={videoId} profile={profile} refreshProfile={refreshProfile} isHost={isHost} />
+        <DesktopContent roomCode={roomCode} room={room} tab={tab} setTab={setTab} countdown={countdown} formatTime={formatTime} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} videoId={videoId} profile={profile} refreshProfile={refreshProfile} isHost={isHost} />
       </div>
       <div className="md:hidden relative z-10 pt-14 max-w-md mx-auto touch-manipulation" style={{ height: 'calc(100vh - 56px - 80px)', overflow: 'hidden' }}>
-        <MobileContent roomCode={roomCode} room={room} mobileTab={mobileTab} setMobileTab={setMobileTab} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} fanDropState={fanDropState} setFanDropState={setFanDropState} videoId={videoId} profile={profile} refreshProfile={refreshProfile} isHost={isHost} />
+        <MobileContent roomCode={roomCode} room={room} mobileTab={mobileTab} setMobileTab={setMobileTab} roomId={roomId} user={user} addToast={addToast} likeCount={likeCount} setLikeCount={setLikeCount} roomStatus={roomStatus} currentStatus={currentStatus} viewerCoins={viewerCoins} viewerPoints={viewerPoints} streamerName={streamerName} streamerAvatar={streamerAvatar} streamerVerified={streamerVerified} viewerCount={viewerCount} subscriberCount={subscriberCount} streamStarted={streamStarted} streamTitle={streamTitle} videoId={videoId} profile={profile} refreshProfile={refreshProfile} isHost={isHost} />
       </div>
       <div className="md:hidden"><MobileNav activeTab={mobileTab} onTabChange={setMobileTab} /></div>
     </div>
@@ -181,7 +176,7 @@ type BaseContentProps = {
   streamerName: string; streamerAvatar: string; streamerVerified: boolean;
   viewerCount: number; subscriberCount: string; streamStarted: string;
   streamTitle: string;
-  fanDropState: string; setFanDropState: (s: string) => void;
+
   videoId: string; profile: Profile | null; refreshProfile: () => Promise<void>; isHost: boolean;
 };
 
@@ -189,7 +184,7 @@ type DesktopContentProps = BaseContentProps & { tab: string; setTab: (t: string)
 type MobileContentProps = BaseContentProps & { mobileTab: string; setMobileTab: (t: string) => void };
 
 
-function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, fanDropState, setFanDropState, videoId, profile, refreshProfile, isHost }: DesktopContentProps) {
+function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, videoId, profile, refreshProfile, isHost }: DesktopContentProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -205,7 +200,7 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
           <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] flex flex-col h-full min-h-[350px]">
             <div className="flex items-center gap-1.5 p-2 border-b border-white/[0.06] overflow-x-auto no-scrollbar">
               {rightPanelTabs.map(t => (
-                <TabButton key={t.id} id={t.id} label={t.id === 'art' ? `Fan Drop ${fanDropBadgeIcon(fanDropState)}` : t.label} icon={t.icon} active={tab === t.id} onClick={() => setTab(t.id)} />
+                <TabButton key={t.id} id={t.id} label={t.id === 'art' ? `Fan Drop ${fanDropBadgeIcon}` : t.label} icon={t.icon} active={tab === t.id} onClick={() => setTab(t.id)} />
               ))}
             </div>
             <div className="flex-1 overflow-y-auto no-scrollbar">
@@ -227,7 +222,7 @@ function DesktopContent({ roomCode, room, tab, setTab, countdown, formatTime, ro
                 )}
                 {tab === 'art' && (
                   <motion.div key="art" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.15 }} className="h-full">
-                    <FanDropRoom roomId={roomId} isHost={user?.id === room?.host_id} onStateChange={setFanDropState} />
+                    <FanDropRoom roomId={roomId} />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -393,7 +388,7 @@ function TabButton({ id, label, icon: Icon, active, onClick }: { id: string; lab
   );
 }
 
-function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, setFanDropState, videoId, profile, refreshProfile, isHost }: MobileContentProps) {
+function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, likeCount, setLikeCount, roomStatus, currentStatus, viewerCoins, viewerPoints, streamerName, streamerAvatar, streamerVerified, viewerCount, subscriberCount, streamStarted, streamTitle, videoId, profile, refreshProfile, isHost }: MobileContentProps) {
   return (
     <div className="h-full overflow-y-auto no-scrollbar">
       <div className="sticky top-0 z-10 bg-bg-primary">
@@ -416,7 +411,7 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
                   <h3 className="font-semibold text-text-primary text-sm">Queue</h3>
                   <div className="ml-auto flex items-center gap-1 px-2 py-1 rounded-lg bg-arcade-blue/10 border border-arcade-blue/20">
                     <span className="w-1.5 h-1.5 rounded-full bg-arcade-green animate-pulse" />
-                    <span className="text-[10px] font-semibold text-arcade-blue">{room?.queue_count || 0} waiting</span>
+                    <span className="text-[10px] font-semibold text-arcade-blue">0 waiting</span>
                   </div>
                 </div>
                 <QueuePanel roomId={roomId} />
@@ -430,7 +425,7 @@ function MobileContent({ roomCode, room, mobileTab, roomId, user, addToast, like
           )}
           {mobileTab === 'art' && (
             <motion.div key="art" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <FanDropRoom roomId={roomId} isHost={user?.id === room?.host_id} onStateChange={setFanDropState} />
+              <FanDropRoom roomId={roomId} />
             </motion.div>
           )}
           {mobileTab === 'rank' && (
@@ -642,11 +637,39 @@ const demoMessages = [
   { id: -11, username: 'Sofia', message: 'just joined, hi everyone!', color: '#FFF2DD', is_super: false, created_at: new Date(Date.now() - 5000).toISOString() },
 ];
 
-const aiVoices = kokoroVoices.map(v => ({ id: v.id, label: v.label }));
 
-function AIVoiceLabel({ voice }: { voice: { id: string; label: string } }) {
-  const icon = voice.id.startsWith('af') || voice.id.startsWith('bf') || voice.id.startsWith('ef') || voice.id.startsWith('hf') || voice.id.startsWith('ff') || voice.id.startsWith('if') || voice.id.startsWith('pf') || voice.id.startsWith('jf') || voice.id.startsWith('zf') ? '🎤' : '🎙️';
-  return <>{icon} {voice.label}</>;
+
+function VoiceLangSelector({ darkFeed, voiceLang, onSelectLang }: { darkFeed: boolean; voiceLang: string; onSelectLang: (c: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+  const current = ttsLanguages.find(l => l.code === voiceLang) || ttsLanguages[0];
+  return (
+    <div ref={ref} className="relative">
+      <button onClick={() => setOpen(!open)}
+        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all ${darkFeed ? 'bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-text-primary' : 'bg-white border border-gray-200 text-gray-600 hover:text-gray-900'}`}
+      ><span className="text-sm">{current.flag}</span> {current.label} <ChevronDown className="w-3 h-3 ml-auto opacity-50" /></button>
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+            className={`absolute bottom-full mb-1 left-0 right-0 rounded-xl overflow-hidden z-50 ${darkFeed ? 'glass-strong' : 'bg-white border border-gray-200 shadow-lg'}`}
+          >
+            {ttsLanguages.map(l => (
+              <button key={l.code} onClick={() => { onSelectLang(l.code); setOpen(false); }}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-[10px] font-bold transition-all hover:bg-white/5 ${voiceLang === l.code ? 'text-arcade-blue' : 'text-neutral-400'}`}
+              ><span className="text-sm">{l.flag}</span> {l.label}</button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }
 
 function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomId: number | undefined; user: User | null; addToast: (t: { message: string; type: 'success' | 'error' | 'info' | 'warning' }) => void; profile: Profile | null; refreshProfile: () => Promise<void> }) {
@@ -660,18 +683,14 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
   const scrollRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef(true);
   const [fetchedOnce, setFetchedOnce] = useState(false);
-  const [superVoice, setSuperVoice] = useState(aiVoices[0]);
   const [showSuperVoice, setShowSuperVoice] = useState(false);
-  const [ttsStatus, setTtsStatus] = useState<TTSStatus>(getTTSStatus());
+  const [voiceLang, setVoiceLang] = useState('en');
+  const [voiceStyle, setVoiceStyle] = useState('normal');
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
   const localRef = useRef(localMessages);
   localRef.current = localMessages;
 
   const isDemo = roomId !== undefined && roomId < 0;
-
-  useEffect(() => {
-    return onTTSStatus(s => setTtsStatus(s));
-  }, []);
 
   const fetchMessages = useCallback(async () => {
     if (isDemo) {
@@ -698,12 +717,17 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
     if (!loading && pinned) scrollToBottom();
   }, [loading]);
 
-  useEffect(() => { initTTS().catch(() => {}); }, []);
+  const voiceLangRef = useRef(voiceLang);
+  voiceLangRef.current = voiceLang;
+  const voiceStyleRef = useRef(voiceStyle);
+  voiceStyleRef.current = voiceStyle;
 
   useRealtimeSubscription('chat_messages', !isDemo && roomId ? { column: 'room_id', value: roomId } : undefined,
     (newMsg: ChatMessage) => {
       setMessages(prev => [...prev, newMsg]);
-      if (newMsg.is_super) speak(newMsg.message, superVoice.id).catch(() => addToast?.({ message: 'Voice announcement failed', type: 'error' }));
+      if (newMsg.is_super && newMsg.user_id !== user?.id) {
+        speakSuperChat(newMsg.username, newMsg.message, voiceLangRef.current, voiceStyleRef.current, addToast);
+      }
     },
   );
 
@@ -728,7 +752,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
         return next;
       });
       setMessage('');
-      if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); speak(message, superVoice.id).catch(() => addToast?.({ message: 'Voice announcement failed', type: 'error' })); }
+      if (isSuper) { const un = profile?.username || user?.email?.split('@')[0] || 'Anonymous'; speakSuperChat(un, message, voiceLang, voiceStyle, addToast); await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); }
       fetchMessages();
       return;
     }
@@ -741,7 +765,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
         color: isSuper ? '#FFB000' : '#FFF2DD', is_super: isSuper,
       });
       setMessage('');
-      if (isSuper) { await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); speak(message, superVoice.id).catch(() => addToast?.({ message: 'Voice announcement failed', type: 'error' })); }
+      if (isSuper) { const un = profile?.username || user?.email?.split('@')[0] || 'Anonymous'; speakSuperChat(un, message, voiceLang, voiceStyle, addToast); await refreshProfile?.(); addToast?.({ message: 'Super Chat sent!', type: 'success' }); }
     } catch { addToast?.({ message: 'Send failed', type: 'error' }); }
   };
 
@@ -778,14 +802,14 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
 
   const entries = displayMessages.map((msg: ChatMessage, i: number) => ({
     id: msg.id || i,
-    type: msg.type === 'ai' ? 'ai' as const : msg.is_super ? 'youtube_superchat' as const : 'youtube_chat' as const,
+    type: msg.is_super ? 'youtube_superchat' as const : 'youtube_chat' as const,
     username: msg.username || 'Anonymous',
     text: msg.message,
     time: msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'now',
     amount: msg.amount || undefined,
   }));
 
-  const filterMap: Record<string, string> = { chat: 'youtube_chat', arena: 'ai', alerts: 'youtube_superchat' };
+  const filterMap: Record<string, string> = { chat: 'youtube_chat', alerts: 'youtube_superchat' };
   const filteredEntries = filter === 'all' ? entries : entries.filter(e => e.type === filterMap[filter]);
 
   const scrollToBottom = useCallback((smooth = false) => {
@@ -829,7 +853,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
 
       {/* Filter tabs */}
       <div className={`flex border-b ${darkFeed ? 'border-arcade-pink/10' : 'border-gray-200'}`}>
-        {([{ id: 'all', label: 'All' }, { id: 'chat', label: 'Chat' }, { id: 'arena', label: 'Arena' }, { id: 'alerts', label: 'Alerts' }] as const).map(tab => (
+        {([{ id: 'all', label: 'All' }, { id: 'chat', label: 'Chat' }, { id: 'alerts', label: 'Alerts' }] as const).map(tab => (
           <button key={tab.id} onClick={() => setFilter(tab.id)}
             className={`flex-1 min-h-[36px] text-[10px] font-semibold transition-all ${filter === tab.id ? 'text-arcade-pink bg-arcade-pink/5' : darkFeed ? 'text-text-muted hover:text-text-primary' : 'text-gray-400 hover:text-gray-700'}`}
           >{tab.label}</button>
@@ -854,26 +878,24 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
               </div>
             ) : filteredEntries.map((entry, idx) => {
               const isSuper = entry.type === 'youtube_superchat';
-              const isAI = entry.type === 'ai';
               return (
                 <motion.div key={entry.id || idx} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                   className={`group flex items-start gap-2.5 p-2.5 rounded-xl transition-colors ${
                     isSuper ? (darkFeed ? 'bg-arcade-blue/5 border border-arcade-blue/20' : 'bg-yellow-50 border border-yellow-200')
-                    : isAI ? (darkFeed ? 'bg-arcade-purple/5 border border-arcade-purple/20' : 'bg-purple-50 border border-purple-200')
                     : (darkFeed ? 'hover:bg-white/[0.03]' : 'hover:bg-gray-50')
                   }`}
                 >
                   <div className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 ${
-                        isSuper ? 'text-arcade-blue' : isAI ? 'text-arcade-purple' : 'text-red-400'
+                        isSuper ? 'text-arcade-blue' : 'text-red-400'
                   } ${darkFeed ? 'bg-white/[0.04] border-white/[0.06]' : 'bg-gray-100 border-gray-200'}`}>
-                    {isSuper ? <Star className="w-3.5 h-3.5" /> : isAI ? <Bot className="w-3.5 h-3.5" /> : <MessageSquare className="w-3.5 h-3.5" />}
+                    {isSuper ? <Star className="w-3.5 h-3.5" /> : <MessageSquare className="w-3.5 h-3.5" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
-                    isSuper ? 'text-arcade-blue' : isAI ? 'text-arcade-purple' : 'text-red-400'
+                    isSuper ? 'text-arcade-blue' : 'text-red-400'
                       } ${darkFeed ? 'bg-white/[0.04]' : 'bg-gray-100'}`}>
-                        [{isSuper ? 'Super' : isAI ? 'AI' : 'Chat'}]
+                        [{isSuper ? 'Super' : 'Chat'}]
                       </span>
                       <span className={`text-xs font-semibold truncate ${darkFeed ? 'text-text-primary' : 'text-gray-900'}`}>{entry.username}</span>
                       <span className={`text-[10px] shrink-0 ${darkFeed ? 'text-text-muted' : 'text-gray-400'}`}>{entry.time}</span>
@@ -919,12 +941,14 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
           {showSuperVoice && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
               <div className={`p-2 rounded-xl ${darkFeed ? 'bg-white/[0.03] border border-white/[0.06]' : 'bg-gray-50 border border-gray-200'}`}>
-                {ttsStatus === 'loading' && <div className="text-[10px] text-arcade-purple text-center pb-1">Downloading voice model...</div>}
-                <div className="flex gap-1 flex-wrap">
-                  {aiVoices.slice(0, 6).map(v => (
-                    <button key={v.id} onClick={() => setSuperVoice(v)}
-                      className={`min-h-[28px] px-2 py-0.5 rounded-lg text-[9px] font-bold transition-all ${superVoice.id === v.id ? 'bg-arcade-blue text-white' : darkFeed ? 'bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-text-primary' : 'bg-white border border-gray-200 text-gray-600 hover:text-gray-900'}`}
-                    ><AIVoiceLabel voice={v} /></button>
+                {/* Language selector */}
+                <VoiceLangSelector darkFeed={darkFeed} voiceLang={voiceLang} onSelectLang={setVoiceLang} />
+                {/* Voice style options */}
+                <div className="flex gap-1 flex-wrap mt-2">
+                  {voiceStyles.map(s => (
+                    <button key={s.id} onClick={() => setVoiceStyle(s.id)}
+                      className={`min-h-[28px] px-2 py-0.5 rounded-lg text-[9px] font-bold transition-all ${voiceStyle === s.id ? 'bg-arcade-blue text-white' : darkFeed ? 'bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-text-primary' : 'bg-white border border-gray-200 text-gray-600 hover:text-gray-900'}`}
+                    >{s.icon} {s.label}</button>
                   ))}
                 </div>
               </div>

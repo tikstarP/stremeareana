@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 import { getQueueEntries, joinQueue } from '../lib/api';
 import type { QueueEntry } from '../types';
@@ -89,7 +89,7 @@ export default function QueuePanel({ roomId }: { roomId?: number }) {
                 <span className="text-xs text-text-primary flex-1 truncate">{item.username}</span>
                 {item.type === 'priority' && <span className="text-xs">🎲</span>}
                 <span className="text-[10px] text-text-muted flex items-center gap-0.5">
-                  <Clock className="w-2.5 h-2.5" />{item.created_at ? Math.floor((Date.now() - new Date(item.created_at).getTime()) / 60000) + 'm' : item.joined_at || '--'}
+                  <Clock className="w-2.5 h-2.5" />{item.created_at ? Math.floor((Date.now() - new Date(item.created_at).getTime()) / 60000) + 'm' : '--'}
                 </span>
               </motion.div>
             ))}

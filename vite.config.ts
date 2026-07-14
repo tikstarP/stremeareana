@@ -11,7 +11,7 @@ export default defineConfig(async ({ mode }) => {
     plugins.push(m.sourceTags());
   } catch {}
 
-  const env = loadEnv(mode, process.cwd(), ['VITE_', 'NEXT_PUBLIC_']);
+  const env = loadEnv(mode, process.cwd(), ['VITE_']);
   const processEnvDefines: Record<string, string> = {};
   for (const [key, value] of Object.entries(env)) {
     processEnvDefines[`process.env.${key}`] = JSON.stringify(value);
@@ -19,13 +19,7 @@ export default defineConfig(async ({ mode }) => {
 
   return {
     plugins,
-    envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
-    define: processEnvDefines,
-    server: {
-      proxy: {
-        '/api': { target: 'http://localhost:3001', changeOrigin: true },
-      },
-    },
+    envPrefix: ['VITE_'],
     build: {
       rollupOptions: {
         output: {

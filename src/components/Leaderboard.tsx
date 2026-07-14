@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { TrendingUp, Flame } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 import { getLeaderboard } from '../lib/api';
 import { Skeleton } from './Skeleton';
 import type { LeaderboardEntry } from '../types';

@@ -18,13 +18,9 @@ export interface RoomData {
   host_avatar: string;
   is_live: boolean;
   viewer_count: number;
+  likes?: number;
   video_id?: string;
   status?: string;
-  host_verified?: boolean;
-  subscriber_count?: number;
-  stream_started_at?: string;
-  stream_title?: string;
-  queue_count?: number;
   created_at?: string;
 }
 
@@ -37,7 +33,6 @@ export interface ChatMessage {
   amount?: number;
   color: string;
   is_super: boolean;
-  type?: string;
   created_at: string;
 }
 
@@ -56,7 +51,6 @@ export interface ArtSubmission {
   username: string;
   avatar_url: string;
   status: string;
-  type?: string;
   content_type?: string;
   message?: string;
   image_url?: string;
@@ -80,9 +74,7 @@ export interface QueueEntry {
   user_id: string;
   username: string;
   avatar_url: string;
-  status: string;
-  priority: boolean;
   type?: string;
-  joined_at?: string;
+  position: number;
   created_at: string;
 }

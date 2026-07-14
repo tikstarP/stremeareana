@@ -5,7 +5,7 @@ import { Mail, Lock, ArrowLeft, Zap, Eye, EyeOff, Bug, KeyRound } from 'lucide-r
 import supabase from '../lib/supabase';
 import { upsertProfile } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../contexts/AppContext';
 
 import MoltenBackground from '../components/MoltenBackground';
 import Toast from '../components/Toast';
@@ -42,6 +42,7 @@ export default function LoginPage() {
     e.preventDefault();
     if (!email || !password) { setError('Fill in all fields'); return; }
     if (password.length < 6) { setError('Password must be 6+ characters'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('Enter a valid email address'); return; }
     setLoading(true);
     setError('');
     try {
@@ -94,14 +95,16 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email address"
+                <label htmlFor="login-email" className="sr-only">Email address</label>
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" aria-hidden="true" />
+                <input id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email address" autoComplete="email"
                   className="w-full bg-bg-secondary border border-arcade-pink/10 rounded-xl pl-10 pr-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/50 transition-all"
                 />
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <input type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Password (6+ chars)"
+                <label htmlFor="login-password" className="sr-only">Password</label>
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" aria-hidden="true" />
+                <input id="login-password" type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Password (6+ chars)" autoComplete={isSignUp ? 'new-password' : 'current-password'}
                   className="w-full bg-bg-secondary border border-arcade-pink/10 rounded-xl pl-10 pr-10 py-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-arcade-pink/50 transition-all"
                 />
                 <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary min-h-[44px] sm:min-h-auto min-w-[44px] sm:min-w-auto flex items-center justify-center">
