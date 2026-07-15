@@ -19,6 +19,7 @@ function extractVideoId(input: string): string | null {
     if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
       if (url.pathname.startsWith('/embed/')) return url.pathname.split('/')[2]?.split('?')[0] || null;
       if (url.pathname.startsWith('/shorts/')) return url.pathname.split('/')[2]?.split('?')[0] || null;
+      if (url.pathname.startsWith('/live/')) return url.pathname.split('/')[2]?.split('?')[0] || null;
       if (url.hostname === 'youtu.be') return url.pathname.slice(1).split('?')[0] || null;
       return url.searchParams.get('v');
     }

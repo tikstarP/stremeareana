@@ -423,11 +423,18 @@ export default function StreamerStudio() {
                     onUpdateRoomTitle={setRoomName}
                     onUpdateYoutubeUrl={(url) => {
                       setYoutubeUrl(url);
-                      const match = url.match(/[?&]v=([a-zA-Z0-9_-]{11})|youtu\.be\/([a-zA-Z0-9_-]{11})|^([a-zA-Z0-9_-]{11})$/);
-                      const id = match?.[1] || match?.[2] || match?.[3] || '';
-                      if (id) {
-                        setVideoId(id);
-                      }
+                      try {
+                        const trimmed = url.trim();
+                        if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) { setVideoId(trimmed); return; }
+                        const u = new URL(trimmed);
+                        if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
+                          const liveMatch = u.pathname.match(/^\/(?:live|embed|shorts)\/([a-zA-Z0-9_-]{11})/);
+                          if (liveMatch) { setVideoId(liveMatch[1]); return; }
+                          if (u.hostname === 'youtu.be') { const id = u.pathname.slice(1).split('?')[0]; if (id && /^[a-zA-Z0-9_-]{11}$/.test(id)) { setVideoId(id); return; } }
+                          const vid = u.searchParams.get('v');
+                          if (vid) { setVideoId(vid); }
+                        }
+                      } catch { /* not a URL */ }
                     }}
                     onUpdateLanguage={setLanguage}
                     onUpdateModeration={setModerationMode}
