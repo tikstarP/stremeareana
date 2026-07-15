@@ -13,18 +13,27 @@ interface StudioLivePreviewProps {
 function extractVideoId(input: string): string | null {
   if (!input) return null;
   const trimmed = input.trim();
+  if (!trimmed) return null;
+
+  // Direct 11-char video ID
   if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+
   try {
-    const url = new URL(trimmed);
+    const url = new URL(trimmed.includes('://') ? trimmed : `https://${trimmed}`);
     if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
-      if (url.pathname.startsWith('/embed/')) return url.pathname.split('/')[2]?.split('?')[0] || null;
-      if (url.pathname.startsWith('/shorts/')) return url.pathname.split('/')[2]?.split('?')[0] || null;
-      if (url.pathname.startsWith('/live/')) return url.pathname.split('/')[2]?.split('?')[0] || null;
-      if (url.hostname === 'youtu.be') return url.pathname.slice(1).split('?')[0] || null;
-      return url.searchParams.get('v');
+      const pathMatch = url.pathname.match(/^\/(?:live|embed|shorts|watch|v|video)\/([a-zA-Z0-9_-]{11})/);
+      if (pathMatch) return pathMatch[1];
+      if (url.hostname === 'youtu.be') {
+        const id = url.pathname.slice(1).split('?')[0];
+        if (/^[a-zA-Z0-9_-]{11}$/.test(id)) return id;
+      }
+      return url.searchParams.get('v') || null;
     }
-  } catch { console.warn('Failed to extract video ID'); }
-  return null;
+  } catch { /* not a URL */ }
+
+  // Last resort: scan for any 11-char alphanumeric sequence
+  const found = trimmed.match(/(?:\/|^)([a-zA-Z0-9_-]{11})(?:\/|$|[?&])/);
+  return found?.[1] || null;
 }
 
 export default function StudioLivePreview({
@@ -44,7 +53,7 @@ export default function StudioLivePreview({
       setInputValue('');
       addToast({ message: 'YouTube video set successfully', type: 'success' });
     } else {
-      addToast({ message: 'Invalid YouTube URL or ID', type: 'error' });
+      addToast({ message: 'Could not find video ID. Paste the URL from your live stream watch page.', type: 'error' });
     }
   };
 

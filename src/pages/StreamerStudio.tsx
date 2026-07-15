@@ -423,18 +423,24 @@ export default function StreamerStudio() {
                     onUpdateRoomTitle={setRoomName}
                     onUpdateYoutubeUrl={(url) => {
                       setYoutubeUrl(url);
+                      const trimmed = url.trim();
+                      if (!trimmed) return;
+                      if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) { setVideoId(trimmed); return; }
                       try {
-                        const trimmed = url.trim();
-                        if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) { setVideoId(trimmed); return; }
-                        const u = new URL(trimmed);
+                        const u = new URL(trimmed.includes('://') ? trimmed : `https://${trimmed}`);
                         if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
-                          const liveMatch = u.pathname.match(/^\/(?:live|embed|shorts)\/([a-zA-Z0-9_-]{11})/);
-                          if (liveMatch) { setVideoId(liveMatch[1]); return; }
-                          if (u.hostname === 'youtu.be') { const id = u.pathname.slice(1).split('?')[0]; if (id && /^[a-zA-Z0-9_-]{11}$/.test(id)) { setVideoId(id); return; } }
+                          const pathMatch = u.pathname.match(/^\/(?:live|embed|shorts|watch|v|video)\/([a-zA-Z0-9_-]{11})/);
+                          if (pathMatch) { setVideoId(pathMatch[1]); return; }
+                          if (u.hostname === 'youtu.be') {
+                            const id = u.pathname.slice(1).split('?')[0];
+                            if (/^[a-zA-Z0-9_-]{11}$/.test(id)) { setVideoId(id); return; }
+                          }
                           const vid = u.searchParams.get('v');
-                          if (vid) { setVideoId(vid); }
+                          if (vid) { setVideoId(vid); return; }
                         }
                       } catch { /* not a URL */ }
+                      const found = trimmed.match(/(?:\/|^)([a-zA-Z0-9_-]{11})(?:\/|$|[?&])/);
+                      if (found) setVideoId(found[1]);
                     }}
                     onUpdateLanguage={setLanguage}
                     onUpdateModeration={setModerationMode}
