@@ -150,6 +150,21 @@ create table if not exists public.follows (
 );
 
 -- =============================================================
+-- CHECK CONSTRAINTS
+-- =============================================================
+
+alter table public.profiles add constraint check_username_length check (char_length(username) <= 30);
+alter table public.rooms add constraint check_room_name_length check (char_length(name) <= 100);
+alter table public.rooms add constraint check_room_description_length check (char_length(description) <= 500);
+alter table public.chat_messages add constraint check_message_length check (char_length(message) <= 500);
+alter table public.art_submissions add constraint check_art_message_length check (char_length(message) <= 500);
+alter table public.art_submissions add constraint check_art_image_url_length check (char_length(image_url) <= 2048);
+alter table public.art_submissions add constraint check_art_emoji_length check (char_length(emoji) <= 20);
+alter table public.game_scores add constraint check_score_range check (score >= 0);
+alter table public.profiles add constraint check_coins_non_negative check (coins >= 0);
+alter table public.profiles add constraint check_points_non_negative check (points >= 0);
+
+-- =============================================================
 -- ROW LEVEL SECURITY
 -- =============================================================
 
@@ -179,22 +194,25 @@ drop policy if exists "Anyone can view rooms" on rooms;
 drop policy if exists "Authenticated users can create rooms" on rooms;
 drop policy if exists "Host can update own room" on rooms;
 create policy "Anyone can view rooms" on rooms for select using (true);
-create policy "Authenticated users can create rooms" on rooms for insert with check (auth.role() = 'authenticated');
+create policy "Authenticated users can create rooms" on rooms for insert with check (auth.uid() = host_id);
 create policy "Host can update own room" on rooms for update using (auth.uid() = host_id);
+create policy "Host can delete own room" on rooms for delete using (auth.uid() = host_id);
 
 -- CHAT MESSAGES
 drop policy if exists "Anyone can view chat" on chat_messages;
 drop policy if exists "Authenticated users can send chat" on chat_messages;
+drop policy if exists "Users can send chat" on chat_messages;
 create policy "Anyone can view chat" on chat_messages for select using (true);
-create policy "Authenticated users can send chat" on chat_messages for insert with check (auth.role() = 'authenticated');
+create policy "Users can send chat" on chat_messages for insert with check (auth.uid() = user_id);
 
 -- ART SUBMISSIONS
 drop policy if exists "Anyone can view art" on art_submissions;
 drop policy if exists "Authenticated users can submit art" on art_submissions;
+drop policy if exists "Users can submit art" on art_submissions;
 drop policy if exists "Host can update art in their room" on art_submissions;
 drop policy if exists "Host can delete art in their room" on art_submissions;
 create policy "Anyone can view art" on art_submissions for select using (true);
-create policy "Authenticated users can submit art" on art_submissions for insert with check (auth.role() = 'authenticated');
+create policy "Users can submit art" on art_submissions for insert with check (auth.uid() = user_id);
 create policy "Host can update art in their room" on art_submissions for update using (
   exists (select 1 from rooms where rooms.id = art_submissions.room_id and rooms.host_id = auth.uid())
 );
@@ -235,7 +253,7 @@ drop policy if exists "Anyone can view likes" on submission_likes;
 drop policy if exists "Authenticated users can like" on submission_likes;
 drop policy if exists "Users can unlike own" on submission_likes;
 create policy "Anyone can view likes" on submission_likes for select using (true);
-create policy "Authenticated users can like" on submission_likes for insert with check (auth.role() = 'authenticated');
+create policy "Users can like" on submission_likes for insert with check (auth.uid() = user_id);
 create policy "Users can unlike own" on submission_likes for delete using (auth.uid() = user_id);
 
 -- ROOM LIKES
@@ -369,6 +387,9 @@ as $$
 declare
   won integer;
 begin
+  if p_score < 0 or p_score > 10000 then
+    raise exception 'Score out of range (0-10000): %', p_score;
+  end if;
   insert into public.game_scores (room_id, user_id, username, game_type, score)
   values (p_room_id, p_user_id, p_username, p_game_type, p_score);
 

@@ -76,17 +76,18 @@ export async function sendChatMessage(msg: {
   amount?: number; color?: string; is_super?: boolean;
 }): Promise<ChatMessage> {
   const uid = msg.user_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(msg.user_id) ? msg.user_id : null;
+
+  if (msg.is_super && msg.amount && uid) {
+    const { error: coinError } = await supabase.rpc('deduct_coins', { user_id: uid, amount: msg.amount });
+    if (coinError) throw coinError;
+  }
+
   const { data, error } = await supabase.from('chat_messages').insert({
     room_id: msg.room_id, user_id: uid, username: msg.username || 'Anonymous',
     message: msg.message, amount: msg.amount || 0,
     color: msg.color || '#FF5A1F', is_super: msg.is_super || false,
   }).select().single();
   if (error) throw error;
-
-  if (msg.is_super && msg.amount && uid) {
-    const { error: coinError } = await supabase.rpc('deduct_coins', { user_id: uid, amount: msg.amount });
-    if (coinError) throw coinError;
-  }
 
   return data;
 }
@@ -129,7 +130,7 @@ export async function deleteArtSubmission(id: number): Promise<void> {
 
 export async function likeSubmission(submissionId: number, userId: string): Promise<void> {
   const { error } = await supabase.from('submission_likes').insert({ submission_id: submissionId, user_id: userId });
-  if (error && !error.message?.includes('duplicate')) throw error;
+  if (error && error.code !== '23505') throw error;
 }
 
 export async function unlikeSubmission(submissionId: number, userId: string): Promise<void> {
@@ -196,7 +197,7 @@ export async function getLeaderboard(period = 'all'): Promise<LeaderboardEntry[]
 
 export async function followUser(followerId: string, followingId: string): Promise<void> {
   const { error } = await supabase.from('follows').insert({ follower_id: followerId, following_id: followingId });
-  if (error && !error.message?.includes('duplicate')) throw error;
+  if (error && error.code !== '23505') throw error;
 }
 
 export async function unfollowUser(followerId: string, followingId: string): Promise<void> {

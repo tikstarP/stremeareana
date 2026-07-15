@@ -7,6 +7,7 @@ import { useApp } from '../contexts/AppContext';
 import { useLivePlayer } from '../contexts/LivePlayerContext';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 import { getRoomByCode, getChatMessages, sendChatMessage, createRoom, followUser, unfollowUser, checkFollowStatus, likeRoom, unlikeRoom, checkRoomLiked, joinQueue, leaveQueue } from '../lib/api';
+import { createThrottle } from '../lib/throttle';
 import MoltenBackground from '../components/MoltenBackground';
 import Navbar from '../components/Navbar';
 import MobileHeader from '../components/MobileHeader';
@@ -249,6 +250,8 @@ function StreamerProfile({ user, hostId, roomId, streamerName, streamerAvatar, s
   const { addToast } = useApp();
   const roomUrl = `${window.location.origin}/room/${roomCode}`;
   const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(roomUrl)}`;
+  const lastFollowTime = useRef(0);
+  const lastLikeTime = useRef(0);
 
   useEffect(() => {
     if (user && hostId && user.id !== hostId) {
@@ -264,28 +267,36 @@ function StreamerProfile({ user, hostId, roomId, streamerName, streamerAvatar, s
 
   const handleFollow = async () => {
     if (!user || !hostId) { addToast({ message: 'Sign in to follow', type: 'error' }); return; }
-    if (isFollowing) {
-      await unfollowUser(user.id, hostId);
-      setIsFollowing(false);
-      addToast({ message: 'Unfollowed', type: 'success' });
-    } else {
-      await followUser(user.id, hostId);
-      setIsFollowing(true);
-      addToast({ message: `Following ${streamerName}`, type: 'success' });
-    }
+    if (Date.now() - lastFollowTime.current < 500) return;
+    lastFollowTime.current = Date.now();
+    try {
+      if (isFollowing) {
+        await unfollowUser(user.id, hostId);
+        setIsFollowing(false);
+        addToast({ message: 'Unfollowed', type: 'success' });
+      } else {
+        await followUser(user.id, hostId);
+        setIsFollowing(true);
+        addToast({ message: `Following ${streamerName}`, type: 'success' });
+      }
+    } catch { addToast({ message: 'Follow action failed', type: 'error' }); }
   };
 
   const handleLike = async () => {
     if (!user || !roomId || roomId < 0) { addToast({ message: 'Sign in to like', type: 'error' }); return; }
-    if (liked) {
-      const n = await unlikeRoom(roomId, user.id);
-      setLikes(n);
-      setLiked(false);
-    } else {
-      const n = await likeRoom(roomId, user.id);
-      setLikes(n);
-      setLiked(true);
-    }
+    if (Date.now() - lastLikeTime.current < 500) return;
+    lastLikeTime.current = Date.now();
+    try {
+      if (liked) {
+        const n = await unlikeRoom(roomId, user.id);
+        setLikes(n);
+        setLiked(false);
+      } else {
+        const n = await likeRoom(roomId, user.id);
+        setLikes(n);
+        setLiked(true);
+      }
+    } catch { addToast({ message: 'Like action failed', type: 'error' }); }
   };
 
   return (
@@ -454,6 +465,8 @@ function StreamerProfileMobile({ user, hostId, roomId, streamerName, streamerAva
   const { addToast } = useApp();
   const roomUrl = `${window.location.origin}/room/${roomCode}`;
   const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(roomUrl)}`;
+  const lastFollowTime = useRef(0);
+  const lastLikeTime = useRef(0);
 
   useEffect(() => {
     if (user && hostId && user.id !== hostId) {
@@ -469,28 +482,36 @@ function StreamerProfileMobile({ user, hostId, roomId, streamerName, streamerAva
 
   const handleFollow = async () => {
     if (!user || !hostId) { addToast({ message: 'Sign in to follow', type: 'error' }); return; }
-    if (isFollowing) {
-      await unfollowUser(user.id, hostId);
-      setIsFollowing(false);
-      addToast({ message: 'Unfollowed', type: 'success' });
-    } else {
-      await followUser(user.id, hostId);
-      setIsFollowing(true);
-      addToast({ message: `Following ${streamerName}`, type: 'success' });
-    }
+    if (Date.now() - lastFollowTime.current < 500) return;
+    lastFollowTime.current = Date.now();
+    try {
+      if (isFollowing) {
+        await unfollowUser(user.id, hostId);
+        setIsFollowing(false);
+        addToast({ message: 'Unfollowed', type: 'success' });
+      } else {
+        await followUser(user.id, hostId);
+        setIsFollowing(true);
+        addToast({ message: `Following ${streamerName}`, type: 'success' });
+      }
+    } catch { addToast({ message: 'Follow action failed', type: 'error' }); }
   };
 
   const handleLike = async () => {
     if (!user || !roomId || roomId < 0) { addToast({ message: 'Sign in to like', type: 'error' }); return; }
-    if (liked) {
-      const n = await unlikeRoom(roomId, user.id);
-      setLikes(n);
-      setLiked(false);
-    } else {
-      const n = await likeRoom(roomId, user.id);
-      setLikes(n);
-      setLiked(true);
-    }
+    if (Date.now() - lastLikeTime.current < 500) return;
+    lastLikeTime.current = Date.now();
+    try {
+      if (liked) {
+        const n = await unlikeRoom(roomId, user.id);
+        setLikes(n);
+        setLiked(false);
+      } else {
+        const n = await likeRoom(roomId, user.id);
+        setLikes(n);
+        setLiked(true);
+      }
+    } catch { addToast({ message: 'Like action failed', type: 'error' }); }
   };
 
   return (
@@ -689,6 +710,7 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
   const localRef = useRef(localMessages);
   localRef.current = localMessages;
+  const lastChatTime = useRef(0);
 
   const isDemo = roomId !== undefined && roomId < 0;
 
@@ -733,6 +755,8 @@ function ViewerFeed({ roomId, user, addToast, profile, refreshProfile }: { roomI
 
   const sendMessage = async (isSuper = false) => {
     if (!message.trim()) return;
+    if (Date.now() - lastChatTime.current < 1000) return;
+    lastChatTime.current = Date.now();
     if (!user) { addToast?.({ message: 'Sign in to chat', type: 'warning' }); return; }
     if (isSuper && (profile?.coins ?? 0) < 10) { addToast?.({ message: 'Need 10 coins for Super Chat', type: 'error' }); return; }
     if (!roomId) return;

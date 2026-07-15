@@ -64,9 +64,12 @@ function App() {
             <Route path="/audio/:roomCode" element={<LazyRoute><AudioDock /></LazyRoute>} />
             <Route path="/overlay/:roomCode" element={<LazyRoute><OverlayPage /></LazyRoute>} />
             <Route path="/fan-gallery/:roomCode" element={<LazyRoute><FanGalleryPage /></LazyRoute>} />
+            <Route path="*" element={<LazyRoute><EntryPage /></LazyRoute>} />
           </Routes>
           </ErrorBoundary>
+          <ErrorBoundary>
           <GlobalFloatingPlayer />
+          </ErrorBoundary>
         </LivePlayerProvider>
       </AppProvider>
     </AuthProvider>

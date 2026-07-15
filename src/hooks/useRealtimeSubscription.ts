@@ -13,7 +13,7 @@ export function useRealtimeSubscription<T = any>(
   callbackRef.current = { onInsert, onUpdate, onDelete };
 
   useEffect(() => {
-    const channelName = `realtime-${table}-${Date.now()}`;
+    const channelName = `realtime-${table}-${filter?.column ?? '*'}-${String(filter?.value ?? '*')}`;
     const channelConfig = {
       event: '*',
       schema: 'public',
@@ -29,7 +29,11 @@ export function useRealtimeSubscription<T = any>(
         if (payload.eventType === 'UPDATE') cb.onUpdate?.(payload.new);
         if (payload.eventType === 'DELETE') cb.onDelete?.(payload.old);
       },
-    ).subscribe();
+    ).subscribe((status) => {
+      if (status === 'CHANNEL_ERROR') {
+        setTimeout(() => channel.subscribe(), 3000);
+      }
+    });
 
     return () => { supabase.removeChannel(channel); };
   }, [table, filter?.column, filter?.value]);

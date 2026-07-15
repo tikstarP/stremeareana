@@ -26,7 +26,7 @@ describe('api - followUser', () => {
   });
 
   it('ignores duplicate key errors', async () => {
-    const mockInsert = vi.fn(() => ({ error: { message: 'duplicate key' } }));
+    const mockInsert = vi.fn(() => ({ error: { code: '23505', message: 'duplicate key' } }));
     (supabase.from as any).mockReturnValue({ insert: mockInsert });
 
     await expect(followUser('uid1', 'uid2')).resolves.toBeUndefined();
@@ -42,7 +42,7 @@ describe('api - followUser', () => {
 
 describe('api - likeSubmission', () => {
   it('ignores duplicate key errors', async () => {
-    const mockInsert = vi.fn(() => ({ error: { message: 'duplicate' } }));
+    const mockInsert = vi.fn(() => ({ error: { code: '23505', message: 'duplicate' } }));
     (supabase.from as any).mockReturnValue({ insert: mockInsert });
 
     await expect(likeSubmission(1, 'uid')).resolves.toBeUndefined();
